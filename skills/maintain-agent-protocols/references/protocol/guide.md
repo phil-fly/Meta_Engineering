@@ -33,12 +33,13 @@ P5 默认 AI 行为
 1. 明确目标：用户级协议、项目级协议、工程路由、场景手册，或完整协议包。
 2. 收集已有规则：用户请求、仓库文档、现有协议文件、命令、测试要求和反复出现的问题。
 3. 盘点已有入口：根级 `AGENTS.md`、`CODEX.md`、`CLAUDE.md`、根级 `playbooks/`、既有 `ai-agent-protocols/`、OpenSpec 或其他项目协议。
-4. 先选择唯一生效入口和各资产真值源，再写入文件；不要同时生成两套可编辑正文。
-5. 在用户仓库中创建或维护 `ai-agent-protocols/` 目录。
-6. 默认生成完整路由骨架，避免遗漏 UI、Go、Java、Rust、通用安全、通用性能和通用质量入口。
-7. 用户协议只写入口和原则，不写执行细节。
-8. 工程路由写执行细节，并按功能类型互相引用。
-9. 检查重复、歧义、冲突、遗漏和意外约束。
+4. 先输出生成方案预览，声明唯一生效入口、各资产真值源、生成模式、拟生成文件和项目事实证据表。
+5. 用户确认后再写入文件；不要同时生成两套可编辑正文。
+6. 在用户仓库中创建或维护 `ai-agent-protocols/` 目录。
+7. 默认使用项目版生成模式，按目标仓证据裁剪工程路由；最小版和完整版只在用户选择或明确语义匹配时使用。
+8. 用户协议只写入口和原则，不写执行细节。
+9. 工程路由写执行细节，并按功能类型互相引用。
+10. 检查重复、歧义、冲突、遗漏、占位符和意外约束。
 
 ## 生效入口与真值源
 
@@ -62,9 +63,11 @@ P5 默认 AI 行为
 
 目标仓协议包的文件清单、内容来源和最小生成范围见 `package-blueprint.md`。如果只是解释协议设计、回答目录来源或审查现有规则，应先输出结论，不自动落盘。
 
+即使用户要求生成协议包，也应先进入生成方案预览，不直接落盘完整协议包。预览确认后再执行文件创建或修改。
+
 ## 仓库目录分层
 
-使用本技能在用户仓库中落盘协议时，默认创建以下结构。保留目录名 `ai-agent-protocols`，不要擅自改写拼写。
+使用本技能在用户仓库中落盘协议时，保留目录名 `ai-agent-protocols`，不要擅自改写拼写。默认结构为项目版：基础目录保持稳定，`routes/` 只生成目标仓证据支持的领域。完整版结构用于用户明确要求完整覆盖时。
 
 ```text
 ai-agent-protocols/
@@ -75,22 +78,22 @@ ai-agent-protocols/
 │   └── AGENTS.md
 ├── routes/
 │   ├── index.md
-│   ├── frontend/
+│   ├── frontend/                    # 项目版：发现前端证据时生成
 │   │   ├── index.md
 │   │   └── ui-development.md
-│   ├── backend/
+│   ├── backend/                     # 项目版：按 go.mod / Maven/Gradle / Cargo.toml 裁剪语言入口
 │   │   ├── index.md
 │   │   ├── go.md
 │   │   ├── java.md
 │   │   └── rust.md
-│   ├── core/
+│   ├── core/                        # 项目版：发现 API、鉴权、数据访问、日志等证据时生成
 │   │   ├── index.md
 │   │   ├── api-design.md
 │   │   ├── auth-and-permission.md
 │   │   ├── data-access.md
 │   │   ├── common-quality.md
 │   │   └── error-and-logging.md
-│   ├── security/
+│   ├── security/                    # 可作为条件路由；不得伪装成已验证项目事实
 │   │   ├── index.md
 │   │   ├── common-security.md
 │   │   ├── trust-boundary.md
@@ -100,15 +103,15 @@ ai-agent-protocols/
 │   │   ├── safe-integers.md
 │   │   ├── dependency-and-config.md
 │   │   └── owasp.md
-│   ├── performance/
+│   ├── performance/                 # 可作为条件路由；按任务触发加载
 │   │   ├── index.md
 │   │   └── common-performance.md
-│   ├── platform/
+│   ├── platform/                    # 项目版：发现部署、网关、观测性证据时生成
 │   │   ├── index.md
 │   │   ├── gateway.md
 │   │   ├── deployment.md
 │   │   └── observability.md
-│   └── governance/
+│   └── governance/                  # 协议或 Agent 治理任务需要时生成
 │       ├── index.md
 │       └── agent-governance.md
 ├── playbooks/
@@ -133,10 +136,16 @@ ai-agent-protocols/
 - `README.md`：说明目录职责、入口策略和维护边界。
 - `user/`：用户级入口协议，只放定位、优先级、任务路由、长期原则。
 - `project/`：项目级协议或模板，可包含项目命令和项目约束。
-- `routes/`：按工程功能承载执行细节，是规则细节的主要落点；前端、后端、安全、性能等必须目录级隔离。
+- `routes/`：按工程功能承载执行细节，是规则细节的主要落点；前端、后端、安全、性能等应目录级隔离。项目版只生成已验证或条件适用的领域，完整版才生成全路由。
 - `playbooks/`：按任务类型承载流程方法。
 - `checks/`：承载审查和验收检查项。
 - `templates/`：承载可复用协议模板。
+
+生成模式：
+
+- 最小版：只生成根协议或协议包入口、必要 playbooks、checks 和 templates；如果入口没有引用 routes，不主动生成工程路由。
+- 项目版：默认模式；基于 `go.mod`、`package.json`、Maven/Gradle、`Cargo.toml`、Makefile、README、OpenSpec 或现有目录证据裁剪工程路由。
+- 完整版：仅用户明确要求时使用；包含 UI、Go、Java、Rust、通用安全、通用性能、平台和治理等完整路由，并在生成报告中标注哪些路由没有目标仓证据。
 
 ## 用户协议入口规则
 
@@ -175,6 +184,7 @@ ai-agent-protocols/
 - 维护模板正文时，必须同步更新 `project-protocol-template.md` 与 `../../templates/project-protocol.md`，避免目标仓落盘内容漂移。
 - 项目级模板中的约束信息应写成结构化记录，至少包含 `约束名称`、`适用范围`、`生效条件`、`规则正文` 和 `验证方式`，不要只留标签词。
 - 项目级协议可以记录长期有效的项目事实和项目约束，但不要保留“已验证项目事实来源”、读取文件清单或生成过程证据；这些内容应进入生成报告、任务日志、Issue 或 PR 描述。
+- 项目级协议中的硬性规范词必须有目标仓证据支撑；证据不足的候选约束只能写成待确认、建议或条件规则。
 - 目标仓建议落盘位置：`ai-agent-protocols/templates/project-protocol.md`。
 - 实际生效时，可按目标仓约定复制到根 `AGENTS.md`、`CODEX.md`、`CLAUDE.md` 或 `ai-agent-protocols/project/AGENTS.md`。
 
@@ -194,10 +204,14 @@ ai-agent-protocols/
 - 范围：每条规则是否明确说明适用位置和对象？
 - 归属：规则属于用户级、项目级、工程路由、场景手册、检查清单还是临时规则？
 - 分层：用户协议是否只保留入口，执行细节是否已下沉？
-- 覆盖：UI、Go、Java、Rust、通用安全、通用性能、通用质量是否都有入口？
+- 生成模式：是否先给方案预览，并按用户确认选择最小版、项目版或完整版？
+- 证据裁剪：项目版是否只生成目标仓证据支持的语言、框架和工程域入口？
+- 覆盖：所选生成模式声明的 UI、Go、Java、Rust、通用安全、通用性能、通用质量入口是否存在？
 - 可执行性：Agent 是否能不靠猜测直接遵循？
 - 可验证性：是否能通过行为、输出或验证结果判断是否遵守？
 - 约束完整性：每条约束是否写明适用范围、生效条件、规则正文和验证方式，而不是只留标签词？
+- 规范词强度：项目级 `必须`、`禁止`、`默认` 或 `仅当` 是否有目标仓证据支撑？
+- 占位符：生效协议、协议包 README 和入口说明中是否残留 `<project>`、`<install-command>` 等模板占位符？
 - 重复：同一规则是否在多个层级重复出现？
 - 冲突：低层级规则是否违背高优先级规则？
 - 新鲜度：命令、路径、工具或政策是否过期？
