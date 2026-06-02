@@ -52,10 +52,12 @@ P5 默认 AI 行为
 
 ```text
 @protocols  = ai-agent-protocols
-@playbooks  = @protocols/playbooks
+@playbooks  = <已选场景手册真值源，默认 @protocols/playbooks>
 @routes     = @protocols/routes
 @checks     = @protocols/checks
 ```
+
+若目标仓已有根级 `playbooks/` 并选择继续作为真值源，应把 `@playbooks` 改为 `playbooks` 或项目约定的根级路径，不要同时复制一套 `ai-agent-protocols/playbooks/` 正文。
 
 ## 任务分类
 
