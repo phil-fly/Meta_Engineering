@@ -1,0 +1,4 @@
+interface:
+  display_name: "维护 Agent 协作协议"
+  short_description: "审查、摄入和维护 AI Agent 协作协议"
+  default_prompt: "使用 $maintain-agent-protocols 审查我的 AI Agent 协作协议体系，判断原则、约束和执行流程应维护在哪里，并优化触发入口与规则路由。"
