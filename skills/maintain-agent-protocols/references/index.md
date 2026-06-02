@@ -10,7 +10,7 @@
 - `protocol/protocol-engineer.md`：协议工程审查，覆盖角色定位、协议膨胀、执行率、冲突、结构和 Token 成本。
 - `protocol/rule-ingestion.md`：原则、约束、执行流程、模板、检查项和知识的摄入与触发判断。
 - `protocol/openspec-workflow.md`：Spec-first 工作流，覆盖规范前置、变更闭环、审查闭环和 Epic 拆分。
-- `protocol/package-blueprint.md`：目标仓协议包落盘蓝图，说明生成方案预览、三档生成模式、目录、内容来源和不会自动生成的边界。
+- `protocol/package-blueprint.md`：目标仓协议包落盘蓝图，说明生成方案预览、入口兼容、三档生成模式、路由状态标注、目录、内容来源和不会自动生成的边界。
 - `protocol/skill-structure.md`：技能自身目录结构说明，覆盖多层 `references/`、`templates/` 和结构校验 warning 处理。
 - `protocol/user-protocol-template.md`：用户级协议模板，可直接复用后按项目裁剪。
 - `protocol/project-protocol-template.md`：项目级协议模板，可直接复用后按仓库约束裁剪。

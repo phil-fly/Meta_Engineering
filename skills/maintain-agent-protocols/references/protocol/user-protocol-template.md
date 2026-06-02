@@ -61,6 +61,8 @@ P5 默认 AI 行为
 
 若目标仓已有根级 `playbooks/` 并选择继续作为真值源，应把 `@playbooks` 改为 `playbooks` 或项目约定的根级路径，不要同时复制一套 `ai-agent-protocols/playbooks/` 正文。
 
+若使用 `@playbooks`、`@routes` 或 `@checks` 等抽象入口，生成协议时必须保证它们能解析到真实文件；当真实文件落在 `ai-agent-protocols/` 下方时，应在本表写明映射，或生成根级兼容入口指向真值源。
+
 ## 任务分类
 
 ```text

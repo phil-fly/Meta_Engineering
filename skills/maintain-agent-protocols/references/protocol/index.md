@@ -8,7 +8,7 @@
 2. 如涉及协议工程审查、执行率、Token 成本、协议膨胀或冲突分析，再读取 `protocol-engineer.md`。
 3. 如涉及原则、约束、执行流程、模板、检查项或知识摄入，再读取 `rule-ingestion.md`。
 4. 如涉及 OpenSpec、Spec-first、规范驱动开发、审查修复闭环或 Epic/Subtask 拆分，再读取 `openspec-workflow.md`。
-5. 如涉及协议包落盘、生成方案预览、三档生成模式、模板目录、playbooks 内容来源或目标仓文件生成，再读取 `package-blueprint.md`。
+5. 如涉及协议包落盘、生成方案预览、入口兼容、三档生成模式、路由状态标注、模板目录、playbooks 内容来源或目标仓文件生成，再读取 `package-blueprint.md`。
 6. 如涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理，再读取 `skill-structure.md`。
 7. 如创建或补充用户级协议，再读取 `user-protocol-template.md`。
 8. 如创建或补充项目级协议，再读取 `project-protocol-template.md`。
@@ -29,6 +29,8 @@
 - 维护 OpenSpec / Spec-first 工作流，并对齐规范前置、变更闭环、审查闭环和 Epic 拆分。
 - 维护 `ai-agent-protocols/` 目录结构。
 - 预览、生成或裁剪最小版、项目版、完整版协议包。
+- 处理 `@playbooks`、`@routes`、`@checks` 等抽象入口映射与兼容入口。
+- 为项目版路由索引标注项目证据支持、条件适用或通用治理。
 - 生成或补齐 `templates/`、`playbooks/`、`routes/` 或 `checks/` 文件内容。
 - 解释或处理本技能自身结构校验 warning。
 - 审查用户协议是否混入执行细节。

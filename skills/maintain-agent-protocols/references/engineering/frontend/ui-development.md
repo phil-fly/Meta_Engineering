@@ -5,11 +5,11 @@
 ## 细分入口
 
 - `api-and-data.md`：前端请求、列表查询、按需加载和筛选能力。
-- `layering-and-size.md`：页面分层、文件规模、函数规模和 props 控制。
+- `layering-and-size.md`：页面分层、文件规模、函数规模、props 控制和组件复用价值。
 - `navigation-and-state.md`：导航层级、路由状态、命名和页面状态。
-- `interaction-and-permission.md`：交互、格式化、小眉标、高影响操作和权限渲染。
+- `interaction-and-permission.md`：交互一致性、格式化、小眉标、高影响操作和权限渲染。
 
 ## 输出要求
 
 - 说明本次任务涉及哪些前端子域。
-- 对大文件、长函数、过多 props、装饰性文案和悬空路由给出明确处理结论。
+- 对复用价值、交互一致性、大文件、长函数、过多 props、装饰性文案和悬空路由给出明确处理结论。
