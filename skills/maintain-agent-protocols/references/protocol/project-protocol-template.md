@@ -53,7 +53,7 @@ P5 默认 AI 行为
 ## 技术栈与运行环境
 
 ```text
-语言/框架      → <例如 TypeScript + React、Go、Java/Spring、Rust>
+语言/框架      → <例如 JavaScript/TypeScript + React/Vue/Angular/Svelte、Go、Java/Spring、Rust、Python>
 包管理器        → <例如 npm、pnpm、uv、go、maven、cargo>
 运行环境        → <例如 Node.js 版本、JDK 版本、数据库、消息队列>
 部署目标        → <例如 Docker、Kubernetes、Serverless、桌面端>

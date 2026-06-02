@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- |
 | 用户级 | 跨项目生效的默认协作规则 | `AGENTS.md`、`ai-agent-protocols/user/AGENTS.md` | 协作风格、指令优先级、任务分类、入口路由、长期原则 | 命令、步骤、检查清单、语言细节、项目约束 |
 | 项目级 | 仓库专属约束和执行要求 | `AGENTS.md`、`CODEX.md`、`CLAUDE.md`、`ai-agent-protocols/project/AGENTS.md` | 架构、命令、测试、编码约定、发布、业务边界 | 个人偏好、全局哲学、跨项目长流程、生成过程证据 |
-| 工程路由 | 按功能类型承载执行细节 | `ai-agent-protocols/routes/*.md` | UI、Go、Java、Rust、API、安全、性能等规则 | 用户协议入口、项目私有例外 |
+| 工程路由 | 按功能类型承载执行细节 | `ai-agent-protocols/routes/*.md` | UI、JavaScript/TypeScript、Go、Java、Rust、Python、API、安全、性能等规则 | 用户协议入口、项目私有例外 |
 | 场景手册 | 某类任务的执行方法 | `ai-agent-protocols/playbooks/*.md` | 开发、架构、安全审查、性能审查、排障、调研流程 | 稳定项目事实、全局优先级 |
 | 检查清单 | 审查和验收项 | `ai-agent-protocols/checks/*.md` | 维护、安全、性能检查项 | 入口路由、项目实施细节 |
 | 本地临时 | 短期任务约定 | 线程备注、任务计划、Issue 评论 | 一次性范围决策、实验说明 | 长期标准，除非审查后正式提升 |
@@ -82,12 +82,17 @@ ai-agent-protocols/
 │   ├── index.md
 │   ├── frontend/                    # 项目版：发现前端证据时生成
 │   │   ├── index.md
-│   │   └── ui-development.md
-│   ├── backend/                     # 项目版：按 go.mod / Maven/Gradle / Cargo.toml 裁剪语言入口
+│   │   ├── ui-development.md
+│   │   ├── javascript-typescript.md
+│   │   ├── form-validation.md       # 条件：发现提交型表单证据
+│   │   ├── design-tokens.md         # 条件：发现 token、主题或颜色体系证据
+│   │   └── compact-ui.md            # 条件：发现紧凑布局或首屏密度证据
+│   ├── backend/                     # 项目版：按 go.mod / Maven/Gradle / Cargo.toml / pyproject.toml 裁剪语言入口
 │   │   ├── index.md
 │   │   ├── go.md
 │   │   ├── java.md
-│   │   └── rust.md
+│   │   ├── rust.md
+│   │   └── python.md
 │   ├── core/                        # 项目版：发现 API、鉴权、数据访问、日志等证据时生成
 │   │   ├── index.md
 │   │   ├── api-design.md
@@ -146,8 +151,8 @@ ai-agent-protocols/
 生成模式：
 
 - 最小版：只生成根协议或协议包入口、必要 playbooks、checks 和 templates；如果入口没有引用 routes，不主动生成工程路由。
-- 项目版：默认模式；基于 `go.mod`、`package.json`、Maven/Gradle、`Cargo.toml`、Makefile、README、OpenSpec 或现有目录证据裁剪到文件级工程路由。
-- 完整版：仅用户明确要求时使用；包含 UI、Go、Java、Rust、通用安全、通用性能、平台和治理等完整路由，并在生成报告中标注哪些路由没有目标仓证据。
+- 项目版：默认模式；基于 `package.json`、前端源码、`go.mod`、Maven/Gradle、`Cargo.toml`、`pyproject.toml`、`requirements.txt`、Makefile、README、OpenSpec 或现有目录证据裁剪到文件级工程路由。
+- 完整版：仅用户明确要求时使用；包含 UI、JavaScript/TypeScript、Go、Java、Rust、Python、通用安全、通用性能、平台和治理等完整路由，并在生成报告中标注哪些路由没有目标仓证据。
 
 项目版路由索引必须标注路由状态：
 
@@ -221,7 +226,7 @@ ai-agent-protocols/
 - 证据裁剪：项目版是否只生成目标仓证据支持的语言、框架和工程域入口？
 - 粒度：项目版是否裁剪到文件级路由，而不是生成整套语言、平台或安全目录？
 - 路由状态：索引是否标注 `项目证据支持`、`条件适用` 或 `通用治理`？
-- 覆盖：所选生成模式声明的 UI、Go、Java、Rust、通用安全、通用性能、通用质量入口是否存在？
+- 覆盖：所选生成模式声明的 UI、JavaScript/TypeScript、Go、Java、Rust、Python、通用安全、通用性能、通用质量入口是否存在？
 - 可执行性：Agent 是否能不靠猜测直接遵循？
 - 可验证性：是否能通过行为、输出或验证结果判断是否遵守？
 - 约束完整性：每条约束是否写明适用范围、生效条件、规则正文和验证方式，而不是只留标签词？

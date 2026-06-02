@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CODEX.md/CLAUDE.md, ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/Go/Java/Rust/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, or maintaining agent collaboration protocols or rule routing."
+description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CODEX.md/CLAUDE.md, ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/JavaScript/TypeScript/Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, or maintaining agent collaboration protocols or rule routing."
 ---
 
 # Maintain Agent Protocols
@@ -36,7 +36,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 2. 判断目标层级。
    - `用户级`：长期有效的个人协作偏好、默认任务路由、全局安全边界、回复风格、跨项目原则。
    - `项目级`：仓库专属架构、命令、测试要求、编码约定、发布流程、业务领域约束。
-   - `工程路由`：UI、Go、Java、Rust、API、安全、性能等功能类型的执行细节入口。
+   - `工程路由`：UI、JavaScript/TypeScript、Go、Java、Rust、Python、API、安全、性能等功能类型的执行细节入口。
    - `场景手册`：开发、架构、安全审查、性能审查、排障、调研等任务方法。
    - `临时规则`：短期本地约定，除非变成可复用规则，否则不要沉淀为长期协议。
 

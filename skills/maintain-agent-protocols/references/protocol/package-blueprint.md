@@ -135,13 +135,13 @@ ai-agent-protocols/templates/route-card.md
 ```text
 最小版  → 根协议或协议包入口 + 必要 playbooks/checks/templates；不主动生成工程 routes，除非入口已引用。
 项目版  → 默认模式；基于目标仓证据裁剪 routes，只生成当前技术栈、目录和任务类型需要的文件级入口。
-完整版  → 用户明确要求时使用；包含 UI、Go、Java、Rust、核心工程、安全、性能、平台和治理等完整路由。
+完整版  → 用户明确要求时使用；包含 UI、JavaScript/TypeScript、Go、Java、Rust、Python、核心工程、安全、性能、平台和治理等完整路由。
 ```
 
 项目版裁剪规则：
 
-- 发现 `package.json`、前端构建配置或前端源码时，可生成 `routes/frontend/index.md`；只有发现列表、远程搜索、权限渲染、导航状态等证据时，才生成对应细分路由。
-- 发现 `go.mod` 时，可生成 Go 后端路由；发现 Maven/Gradle 文件时，可生成 Java 路由；发现 `Cargo.toml` 时，可生成 Rust 路由；未发现的语言路由不生成。
+- 发现 `package.json`、前端构建配置或前端源码时，可生成 `routes/frontend/index.md` 和 `routes/frontend/javascript-typescript.md`；只有发现列表、远程搜索、提交型表单、Design Token、紧凑布局、权限渲染、导航状态等证据时，才生成对应细分路由。
+- 发现 `go.mod` 时，可生成 Go 后端路由；发现 Maven/Gradle 文件时，可生成 Java 路由；发现 `Cargo.toml` 时，可生成 Rust 路由；发现 `pyproject.toml`、`requirements.txt`、`setup.py`、`Pipfile` 或 Python 服务源码时，可生成 Python 路由；未发现的语言路由不生成。
 - 发现 API、数据库、鉴权、日志、配置或服务目录证据时，可生成对应 `routes/core/` 细分入口；只发现其中一类时，不展开其他无证据细项。
 - 通用安全、性能和质量入口可作为条件适用路由生成，但正文必须写明适用触发条件，避免把未启用架构写成项目事实。
 - Agent 治理、证据范围、资产一致性等与协议维护相关的内容归为通用治理路由，默认只生成索引或轻量入口。
