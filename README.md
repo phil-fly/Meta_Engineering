@@ -9,3 +9,7 @@
 - `skills/<skill-name>/references/`：按需加载的技能参考资料。
 - `skills/<skill-name>/scripts/`：技能维护或执行脚本。
 - `skills/<skill-name>/templates/`：技能可复制模板资产。
+
+## 技能说明索引
+
+- [`maintain-agent-protocols`](skills/maintain-agent-protocols/README.md)：AI Agent 协作协议与规则路由的创建、审查、维护和快速使用手册。
