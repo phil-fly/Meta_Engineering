@@ -18,7 +18,7 @@ Spec-first 属于项目规范工作流，不属于用户级协议正文。
 
 ## 规范前置
 
-涉及以下变更时，先确认是否需要更新 Spec：
+`CON-SPEC-FIRST-SCOPE`：涉及以下变更时，先确认是否需要更新 Spec：
 
 - API 行为、字段、响应结构或错误码。
 - 数据结构、存储模型、索引或迁移。
@@ -35,7 +35,7 @@ Spec-first 属于项目规范工作流，不属于用户级协议正文。
 
 ## 双层规范体系
 
-推荐保留“双层规范”的思想，但目录名以项目实际约定为准。
+`CON-SPEC-LAYERING`：推荐保留“双层规范”的思想，但目录名以项目实际约定为准。
 
 ```text
 通用规范      → 可跨项目复用，使用占位符表达通用规则
@@ -44,14 +44,13 @@ Spec-first 属于项目规范工作流，不属于用户级协议正文。
 
 占位符规则：
 
-- 通用规范可以使用 `{{PLACEHOLDER}}` 表达项目变量。
-- 具体值由项目配置或项目级协议提供。
-- 禁止把项目私有路径写进通用规范。
-- 若项目从外部规范源摄入规则，目标仓应记录来源、版本、适用范围和同步方式；本技能只维护协议路由和执行方法。
+- `CON-SPEC-PLACEHOLDER`：通用规范可以使用 `{{PLACEHOLDER}}` 表达项目变量，具体值由项目配置或项目级协议提供。
+- `CON-SPEC-PRIVATE-PATH`：禁止把项目私有路径写进通用规范。
+- `CON-SPEC-EXTERNAL-SOURCE`：若项目从外部规范源摄入规则，目标仓应记录来源、版本、适用范围和同步方式；本技能只维护协议路由和执行方法。
 
 ## 变更闭环
 
-使用 Spec-first 的项目，开发任务默认闭环：
+`WF-SPEC-FIRST`：使用 Spec-first 的项目，开发任务默认闭环：
 
 ```text
 识别变更类型 → 判断是否影响 Spec → 更新或确认 Spec → 实施最小变更 → 验证 → 记录未覆盖范围
@@ -59,14 +58,14 @@ Spec-first 属于项目规范工作流，不属于用户级协议正文。
 
 要求：
 
-- 如果更新了 Spec，应说明更新的文件和变更点。
-- 如果未更新 Spec，应说明不影响契约或规范的理由。
-- 实现必须与已确认的 Spec 保持一致。
-- 禁止用代码实现长期绕过已有 Spec 约束。
+- `CON-SPEC-UPDATE-TRACE`：如果更新了 Spec，应说明更新的文件和变更点。
+- `CON-SPEC-NO-UPDATE-REASON`：如果未更新 Spec，应说明不影响契约或规范的理由。
+- `CON-SPEC-IMPLEMENTATION-ALIGNMENT`：实现必须与已确认的 Spec 保持一致。
+- `CON-SPEC-NO-BYPASS`：禁止用代码实现长期绕过已有 Spec 约束。
 
 ## Epic / Subtask 拆分
 
-任务满足以下任一条件时，应考虑拆为 Epic：
+`CON-SPEC-EPIC-SPLIT`：任务满足以下任一条件时，应考虑拆为 Epic：
 
 - 预计涉及 3 个以上独立交付波次。
 - 跨越 2 个以上业务领域。
@@ -92,26 +91,26 @@ parent_epic: <epic-change-name>
 
 ## 审查 / 修复闭环
 
-当任务是全面审查、规范合规性检查、先审查再修，或根据审查结果发起 Spec 修复时：
+`WF-SPEC-REVIEW-CLOSURE`：当任务是全面审查、规范合规性检查、先审查再修，或根据审查结果发起 Spec 修复时：
 
-1. 先确认工作区时点：审查前查看工作区状态，并说明结论对应的审查时点。
-2. 先定义审查模式：`Repo-wide baseline audit` 或 `Scoped change review`，禁止混写。
-3. 先列目标清单：纳入范围、排除范围、关注问题类型和检索结果。
-4. 发现必须可对账：每条发现标记为本轮解决、延后处理、明确排除或转入后续 change。
-5. 验收前回扫同类问题：区分已清理项、本轮范围外残留和新发现残留。
+1. `CHK-SPEC-REVIEW-TIMEPOINT`：先确认工作区时点，审查前查看工作区状态，并说明结论对应的审查时点。
+2. `CHK-SPEC-REVIEW-MODE`：先定义审查模式，`Repo-wide baseline audit` 或 `Scoped change review`，禁止混写。
+3. `CHK-SPEC-REVIEW-SCOPE`：先列目标清单，纳入范围、排除范围、关注问题类型和检索结果。
+4. `CHK-SPEC-FINDING-ACCOUNTING`：发现必须可对账，每条发现标记为本轮解决、延后处理、明确排除或转入后续 change。
+5. `CHK-SPEC-RESCAN`：验收前回扫同类问题，区分已清理项、本轮范围外残留和新发现残留。
 
 注意：
 
-- Repo-wide baseline audit 才能回答仓库整体符合性。
-- Scoped change review 只证明某个变更范围是否闭环。
-- 具体检索方式和领域规则由对应 skill、routes 或 Spec 负责。
+- `CON-SPEC-BASELINE-SCOPE`：Repo-wide baseline audit 才能回答仓库整体符合性。
+- `CON-SPEC-SCOPED-REVIEW`：Scoped change review 只证明某个变更范围是否闭环。
+- `CON-SPEC-DOMAIN-RULES`：具体检索方式和领域规则由对应 skill、routes 或 Spec 负责。
 
 ## 输出建议
 
 Spec-first 相关任务的最终回复应包含：
 
-- Spec 对齐：更新或确认了哪些 Spec，或为何无需更新。
-- 实现摘要：本轮做了哪些最小变更。
-- 验证结果：运行了什么验证，未运行什么验证及原因。
-- 审查闭环：发现项如何归类，是否存在范围外残留。
-- 剩余风险：需要后续 Spec、change 或人工确认的事项。
+- `CHK-SPEC-OUTPUT-ALIGNMENT`：Spec 对齐，更新或确认了哪些 Spec，或为何无需更新。
+- `CHK-SPEC-OUTPUT-IMPLEMENTATION`：实现摘要，本轮做了哪些最小变更。
+- `CHK-SPEC-OUTPUT-VALIDATION`：验证结果，运行了什么验证，未运行什么验证及原因。
+- `CHK-SPEC-OUTPUT-REVIEW-CLOSURE`：审查闭环，发现项如何归类，是否存在范围外残留。
+- `CHK-SPEC-OUTPUT-RISK`：剩余风险，需要后续 Spec、change 或人工确认的事项。

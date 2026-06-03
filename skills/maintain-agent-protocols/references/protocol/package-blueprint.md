@@ -4,7 +4,7 @@
 
 ## 触发边界
 
-技能被读取或命中触发词时，不自动创建目录或文件。
+`CON-PACKAGE-TRIGGER-NO-AUTO-CREATE`：技能被读取或命中触发词时，不自动创建目录或文件。
 
 仅当用户明确提出以下意图时，才在目标仓落盘或修改协议包：
 
@@ -14,11 +14,11 @@
 - 生成或维护 `playbooks/`、`routes/`、`checks/`、`templates/`。
 - 把当前协议入口引用的文件补齐。
 
-如果用户只是在询问规则、设计或差异，应先解释，不落盘。
+`CON-PACKAGE-TRIGGER-EXPLAIN-ONLY`：如果用户只是在询问规则、设计或差异，应先解释，不落盘。
 
 ## 生成方案预览
 
-落盘前必须先给用户一份生成方案预览，并等待确认。预览只说明计划，不创建文件。
+`WF-PACKAGE-PREVIEW`：落盘前必须先给用户一份生成方案预览，并等待确认。预览只说明计划，不创建文件。
 
 预览必须包含：
 
@@ -27,6 +27,7 @@
 - 生成模式：最小版、项目版或完整版；默认选择项目版。
 - 拟生成文件：列出将创建或修改的路径，标明新建、最小修改、别名或跳过。
 - 路径变量映射：若用户协议使用 `@playbooks`、`@routes` 或 `@checks`，必须说明它们映射到目标仓哪些真实目录。
+- 编号方案：说明本次工作流 `WF-*`、约束 `CON-*`、检查项 `CHK-*` 的编号范围、继承来源和冲突处理。
 - 项目事实证据表：每条项目事实、技术栈、命令、目录职责或规范入口都要标注来源文件；没有证据时标为待确认。
 - 模板内容边界：说明哪些内容来自通用模板，哪些内容来自目标仓证据。
 - 风险与确认点：列出会影响长期协议、入口迁移、双写、无关路由或占位符处理的事项。
@@ -40,19 +41,19 @@
 
 状态规则：
 
-- 已验证：来自本轮已读取的目标仓文件或工具输出。
-- 待确认：证据不足但用户表达或目录形态提供合理候选。
-- 通用模板：来自本技能模板，不作为项目事实。
+- `CON-PACKAGE-FACT-VERIFIED`：已验证状态必须来自本轮已读取的目标仓文件或工具输出。
+- `CON-PACKAGE-FACT-PENDING`：待确认状态表示证据不足但用户表达或目录形态提供合理候选。
+- `CON-PACKAGE-FACT-TEMPLATE`：通用模板来自本技能模板，不作为项目事实。
 
 规范词规则：
 
-- 已验证且长期适用的项目事实可写成 `必须`、`禁止`、`默认` 或 `仅当`。
-- 待确认、跨项目通用或架构未启用的内容只能写成 `应`、`建议` 或 `如项目采用...`。
-- 如果无法找到证据，不得把候选技术栈、命令、目录职责或路由写成项目级硬约束。
+- `CON-PACKAGE-NORM-VERIFIED`：已验证且长期适用的项目事实可写成 `必须`、`禁止`、`默认` 或 `仅当`。
+- `CON-PACKAGE-NORM-PENDING`：待确认、跨项目通用或架构未启用的内容只能写成 `应`、`建议` 或 `如项目采用...`。
+- `CON-PACKAGE-NORM-NO-EVIDENCE`：如果无法找到证据，不得把候选技术栈、命令、目录职责或路由写成项目级硬约束。
 
 ## 内容来源
 
-目标仓文件应从技能内 `references/` 派生，不要凭空编写，也不要复制外部仓库路径。
+`CON-PACKAGE-CONTENT-SOURCE`：目标仓文件应从技能内 `references/` 派生，不要凭空编写，也不要复制外部仓库路径。
 
 技能内 `templates/` 目录提供可直接复制到目标仓 `ai-agent-protocols/templates/` 的模板资产；`references/protocol/user-protocol-template.md`、`references/protocol/project-protocol-template.md` 和 `references/protocol/route-card-template.md` 是模板正文的解释性来源，维护时应保持两者同步。
 
@@ -70,13 +71,22 @@
 
 模型入口规则：
 
-- 用户明确指定入口文件时，按用户当前要求执行。
-- 用户未指定时，必须主动判断当前模型或工具环境：Codex/OpenAI 场景默认生成或维护 `AGENTS.md`；Claude/Anthropic 场景默认生成或维护 `CLAUDE.md`。
-- 无法识别模型或工具环境时，默认使用 `AGENTS.md`。
-- `CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
-- 若既有入口与模型默认入口不同，预览中必须说明保留、迁移或别名策略，并确保只有一个可编辑真值源。
+- `CON-PACKAGE-ENTRY-USER-SPECIFIED`：用户明确指定入口文件时，按用户当前要求执行。
+- `CON-PACKAGE-ENTRY-MODEL-AWARE`：用户未指定时，必须主动判断当前模型或工具环境；Codex/OpenAI 场景默认生成或维护 `AGENTS.md`，Claude/Anthropic 场景默认生成或维护 `CLAUDE.md`。
+- `CON-PACKAGE-ENTRY-FALLBACK`：无法识别模型或工具环境时，默认使用 `AGENTS.md`。
+- `CON-PACKAGE-ENTRY-CODEX-LEGACY`：`CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
+- `CON-PACKAGE-ENTRY-MIGRATION`：若既有入口与模型默认入口不同，预览中必须说明保留、迁移或别名策略，并确保只有一个可编辑真值源。
 
-若目标仓已有根级 `playbooks/` 且内容应继续生效，默认不要再生成同内容的 `ai-agent-protocols/playbooks/*.md`；需要协议包内入口时，只写索引或别名说明，指向根级真值源。若用户明确要求迁移到 `ai-agent-protocols/playbooks/`，应先说明迁移影响，并避免保留两套可编辑正文。
+编号规则：
+
+- `CON-PACKAGE-ID-WORKFLOW`：工作流和执行流程使用 `WF-*`。
+- `CON-PACKAGE-ID-CONSTRAINT`：约束和边界规则使用 `CON-*`。
+- `CON-PACKAGE-ID-CHECK`：检查项和验收项使用 `CHK-*`。
+- `CON-PACKAGE-ID-INHERIT`：目标仓已有编号时继承既有编号，不为同一规则创建新编号。
+- `CON-PACKAGE-ID-UNIQUE`：新增编号前必须扫描同一真值源，避免同类型编号冲突。
+- `CON-PACKAGE-ID-REPORT`：生成报告必须列出新增、继承、弃用或迁移的编号。
+
+`CON-PACKAGE-PLAYBOOK-SINGLE-SOURCE`：若目标仓已有根级 `playbooks/` 且内容应继续生效，默认不要再生成同内容的 `ai-agent-protocols/playbooks/*.md`；需要协议包内入口时，只写索引或别名说明，指向根级真值源。若用户明确要求迁移到 `ai-agent-protocols/playbooks/`，应先说明迁移影响，并避免保留两套可编辑正文。
 
 ## 入口兼容与别名
 
@@ -88,10 +98,10 @@
 
 兼容入口规则：
 
-- 兼容入口只写跳转、映射和真值源说明，不复制完整正文。
-- 如果用户协议引用 `@playbooks/coding.md`，生成后必须能解析到真实文件或别名文件。
-- 如果选择不生成兼容入口，必须在生成报告中说明原因，并把用户协议中的路径变量改成真实目录。
-- 生成报告应列出抽象入口、真实路径、兼容入口和验证结果。
+- `CON-PACKAGE-ALIAS-LIGHTWEIGHT`：兼容入口只写跳转、映射和真值源说明，不复制完整正文。
+- `CON-PACKAGE-ALIAS-RESOLVABLE`：如果用户协议引用 `@playbooks/coding.md`，生成后必须能解析到真实文件或别名文件。
+- `CON-PACKAGE-ALIAS-NO-COMPAT`：如果选择不生成兼容入口，必须在生成报告中说明原因，并把用户协议中的路径变量改成真实目录。
+- `CON-PACKAGE-ALIAS-REPORT`：生成报告应列出抽象入口、真实路径、兼容入口和验证结果。
 
 ```text
 ai-agent-protocols/README.md
@@ -124,20 +134,21 @@ ai-agent-protocols/templates/route-card.md
 
 ## 生成规则
 
-- 目标仓已有同名文件时，先读取并做最小修改，不覆盖用户内容。
-- 目标仓没有同名文件时，按蓝图创建骨架并填充可执行内容。
-- 默认生成模式是项目版；除非用户明确要求完整版，不生成目标仓未采用的语言、框架或平台路由。
-- 项目版必须支持文件级路由粒度；不要因为发现一个后端证据就生成全部后端语言路由。
-- 若 `ai-agent-protocols/playbooks/` 被选为场景手册真值源，`playbooks/*.md` 应拆分为独立文件，每个文件只包含一个任务流程。
-- 若根级 `playbooks/` 被选为场景手册真值源，协议包内不要复制同名正文；可创建 `ai-agent-protocols/playbooks/README.md` 或单文件别名说明，指向根级手册。
-- `templates/*.md` 只放可复用格式骨架、填写规则和可实例化的通用协议条款，不承载目标仓专属决策或一次性任务约定。
-- 从目标仓扫描得到的读取文件清单、事实来源、置信度标注和生成过程记录只在生成报告中说明，不写入落盘协议正文、协议包 `README.md` 或入口说明。
-- 生效协议、协议包 `README.md` 和入口说明不得保留 `<project>`、`<install-command>`、`<path>` 等模板占位符；证据不足时删除该项或写为待确认，不把占位符交给后续 Agent 猜测。
-- 修改技能内模板正文时，应同步更新 `templates/` 与 `references/protocol/` 下对应模板参考文件。
-- `routes/**` 应保留领域分层，避免把所有工程规则压成单个大文件。
-- `checks/*.md` 只放检查项，不放长流程或教程。
-- 如果目标仓已经采用不同目录名，应先说明差异并征求确认；默认目录名是 `ai-agent-protocols`。
-- 每个生成文件的路径引用必须统一口径。协议包内文件引用根级文件时，使用 `../`、`../../` 等当前文件相对路径，或明确写 `仓库根：<path>`；不要写基准不明的裸路径。
+- `CON-PACKAGE-GENERATE-MINIMAL-EDIT`：目标仓已有同名文件时，先读取并做最小修改，不覆盖用户内容。
+- `CON-PACKAGE-GENERATE-SKELETON`：目标仓没有同名文件时，按蓝图创建骨架并填充可执行内容。
+- `CON-PACKAGE-GENERATE-PROJECT-MODE`：默认生成模式是项目版；除非用户明确要求完整版，不生成目标仓未采用的语言、框架或平台路由。
+- `CON-PACKAGE-GENERATE-ENTRY-PRUNING`：生成用户协议时，工程路由和检查入口只列本次实际生成、目标仓既有存在或已生成兼容入口的路径；未采用路由只写入生成报告。
+- `CON-PACKAGE-GENERATE-FILE-LEVEL`：项目版必须支持文件级路由粒度；不要因为发现一个后端证据就生成全部后端语言路由。
+- `CON-PACKAGE-GENERATE-PLAYBOOK-SPLIT`：若 `ai-agent-protocols/playbooks/` 被选为场景手册真值源，`playbooks/*.md` 应拆分为独立文件，每个文件只包含一个任务流程。
+- `CON-PACKAGE-GENERATE-ROOT-PLAYBOOK`：若根级 `playbooks/` 被选为场景手册真值源，协议包内不要复制同名正文；可创建 `ai-agent-protocols/playbooks/README.md` 或单文件别名说明，指向根级手册。
+- `CON-PACKAGE-GENERATE-TEMPLATE-SCOPE`：`templates/*.md` 只放可复用格式骨架、填写规则和可实例化的通用协议条款，不承载目标仓专属决策或一次性任务约定。
+- `CON-PACKAGE-GENERATE-EVIDENCE-REPORT-ONLY`：从目标仓扫描得到的读取文件清单、事实来源、置信度标注和生成过程记录只在生成报告中说明，不写入落盘协议正文、协议包 `README.md` 或入口说明。
+- `CON-PACKAGE-GENERATE-NO-PLACEHOLDER`：生效协议、协议包 `README.md` 和入口说明不得保留 `<project>`、`<install-command>`、`<path>` 等模板占位符；证据不足时删除该项或写为待确认，不把占位符交给后续 Agent 猜测。
+- `CON-PACKAGE-GENERATE-TEMPLATE-SYNC`：修改技能内模板正文时，应同步更新 `templates/` 与 `references/protocol/` 下对应模板参考文件。
+- `CON-PACKAGE-GENERATE-ROUTE-LAYERING`：`routes/**` 应保留领域分层，避免把所有工程规则压成单个大文件。
+- `CON-PACKAGE-GENERATE-CHECKS-SCOPE`：`checks/*.md` 只放检查项，不放长流程或教程。
+- `CON-PACKAGE-GENERATE-DIR-DIFFERENCE`：如果目标仓已经采用不同目录名，应先说明差异并征求确认；默认目录名是 `ai-agent-protocols`。
+- `CON-PACKAGE-GENERATE-PATH-BASE`：每个生成文件的路径引用必须统一口径。协议包内文件引用根级文件时，使用 `../`、`../../` 等当前文件相对路径，或明确写 `仓库根：<path>`；不要写基准不明的裸路径。
 
 ## 三档生成模式
 
@@ -218,29 +229,32 @@ ai-agent-protocols/
 
 落盘后必须检查：
 
-- 用户协议中的每个入口路径是否存在。
-- `@playbooks`、`@routes`、`@checks` 等抽象入口是否有真实路径映射或兼容入口。
-- 生成模式是否符合用户确认；默认项目版是否没有无证据语言/框架路由。
-- 路由索引是否按 `项目证据支持`、`条件适用`、`通用治理` 标注。
-- 工作区状态是否清楚；如存在未跟踪文件或无关修改，应在生成报告中说明但不擅自处理。
-- `playbooks/` 中是否覆盖用户协议声明的任务分类。
-- `templates/` 中是否有用户级、项目级和路由卡片模板。
-- `checks/` 中是否有维护、安全和性能检查清单。
-- 是否误把项目专属命令、业务规则或一次性约定写入通用模板。
-- 是否误把生成过程证据、读取文件清单或“已验证项目事实来源”写入协议正文。
-- 是否误把生成依据写入 `ai-agent-protocols/README.md`、`project/AGENTS.md` 或其他入口说明。
-- 生效协议、协议包 README 和入口说明是否仍残留 `<...>` 模板占位符。
-- Codex 场景是否默认选择 `AGENTS.md`，且未新建 `codex.md` 或 `CODEX.md`。
-- Claude 场景是否默认选择 `CLAUDE.md`，且与 `AGENTS.md` 或既有入口的真值源关系清楚。
-- 项目级 `必须`、`禁止`、`默认` 或 `仅当` 是否都有目标仓证据支撑。
-- OpenSpec、风险控制等高频规则是否只保留入口锚点，避免结构化约束和详情章节重复展开。
-- 是否存在根级 `playbooks/` 与 `ai-agent-protocols/playbooks/` 的同内容全文双写；若存在，应明确一个为真值源，另一个改为索引或别名。
-- 嵌套入口文件中的 `AGENTS.md`、`CODEX.md`、`playbooks/`、`routes/`、`checks/` 路径是否按当前文件位置可解析。
+- CHK-MAINT-001 用户协议中的每个入口路径是否存在。
+- CHK-MAINT-002 `@playbooks`、`@routes`、`@checks` 等抽象入口是否有真实路径映射或兼容入口。
+- CHK-MAINT-003 用户协议是否只列实际生成、既有存在或已兼容的工程路由和检查入口。
+- CHK-MAINT-004 生成模式是否符合用户确认；默认项目版是否没有无证据语言/框架路由。
+- CHK-MAINT-005 工作流、约束和检查项是否分别使用 `WF-*`、`CON-*`、`CHK-*` 编号，且同一真值源内唯一。
+- CHK-MAINT-006 路由索引是否按 `项目证据支持`、`条件适用`、`通用治理` 标注。
+- CHK-MAINT-007 工作区状态是否清楚；如存在未跟踪文件或无关修改，应在生成报告中说明但不擅自处理。
+- CHK-MAINT-008 `playbooks/` 中是否覆盖用户协议声明的任务分类。
+- CHK-MAINT-009 `templates/` 中是否有用户级、项目级和路由卡片模板。
+- CHK-MAINT-010 `checks/` 中是否有维护、安全和性能检查清单。
+- CHK-MAINT-011 是否误把项目专属命令、业务规则或一次性约定写入通用模板。
+- CHK-MAINT-012 是否误把生成过程证据、读取文件清单或“已验证项目事实来源”写入协议正文。
+- CHK-MAINT-013 是否误把生成依据写入 `ai-agent-protocols/README.md`、`project/AGENTS.md` 或其他入口说明。
+- CHK-MAINT-014 生效协议、协议包 README 和入口说明是否仍残留 `<...>` 模板占位符。
+- CHK-MAINT-015 Codex 场景是否默认选择 `AGENTS.md`，且未新建 `codex.md` 或 `CODEX.md`。
+- CHK-MAINT-016 Claude 场景是否默认选择 `CLAUDE.md`，且与 `AGENTS.md` 或既有入口的真值源关系清楚。
+- CHK-MAINT-017 项目级 `必须`、`禁止`、`默认` 或 `仅当` 是否都有目标仓证据支撑。
+- CHK-MAINT-018 OpenSpec、风险控制等高频规则是否只保留入口锚点，避免结构化约束和详情章节重复展开。
+- CHK-MAINT-019 是否存在根级 `playbooks/` 与 `ai-agent-protocols/playbooks/` 的同内容全文双写；若存在，应明确一个为真值源，另一个改为索引或别名。
+- CHK-MAINT-020 嵌套入口文件中的 `AGENTS.md`、`CODEX.md`、`playbooks/`、`routes/`、`checks/` 路径是否按当前文件位置可解析。
 
 生成报告应与生效协议分离，至少包含：
 
 - 本次生成模式和确认依据。
 - 模型入口判断依据，以及最终生效入口文件。
+- 编号清单：新增、继承、弃用或迁移的 `WF-*`、`CON-*`、`CHK-*`。
 - 创建、修改、跳过的文件清单。
 - 项目事实证据表和待确认项。
 - 抽象入口映射和兼容入口验证结果。

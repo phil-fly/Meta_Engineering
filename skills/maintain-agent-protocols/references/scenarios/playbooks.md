@@ -2,7 +2,7 @@
 
 本文件是技能内场景流程的单一来源。落盘到目标仓时，先确认场景手册真值源：若选择 `ai-agent-protocols/playbooks/`，应按章节拆分为独立文件；若目标仓已有根级 `playbooks/` 并继续作为真值源，则协议包内只生成索引或别名说明，不复制完整正文。
 
-## coding
+## WF-CODING coding
 
 开发任务默认流程：
 
@@ -13,7 +13,7 @@
 5. 运行与变更范围匹配的验证。
 6. 汇报变更、验证结果和剩余风险。
 
-## architecture
+## WF-ARCHITECTURE architecture
 
 架构任务默认流程：
 
@@ -22,7 +22,7 @@
 3. 对比可选方案及权衡。
 4. 给出推荐方案、迁移影响和验证方式。
 
-## security-review
+## WF-SECURITY-REVIEW security-review
 
 安全审查默认流程：
 
@@ -32,7 +32,7 @@
 4. 按控制点审查，避免只凭漏洞直觉搜索。
 5. 输出发现、证据、影响、修复建议和沉淀去向。
 
-## performance-review
+## WF-PERFORMANCE-REVIEW performance-review
 
 性能审查默认流程：
 
@@ -41,7 +41,7 @@
 3. 检查 N+1、资源泄漏、复杂度、对象分配、阻塞和缓存一致性。
 4. 输出瓶颈、证据、优化建议、验证方式和风险。
 
-## troubleshooting
+## WF-TROUBLESHOOTING troubleshooting
 
 故障排查默认流程：
 
@@ -52,7 +52,7 @@
 5. 定位根因后给出修复方案、回归验证方式和剩余风险。
 6. 仅将可复用经验、长期规则或架构决策沉淀到协议、文档或 Wiki。
 
-## research
+## WF-RESEARCH research
 
 技术调研默认流程：
 
