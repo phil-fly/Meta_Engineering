@@ -4,13 +4,15 @@
 
 `maintain-agent-protocols` 用于创建、审查、重构和维护 AI Agent 协作协议与规则路由。
 
+新项目默认把协议产物放入目标仓统一入口 `ai-agent-workspace/protocols/`；已有项目若采用 `ai-agent-protocols/`，可继续作为兼容真值源，但必须声明映射并避免双写。
+
 它适合处理这类问题：
 
 - 如何把零散协作规则整理成稳定协议。
 - 如何区分用户级、项目级、工程路由、场景手册和临时规则。
 - 如何判断一条规则属于原则、约束、工作流、模板、检查项或知识背景。
 - 如何降低协议冲突、误触发、重复维护和上下文成本。
-- 如何为目标仓生成或维护 `AGENTS.md`、`CLAUDE.md`、既有 `CODEX.md` 迁移兼容或 `ai-agent-protocols/`。
+- 如何为目标仓生成或维护 `AGENTS.md`、`CLAUDE.md`、既有 `CODEX.md` 迁移兼容、`ai-agent-workspace/protocols/` 或兼容 `ai-agent-protocols/`。
 
 不适合直接处理普通功能开发、普通代码审查、一般架构讨论或项目调试；除非任务目标是维护 Agent 协作协议、规则路由或技能本身。
 

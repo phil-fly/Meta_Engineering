@@ -1,6 +1,6 @@
 # 目标仓协议包蓝图
 
-本文件说明使用本技能在目标仓落盘 `ai-agent-protocols/` 时，应创建哪些文件、文件内容从哪里来，以及哪些行为不会自动发生。
+本文件说明使用本技能在目标仓落盘协议包时，应创建哪些文件、文件内容从哪里来，以及哪些行为不会自动发生。新项目默认协议包路径为 `ai-agent-workspace/protocols/`；目标仓已存在 `ai-agent-protocols/` 时可兼容继承。跨技能统一布局见仓库根 `references/target-workspace-layout.md`。
 
 ## 触发边界
 
@@ -55,17 +55,17 @@
 
 `CON-PACKAGE-CONTENT-SOURCE`：目标仓文件应从技能内 `references/` 派生，不要凭空编写，也不要复制外部仓库路径。
 
-技能内 `templates/` 目录提供可直接复制到目标仓 `ai-agent-protocols/templates/` 的模板资产；`references/protocol/user-protocol-template.md`、`references/protocol/project-protocol-template.md` 和 `references/protocol/route-card-template.md` 是模板正文的解释性来源，维护时应保持两者同步。
+技能内 `templates/` 目录提供可直接复制到目标仓协议模板目录的模板资产；新项目默认 `ai-agent-workspace/protocols/templates/`，旧项目兼容 `ai-agent-protocols/templates/`。`references/protocol/user-protocol-template.md`、`references/protocol/project-protocol-template.md` 和 `references/protocol/route-card-template.md` 是模板正文的解释性来源，维护时应保持两者同步。
 
 落盘前先确定目标仓真值源：
 
 ```text
-项目协议正文    → 根级 AGENTS.md / CLAUDE.md / ai-agent-protocols/project/AGENTS.md（三选一；按模型入口规则）
-用户协议正文    → 根级 AGENTS.md / CLAUDE.md / ai-agent-protocols/user/AGENTS.md（三选一；按模型入口规则）
-场景手册正文    → 根级 playbooks/ 或 ai-agent-protocols/playbooks/（二选一）
-工程路由正文    → ai-agent-protocols/routes/
-检查清单正文    → ai-agent-protocols/checks/
-模板资产正文    → ai-agent-protocols/templates/
+项目协议正文    → 根级 AGENTS.md / CLAUDE.md / ai-agent-workspace/protocols/project/AGENTS.md / 兼容 ai-agent-protocols/project/AGENTS.md（四选一；按模型入口规则）
+用户协议正文    → 根级 AGENTS.md / CLAUDE.md / ai-agent-workspace/protocols/user/AGENTS.md / 兼容 ai-agent-protocols/user/AGENTS.md（四选一；按模型入口规则）
+场景手册正文    → 根级 playbooks/ / ai-agent-workspace/protocols/playbooks/ / 兼容 ai-agent-protocols/playbooks/（三选一）
+工程路由正文    → ai-agent-workspace/protocols/routes/，兼容 ai-agent-protocols/routes/
+检查清单正文    → ai-agent-workspace/protocols/checks/，兼容 ai-agent-protocols/checks/
+模板资产正文    → ai-agent-workspace/protocols/templates/，兼容 ai-agent-protocols/templates/
 生成过程证据    → 生成报告 / 任务日志 / Issue / PR 描述
 ```
 
@@ -86,15 +86,15 @@
 - `CON-PACKAGE-ID-UNIQUE`：新增编号前必须扫描同一真值源，避免同类型编号冲突。
 - `CON-PACKAGE-ID-REPORT`：生成报告必须列出新增、继承、弃用或迁移的编号。
 
-`CON-PACKAGE-PLAYBOOK-SINGLE-SOURCE`：若目标仓已有根级 `playbooks/` 且内容应继续生效，默认不要再生成同内容的 `ai-agent-protocols/playbooks/*.md`；需要协议包内入口时，只写索引或别名说明，指向根级真值源。若用户明确要求迁移到 `ai-agent-protocols/playbooks/`，应先说明迁移影响，并避免保留两套可编辑正文。
+`CON-PACKAGE-PLAYBOOK-SINGLE-SOURCE`：若目标仓已有根级 `playbooks/` 且内容应继续生效，默认不要再生成同内容的协议包 `playbooks/*.md`；需要协议包内入口时，只写索引或别名说明，指向根级真值源。若用户明确要求迁移到统一协议目录，应先说明迁移影响，并避免保留两套可编辑正文。
 
 ## 入口兼容与别名
 
 当生效用户协议使用 `@playbooks`、`@routes`、`@checks` 等抽象入口时，目标仓必须满足以下任一条件，避免首次读取失败：
 
-- 在用户协议的“路径变量”中声明真实映射，例如 `@playbooks = ai-agent-protocols/playbooks`。
+- 在用户协议的“路径变量”中声明真实映射，例如 `@playbooks = ai-agent-workspace/protocols/playbooks`。
 - 在协议包 README 或入口说明中声明同一映射，并确保用户协议引用该说明。
-- 生成兼容入口，例如根级 `playbooks/README.md` 指向 `ai-agent-protocols/playbooks/`，或根级 `playbooks/<task>.md` 作为别名文件指向协议包内真值源。
+- 生成兼容入口，例如根级 `playbooks/README.md` 指向 `ai-agent-workspace/protocols/playbooks/` 或兼容协议目录，或根级 `playbooks/<task>.md` 作为别名文件指向协议包内真值源。
 
 兼容入口规则：
 
@@ -147,7 +147,7 @@ ai-agent-protocols/templates/route-card.md
 - `CON-PACKAGE-GENERATE-TEMPLATE-SYNC`：修改技能内模板正文时，应同步更新 `templates/` 与 `references/protocol/` 下对应模板参考文件。
 - `CON-PACKAGE-GENERATE-ROUTE-LAYERING`：`routes/**` 应保留领域分层，避免把所有工程规则压成单个大文件。
 - `CON-PACKAGE-GENERATE-CHECKS-SCOPE`：`checks/*.md` 只放检查项，不放长流程或教程。
-- `CON-PACKAGE-GENERATE-DIR-DIFFERENCE`：如果目标仓已经采用不同目录名，应先说明差异并征求确认；默认目录名是 `ai-agent-protocols`。
+- `CON-PACKAGE-GENERATE-DIR-DIFFERENCE`：如果目标仓已经采用不同目录名，应先说明差异并征求确认；新项目默认目录是 `ai-agent-workspace/protocols`，旧项目可兼容 `ai-agent-protocols`。
 - `CON-PACKAGE-GENERATE-PATH-BASE`：每个生成文件的路径引用必须统一口径。协议包内文件引用根级文件时，使用 `../`、`../../` 等当前文件相对路径，或明确写 `仓库根：<path>`；不要写基准不明的裸路径。
 
 ## 三档生成模式

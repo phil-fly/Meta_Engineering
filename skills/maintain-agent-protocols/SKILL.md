@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/JavaScript/TypeScript/Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, or maintaining agent collaboration protocols or rule routing."
+description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-workspace/protocols and compatible ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/JavaScript/TypeScript/Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, or maintaining agent collaboration protocols or rule routing."
 ---
 
 # Maintain Agent Protocols
@@ -19,13 +19,13 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 - `references/engineering/`：工程规则路由场景；前端、后端、安全、性能、平台、治理必须用目录隔离。
 - `references/scenarios/`：任务流程场景，覆盖开发、架构、安全审查、性能审查、排障和调研。
 - `references/checks/`：审查检查场景，覆盖维护、安全与性能检查清单。
-- `templates/`：可复制到目标仓 `ai-agent-protocols/templates/` 的模板资产；维护模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
+- `templates/`：可复制到目标仓统一产物目录的协议模板资产；新项目默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；维护模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
 - `scripts/`：技能维护验证脚本；当前用于检查模板资产与协议模板参考是否同步。
 
 ## 工作流
 
 1. 识别请求类型。
-   - `创建`：起草新的用户级协议、项目级协议或 `ai-agent-protocols/` 协议包。
+   - `创建`：起草新的用户级协议、项目级协议或目标仓协议包。
    - `维护`：更新、合并、拆分或重构已有规则。
    - `审查`：检查规则是否存在遗漏、歧义、冲突、范围缺失或过期约束。
    - `转换`：把零散说明、口头约定或草稿转成结构化协议和路由文件。
@@ -52,6 +52,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - 涉及协议工程审查、执行率、Token 成本、协议膨胀或冲突分析时，读取 `references/protocol/protocol-engineer.md`。
    - 涉及原则摄入、约束摄入、执行流程摄入或触发入口判断时，读取 `references/protocol/rule-ingestion.md`。
    - 涉及 OpenSpec、Spec-first、规范驱动开发、审查修复闭环或 Epic/Subtask 拆分时，读取 `references/protocol/openspec-workflow.md`。
+   - 涉及目标仓统一产物入口、跨技能产物目录或新旧路径兼容时，读取本仓库共享参考 `target-workspace-layout`。
    - 涉及协议包落盘、三档生成模式、模板目录、playbooks 内容来源或目标仓文件生成时，读取 `references/protocol/package-blueprint.md`。
    - 涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理时，读取 `references/protocol/skill-structure.md`。
    - 需要工程规则细节时先读取 `references/engineering/index.md`，再进入对应领域目录读取路由文件。
@@ -59,7 +60,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - 落盘前必须先声明唯一生效入口和各资产真值源，例如项目协议、用户协议、playbooks、routes、checks 和 templates 分别由哪个目录维护。
    - 生成协作协议时必须按用户明确要求、当前模型/工具环境、既有协议文件和默认规则选择入口文件；Codex 场景默认生成或维护 `AGENTS.md`，Claude 场景默认生成或维护 `CLAUDE.md`，不得为 Codex 新建 `codex.md` 或 `CODEX.md`。
    - 工作流、约束和检查项必须使用分类编号，便于管理和引用；工作流使用 `WF-*`，约束使用 `CON-*`，检查项使用 `CHK-*`。
-   - 在用户仓库落盘时，必须创建或维护 `ai-agent-protocols/`，并按功能类型做好入口分层。
+   - 在用户仓库新建协议包时，默认创建或维护 `ai-agent-workspace/protocols/`，并按功能类型做好入口分层；目标仓已存在 `ai-agent-protocols/` 时可作为兼容真值源，但必须声明映射并避免双写。
    - 用户协议中禁止写执行细节；用户协议只保留执行细节入口。
    - 生成用户协议时，工程路由和检查入口只能列出本次实际生成、既有存在或已生成兼容入口的路径；未采用入口只写入生成报告，不写入生效协议。
    - 用户协议使用 `@playbooks`、`@routes` 或 `@checks` 时，必须声明真实路径映射或生成兼容入口，避免首次读取失败。
@@ -80,7 +81,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 
 以下规则在整个会话期间有效，不因对话长度而放松：
 
-1. ❗ 用户协议只保留入口和长期原则，执行细节必须下沉到 `references/` 或目标仓 `ai-agent-protocols/`；每次修改前自检。
+1. ❗ 用户协议只保留入口和长期原则，执行细节必须下沉到 `references/` 或目标仓统一产物目录；每次修改前自检。
 2. ❗ 新增规则必须先评估合理性、适用范围、反例和规范词强度，再按原则、约束、执行流程、模板、检查项、知识或临时约定分类并决定维护位置；每次输出前自检。
 3. ❗ 审查和优化结论必须说明范围、证据和剩余风险；每次输出前自检。
 
@@ -119,7 +120,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 - 让未生成、未存在、未兼容的 `@routes`、`@checks` 或 `@playbooks` 入口进入生效协议。
 - 让工作流、约束或检查项缺少分类编号，或混用错误前缀。
 - 在项目协议中同时用结构化约束和详情章节重复展开同一 OpenSpec、风险控制或审查闭环规则。
-- 在根目录和 `ai-agent-protocols/` 中全文双写同一 playbook、协议或检查清单，除非用户明确要求迁移并确认双写维护策略。
+- 在推荐目录和兼容目录中全文双写同一 playbook、协议或检查清单，除非用户明确要求迁移并确认双写维护策略。
 - 大段复述模板全文，除非用户明确要求。
 
 维护协议时，最终回复应包含变更范围、验证结果和剩余风险。
@@ -148,7 +149,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 - 使用简短稳定的章节名和术语。
 - 规范词保持一致：`必须`、`应`、`默认`、`避免`、`禁止`、`仅当`。
 - 用户协议只写定位、优先级、任务分类、入口路由和通用原则；不要写具体执行步骤、命令、清单或长模板。
-- 执行细节必须写入 `ai-agent-protocols/` 下方功能子目录，例如 `routes/`、`playbooks/`、`checks/`、`templates/`。
+- 执行细节必须写入目标仓统一产物目录的协议子域，新项目默认 `ai-agent-workspace/protocols/`，旧项目可兼容 `ai-agent-protocols/`。
 - 不要保留外部仓库路径、来源痕迹或外部规格依赖；规则应成为技能内自包含内容。
 - 不要把重要约束藏在示例里。
 

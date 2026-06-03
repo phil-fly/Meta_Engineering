@@ -1,16 +1,16 @@
 # AI Agent 协作协议指南
 
-创建或维护用户级、项目级 AI Agent 协作协议时使用本参考。协议文件负责入口和边界，工程路由与场景手册负责执行细节。
+创建或维护用户级、项目级 AI Agent 协作协议时使用本参考。协议文件负责入口和边界，工程路由与场景手册负责执行细节。目标仓统一产物目录和新旧路径兼容规则见仓库根 `references/target-workspace-layout.md`。
 
 ## 协议层级
 
 | 层级 | 目的 | 常见文件 | 适合放置 | 避免放置 |
 | --- | --- | --- | --- | --- |
-| 用户级 | 跨项目生效的默认协作规则 | `AGENTS.md`、`ai-agent-protocols/user/AGENTS.md` | 协作风格、指令优先级、任务分类、入口路由、长期原则 | 命令、步骤、检查清单、语言细节、项目约束 |
-| 项目级 | 仓库专属约束和执行要求 | `AGENTS.md`、`CLAUDE.md`、`ai-agent-protocols/project/AGENTS.md`、既有 `CODEX.md` 兼容入口 | 架构、命令、测试、编码约定、发布、业务边界 | 个人偏好、全局哲学、跨项目长流程、生成过程证据 |
-| 工程路由 | 按功能类型承载执行细节 | `ai-agent-protocols/routes/*.md` | UI、JavaScript/TypeScript、Go、Java、Rust、Python、API、安全、性能等规则 | 用户协议入口、项目私有例外 |
-| 场景手册 | 某类任务的执行方法 | `ai-agent-protocols/playbooks/*.md` | 开发、架构、安全审查、性能审查、排障、调研流程 | 稳定项目事实、全局优先级 |
-| 检查清单 | 审查和验收项 | `ai-agent-protocols/checks/*.md` | 维护、安全、性能检查项 | 入口路由、项目实施细节 |
+| 用户级 | 跨项目生效的默认协作规则 | `AGENTS.md`、`ai-agent-workspace/protocols/user/AGENTS.md`、兼容 `ai-agent-protocols/user/AGENTS.md` | 协作风格、指令优先级、任务分类、入口路由、长期原则 | 命令、步骤、检查清单、语言细节、项目约束 |
+| 项目级 | 仓库专属约束和执行要求 | `AGENTS.md`、`CLAUDE.md`、`ai-agent-workspace/protocols/project/AGENTS.md`、兼容 `ai-agent-protocols/project/AGENTS.md`、既有 `CODEX.md` 兼容入口 | 架构、命令、测试、编码约定、发布、业务边界 | 个人偏好、全局哲学、跨项目长流程、生成过程证据 |
+| 工程路由 | 按功能类型承载执行细节 | `ai-agent-workspace/protocols/routes/*.md`，兼容 `ai-agent-protocols/routes/*.md` | UI、JavaScript/TypeScript、Go、Java、Rust、Python、API、安全、性能等规则 | 用户协议入口、项目私有例外 |
+| 场景手册 | 某类任务的执行方法 | `ai-agent-workspace/protocols/playbooks/*.md`，兼容 `ai-agent-protocols/playbooks/*.md` | 开发、架构、安全审查、性能审查、排障、调研流程 | 稳定项目事实、全局优先级 |
+| 检查清单 | 审查和验收项 | `ai-agent-workspace/protocols/checks/*.md`，兼容 `ai-agent-protocols/checks/*.md` | 维护、安全、性能检查项 | 入口路由、项目实施细节 |
 | 本地临时 | 短期任务约定 | 线程备注、任务计划、Issue 评论 | 一次性范围决策、实验说明 | 长期标准，除非审查后正式提升 |
 
 ## 指令优先级
@@ -38,7 +38,7 @@ P5 默认 AI 行为
 4. 若用户未明确指定入口文件，先按模型入口判据识别当前模型或工具环境并选择默认入口：Codex/OpenAI 场景使用 `AGENTS.md`，Claude/Anthropic 场景使用 `CLAUDE.md`，无法识别时使用 `AGENTS.md`。
 5. 先输出生成方案预览，声明唯一生效入口、各资产真值源、生成模式、拟生成文件、路径变量映射和项目事实证据表。
 6. 用户确认后再写入文件；不要同时生成两套可编辑正文。
-7. 在用户仓库中创建或维护 `ai-agent-protocols/` 目录。
+7. 在用户仓库中创建或维护统一协议目录；新项目默认 `ai-agent-workspace/protocols/`，旧项目已有 `ai-agent-protocols/` 时可继续作为真值源。
 8. 默认使用项目版生成模式，按目标仓证据裁剪工程路由；最小版和完整版只在用户选择或明确语义匹配时使用。
 9. 用户协议只写入口和原则，不写执行细节。
 10. 工程路由写执行细节，并按功能类型互相引用。
@@ -70,7 +70,7 @@ P5 默认 AI 行为
 
 ## 落盘触发边界
 
-`CON-PROTOCOL-MATERIALIZATION-EXPLICIT`：使用本技能不会自动创建目录或文件。只有用户明确要求创建、补齐、落盘或维护目标仓协议包时，才写入 `ai-agent-protocols/` 或相关入口文件。
+`CON-PROTOCOL-MATERIALIZATION-EXPLICIT`：使用本技能不会自动创建目录或文件。只有用户明确要求创建、补齐、落盘或维护目标仓协议包时，才写入 `ai-agent-workspace/protocols/`、兼容 `ai-agent-protocols/` 或相关入口文件。
 
 目标仓协议包的文件清单、内容来源和最小生成范围见 `package-blueprint.md`。如果只是解释协议设计、回答目录来源或审查现有规则，应先输出结论，不自动落盘。
 
@@ -78,80 +78,35 @@ P5 默认 AI 行为
 
 ## 仓库目录分层
 
-`CON-PROTOCOL-DIR-NAME`：使用本技能在用户仓库中落盘协议时，保留目录名 `ai-agent-protocols`，不要擅自改写拼写。
+`CON-PROTOCOL-DIR-NAME`：使用本技能在新用户仓库中落盘协议时，默认目录为 `ai-agent-workspace/protocols`。如果目标仓已采用 `ai-agent-protocols`，应先说明兼容关系并可继续维护旧目录作为真值源，不要同时生成两套可编辑正文。
 
 `CON-PROTOCOL-DIR-PROJECT-MODE`：默认结构为项目版，基础目录保持稳定，`routes/` 只生成目标仓证据支持的领域。完整版结构用于用户明确要求完整覆盖时。
 
 ```text
-ai-agent-protocols/
-├── README.md
-├── user/
-│   └── AGENTS.md
-├── project/
-│   └── AGENTS.md
-├── routes/
-│   ├── index.md
-│   ├── frontend/                    # 项目版：发现前端证据时生成
-│   │   ├── index.md
-│   │   ├── ui-development.md
-│   │   ├── javascript-typescript.md
-│   │   ├── form-validation.md       # 条件：发现提交型表单证据
-│   │   ├── design-tokens.md         # 条件：发现 token、主题或颜色体系证据
-│   │   └── compact-ui.md            # 条件：发现紧凑布局或首屏密度证据
-│   ├── backend/                     # 项目版：按 go.mod / Maven/Gradle / Cargo.toml / pyproject.toml 裁剪语言入口
-│   │   ├── index.md
-│   │   ├── go.md
-│   │   ├── java.md
-│   │   ├── rust.md
-│   │   └── python.md
-│   ├── core/                        # 项目版：发现 API、鉴权、数据访问、日志等证据时生成
-│   │   ├── index.md
-│   │   ├── api-design.md
-│   │   ├── auth-and-permission.md
-│   │   ├── data-access.md
-│   │   ├── common-quality.md
-│   │   └── error-and-logging.md
-│   ├── security/                    # 可作为条件路由；不得伪装成已验证项目事实
-│   │   ├── index.md
-│   │   ├── common-security.md
-│   │   ├── trust-boundary.md
-│   │   ├── secrets-and-audit.md
-│   │   ├── unsafe-selectors.md
-│   │   ├── sensitive-operations.md
-│   │   ├── safe-integers.md
-│   │   ├── dependency-and-config.md
-│   │   └── owasp.md
-│   ├── performance/                 # 可作为条件路由；按任务触发加载
-│   │   ├── index.md
-│   │   └── common-performance.md
-│   ├── platform/                    # 项目版：发现部署、网关、观测性证据时生成
-│   │   ├── index.md
-│   │   ├── gateway.md
-│   │   ├── deployment.md
-│   │   └── observability.md
-│   └── governance/                  # 协议或 Agent 治理任务需要时生成
-│       ├── index.md
-│       └── agent-governance.md
-├── playbooks/
-│   ├── coding.md
-│   ├── architecture.md
-│   ├── security-review.md
-│   ├── performance-review.md
-│   ├── troubleshooting.md
-│   └── research.md
-├── checks/
-│   ├── maintenance-checklist.md
-│   ├── security-checklist.md
-│   └── performance-checklist.md
-└── templates/
-    ├── user-protocol.md
-    ├── project-protocol.md
-    └── route-card.md
+ai-agent-workspace/
+└── protocols/
+    ├── README.md
+    ├── user/
+    │   └── AGENTS.md
+    ├── project/
+    │   └── AGENTS.md
+    ├── routes/
+    │   ├── index.md
+    │   ├── frontend/
+    │   ├── backend/
+    │   ├── core/
+    │   ├── security/
+    │   ├── performance/
+    │   ├── platform/
+    │   └── governance/
+    ├── playbooks/
+    ├── checks/
+    └── templates/
 ```
 
 推荐职责：
 
-- `README.md`：说明目录职责、入口策略和维护边界。
+- `README.md`：说明目录职责、入口策略、与目标仓统一产物目录的映射和维护边界。
 - `user/`：用户级入口协议，只放定位、优先级、任务路由、长期原则。
 - `project/`：项目级协议或模板，可包含项目命令和项目约束。
 - `routes/`：按工程功能承载执行细节，是规则细节的主要落点；前端、后端、安全、性能等应目录级隔离。项目版只生成已验证或条件适用的领域，完整版才生成全路由。
@@ -177,7 +132,7 @@ ai-agent-protocols/
 
 ## 用户协议入口规则
 
-用户协议禁止包含执行细节。以下内容视为执行细节，必须下沉到 `ai-agent-protocols/` 下方子目录：
+用户协议禁止包含执行细节。以下内容视为执行细节，必须下沉到目标仓统一协议目录：
 
 - 具体命令、脚本、工具调用方式。
 - 多步骤实施流程。
