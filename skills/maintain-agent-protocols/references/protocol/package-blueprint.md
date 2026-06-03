@@ -23,6 +23,7 @@
 预览必须包含：
 
 - 生效入口：项目协议、用户协议、场景手册、工程路由、检查清单和模板分别选择哪个真值源。
+- 模型入口判断：说明用户是否明确指定入口；未指定时说明当前模型或工具环境如何推断，以及为什么选择 `AGENTS.md`、`CLAUDE.md` 或既有兼容入口。
 - 生成模式：最小版、项目版或完整版；默认选择项目版。
 - 拟生成文件：列出将创建或修改的路径，标明新建、最小修改、别名或跳过。
 - 路径变量映射：若用户协议使用 `@playbooks`、`@routes` 或 `@checks`，必须说明它们映射到目标仓哪些真实目录。
@@ -58,14 +59,22 @@
 落盘前先确定目标仓真值源：
 
 ```text
-项目协议正文    → 根级 AGENTS.md 或 ai-agent-protocols/project/AGENTS.md（二选一）
-用户协议正文    → 根级 CODEX.md / CLAUDE.md / ai-agent-protocols/user/AGENTS.md（三选一或按项目约定）
+项目协议正文    → 根级 AGENTS.md / CLAUDE.md / ai-agent-protocols/project/AGENTS.md（三选一；按模型入口规则）
+用户协议正文    → 根级 AGENTS.md / CLAUDE.md / ai-agent-protocols/user/AGENTS.md（三选一；按模型入口规则）
 场景手册正文    → 根级 playbooks/ 或 ai-agent-protocols/playbooks/（二选一）
 工程路由正文    → ai-agent-protocols/routes/
 检查清单正文    → ai-agent-protocols/checks/
 模板资产正文    → ai-agent-protocols/templates/
 生成过程证据    → 生成报告 / 任务日志 / Issue / PR 描述
 ```
+
+模型入口规则：
+
+- 用户明确指定入口文件时，按用户当前要求执行。
+- 用户未指定时，必须主动判断当前模型或工具环境：Codex/OpenAI 场景默认生成或维护 `AGENTS.md`；Claude/Anthropic 场景默认生成或维护 `CLAUDE.md`。
+- 无法识别模型或工具环境时，默认使用 `AGENTS.md`。
+- `CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
+- 若既有入口与模型默认入口不同，预览中必须说明保留、迁移或别名策略，并确保只有一个可编辑真值源。
 
 若目标仓已有根级 `playbooks/` 且内容应继续生效，默认不要再生成同内容的 `ai-agent-protocols/playbooks/*.md`；需要协议包内入口时，只写索引或别名说明，指向根级真值源。若用户明确要求迁移到 `ai-agent-protocols/playbooks/`，应先说明迁移影响，并避免保留两套可编辑正文。
 
@@ -221,6 +230,8 @@ ai-agent-protocols/
 - 是否误把生成过程证据、读取文件清单或“已验证项目事实来源”写入协议正文。
 - 是否误把生成依据写入 `ai-agent-protocols/README.md`、`project/AGENTS.md` 或其他入口说明。
 - 生效协议、协议包 README 和入口说明是否仍残留 `<...>` 模板占位符。
+- Codex 场景是否默认选择 `AGENTS.md`，且未新建 `codex.md` 或 `CODEX.md`。
+- Claude 场景是否默认选择 `CLAUDE.md`，且与 `AGENTS.md` 或既有入口的真值源关系清楚。
 - 项目级 `必须`、`禁止`、`默认` 或 `仅当` 是否都有目标仓证据支撑。
 - OpenSpec、风险控制等高频规则是否只保留入口锚点，避免结构化约束和详情章节重复展开。
 - 是否存在根级 `playbooks/` 与 `ai-agent-protocols/playbooks/` 的同内容全文双写；若存在，应明确一个为真值源，另一个改为索引或别名。
@@ -229,6 +240,7 @@ ai-agent-protocols/
 生成报告应与生效协议分离，至少包含：
 
 - 本次生成模式和确认依据。
+- 模型入口判断依据，以及最终生效入口文件。
 - 创建、修改、跳过的文件清单。
 - 项目事实证据表和待确认项。
 - 抽象入口映射和兼容入口验证结果。

@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CODEX.md/CLAUDE.md, ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/JavaScript/TypeScript/Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, or maintaining agent collaboration protocols or rule routing."
+description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/JavaScript/TypeScript/Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, or maintaining agent collaboration protocols or rule routing."
 ---
 
 # Maintain Agent Protocols
@@ -57,6 +57,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - 需要工程规则细节时先读取 `references/engineering/index.md`，再进入对应领域目录读取路由文件。
    - 区分“入口”和“执行细节”：用户协议定义路由，工程路由和场景手册定义执行细节。
    - 落盘前必须先声明唯一生效入口和各资产真值源，例如项目协议、用户协议、playbooks、routes、checks 和 templates 分别由哪个目录维护。
+   - 生成协作协议时必须按用户明确要求、当前模型/工具环境、既有协议文件和默认规则选择入口文件；Codex 场景默认生成或维护 `AGENTS.md`，Claude 场景默认生成或维护 `CLAUDE.md`，不得为 Codex 新建 `codex.md` 或 `CODEX.md`。
    - 在用户仓库落盘时，必须创建或维护 `ai-agent-protocols/`，并按功能类型做好入口分层。
    - 用户协议中禁止写执行细节；用户协议只保留执行细节入口。
    - 用户协议使用 `@playbooks`、`@routes` 或 `@checks` 时，必须声明真实路径映射或生成兼容入口，避免首次读取失败。
