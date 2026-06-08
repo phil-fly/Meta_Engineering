@@ -100,47 +100,51 @@
 
 - `CON-PACKAGE-ALIAS-LIGHTWEIGHT`：兼容入口只写跳转、映射和真值源说明，不复制完整正文。
 - `CON-PACKAGE-ALIAS-RESOLVABLE`：如果用户协议引用 `@playbooks/coding.md`，生成后必须能解析到真实文件或别名文件。
+- `CON-PACKAGE-ALIAS-CANONICAL-ENTRY`：生成生效用户协议时，任务分类、场景手册、工程路由和检查入口必须写展开后的真实路径；`@playbooks`、`@routes` 和 `@checks` 只保留在路径变量表或入口说明中。
+- `CON-PACKAGE-ALIAS-NO-GUESS`：不得要求后续模型把 `@playbooks/coding.md` 自行解释为某个目录；若真实真值源是根级 `playbooks/`，必须在路径变量表中显式写 `@playbooks = playbooks`。
 - `CON-PACKAGE-ALIAS-NO-COMPAT`：如果选择不生成兼容入口，必须在生成报告中说明原因，并把用户协议中的路径变量改成真实目录。
 - `CON-PACKAGE-ALIAS-REPORT`：生成报告应列出抽象入口、真实路径、兼容入口和验证结果。
 
 ```text
-ai-agent-protocols/README.md
+ai-agent-workspace/protocols/README.md
   → references/protocol/guide.md 的目录职责、入口策略和维护边界
 
-ai-agent-protocols/user/AGENTS.md
+ai-agent-workspace/protocols/user/AGENTS.md
   → 仅当用户协议正文真值源选在协议包内时，来自 references/protocol/user-protocol-template.md；否则只写根级用户协议入口说明
 
-ai-agent-protocols/project/AGENTS.md
+ai-agent-workspace/protocols/project/AGENTS.md
   → 仅当项目协议正文真值源选在协议包内时，来自 references/protocol/project-protocol-template.md；否则只写根级项目协议入口说明
 
-ai-agent-protocols/routes/**
+ai-agent-workspace/protocols/routes/**
   → 项目版按粒度选择目标仓证据支持的 references/engineering/** 对应目录和文件；完整版才复制完整路由覆盖
 
-ai-agent-protocols/playbooks/*.md
+ai-agent-workspace/protocols/playbooks/*.md
   → 仅当场景手册正文真值源选在协议包内时，来自 references/scenarios/playbooks.md 中同名场景章节；否则只写根级手册别名或索引
 
-ai-agent-protocols/checks/*.md
+ai-agent-workspace/protocols/checks/*.md
   → references/checks/checklists.md 中同名检查清单章节
 
-ai-agent-protocols/templates/user-protocol.md
+ai-agent-workspace/protocols/templates/user-protocol.md
   → templates/user-protocol.md
 
-ai-agent-protocols/templates/project-protocol.md
+ai-agent-workspace/protocols/templates/project-protocol.md
   → templates/project-protocol.md
 
-ai-agent-protocols/templates/route-card.md
+ai-agent-workspace/protocols/templates/route-card.md
   → templates/route-card.md
 ```
+
+目标仓已采用 `ai-agent-protocols/` 时，可把上述路径整体映射到兼容目录；映射必须写入入口说明或生成报告，且不得同时保留两套可编辑正文。
 
 ## 生成规则
 
 - `CON-PACKAGE-GENERATE-MINIMAL-EDIT`：目标仓已有同名文件时，先读取并做最小修改，不覆盖用户内容。
 - `CON-PACKAGE-GENERATE-SKELETON`：目标仓没有同名文件时，按蓝图创建骨架并填充可执行内容。
 - `CON-PACKAGE-GENERATE-PROJECT-MODE`：默认生成模式是项目版；除非用户明确要求完整版，不生成目标仓未采用的语言、框架或平台路由。
-- `CON-PACKAGE-GENERATE-ENTRY-PRUNING`：生成用户协议时，工程路由和检查入口只列本次实际生成、目标仓既有存在或已生成兼容入口的路径；未采用路由只写入生成报告。
+- `CON-PACKAGE-GENERATE-ENTRY-PRUNING`：生成用户协议时，场景手册、工程路由和检查入口只列本次实际生成、目标仓既有存在或已生成兼容入口的真实路径；未采用路由只写入生成报告。
 - `CON-PACKAGE-GENERATE-FILE-LEVEL`：项目版必须支持文件级路由粒度；不要因为发现一个后端证据就生成全部后端语言路由。
-- `CON-PACKAGE-GENERATE-PLAYBOOK-SPLIT`：若 `ai-agent-protocols/playbooks/` 被选为场景手册真值源，`playbooks/*.md` 应拆分为独立文件，每个文件只包含一个任务流程。
-- `CON-PACKAGE-GENERATE-ROOT-PLAYBOOK`：若根级 `playbooks/` 被选为场景手册真值源，协议包内不要复制同名正文；可创建 `ai-agent-protocols/playbooks/README.md` 或单文件别名说明，指向根级手册。
+- `CON-PACKAGE-GENERATE-PLAYBOOK-SPLIT`：若协议包 `playbooks/` 被选为场景手册真值源，`playbooks/*.md` 应拆分为独立文件，每个文件只包含一个任务流程。
+- `CON-PACKAGE-GENERATE-ROOT-PLAYBOOK`：若根级 `playbooks/` 被选为场景手册真值源，协议包内不要复制同名正文；可创建协议包内 `playbooks/README.md` 或单文件别名说明，指向根级手册。
 - `CON-PACKAGE-GENERATE-TEMPLATE-SCOPE`：`templates/*.md` 只放可复用格式骨架、填写规则和可实例化的通用协议条款，不承载目标仓专属决策或一次性任务约定。
 - `CON-PACKAGE-GENERATE-EVIDENCE-REPORT-ONLY`：从目标仓扫描得到的读取文件清单、事实来源、置信度标注和生成过程记录只在生成报告中说明，不写入落盘协议正文、协议包 `README.md` 或入口说明。
 - `CON-PACKAGE-GENERATE-NO-PLACEHOLDER`：生效协议、协议包 `README.md` 和入口说明不得保留 `<project>`、`<install-command>`、`<path>` 等模板占位符；证据不足时删除该项或写为待确认，不把占位符交给后续 Agent 猜测。
@@ -207,23 +211,24 @@ templates/route-card.md             == references/protocol/route-card-template.m
 当用户要求“补齐可用协议包”但未要求完整工程路由时，至少创建入口、必要场景手册、必要检查项和模板资产；未被入口引用或用户未选择的场景文件不要强行生成：
 
 ```text
-ai-agent-protocols/
-├── README.md
-├── playbooks/
-│   ├── <必要任务手册>.md
-│   └── README.md
-├── checks/
-│   ├── <必要检查清单>.md
-│   └── README.md
-└── templates/
-    ├── user-protocol.md
-    ├── project-protocol.md
-    └── route-card.md
+ai-agent-workspace/
+└── protocols/
+    ├── README.md
+    ├── playbooks/
+    │   ├── <必要任务手册>.md
+    │   └── README.md
+    ├── checks/
+    │   ├── <必要检查清单>.md
+    │   └── README.md
+    └── templates/
+        ├── user-protocol.md
+        ├── project-protocol.md
+        └── route-card.md
 ```
 
 如用户协议已经引用 `routes/`，还应同步创建对应路由入口文件，避免入口悬空。
 
-如果目标仓已有根级 `playbooks/` 并选择继续作为真值源，最小协议包中的 `ai-agent-protocols/playbooks/` 可改为只包含 `README.md` 或别名文件，不复制根级手册正文。
+如果目标仓已有根级 `playbooks/` 并选择继续作为真值源，最小协议包中的协议 `playbooks/` 目录可改为只包含 `README.md` 或别名文件，不复制根级手册正文。
 
 ## 闭环检查
 
@@ -231,7 +236,7 @@ ai-agent-protocols/
 
 - CHK-MAINT-001 用户协议中的每个入口路径是否存在。
 - CHK-MAINT-002 `@playbooks`、`@routes`、`@checks` 等抽象入口是否有真实路径映射或兼容入口。
-- CHK-MAINT-003 用户协议是否只列实际生成、既有存在或已兼容的工程路由和检查入口。
+- CHK-MAINT-003 用户协议是否只列实际生成、既有存在或已兼容的场景手册、工程路由和检查入口。
 - CHK-MAINT-004 生成模式是否符合用户确认；默认项目版是否没有无证据语言/框架路由。
 - CHK-MAINT-005 工作流、约束和检查项是否分别使用 `WF-*`、`CON-*`、`CHK-*` 编号，且同一真值源内唯一。
 - CHK-MAINT-006 路由索引是否按 `项目证据支持`、`条件适用`、`通用治理` 标注。
@@ -249,6 +254,7 @@ ai-agent-protocols/
 - CHK-MAINT-018 OpenSpec、风险控制等高频规则是否只保留入口锚点，避免结构化约束和详情章节重复展开。
 - CHK-MAINT-019 是否存在根级 `playbooks/` 与 `ai-agent-protocols/playbooks/` 的同内容全文双写；若存在，应明确一个为真值源，另一个改为索引或别名。
 - CHK-MAINT-020 嵌套入口文件中的 `AGENTS.md`、`CODEX.md`、`playbooks/`、`routes/`、`checks/` 路径是否按当前文件位置可解析。
+- CHK-MAINT-021 任务分类、场景手册、工程路由、组合入口和检查入口是否已展开为真实路径，避免执行模型把 `@playbooks`、`@routes` 或 `@checks` 猜成未声明目录。
 
 生成报告应与生效协议分离，至少包含：
 

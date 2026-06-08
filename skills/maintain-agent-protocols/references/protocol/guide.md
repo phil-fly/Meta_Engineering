@@ -66,6 +66,8 @@ P5 默认 AI 行为
 - `CON-PROTOCOL-PATH-NESTED`：嵌套目录中的文件引用根级文件时，应使用可解析路径，例如 `../../AGENTS.md`，或明确标注 `仓库根：AGENTS.md`。
 - `CON-PROTOCOL-PATH-NO-BARE-NESTED`：禁止在嵌套文件中写无法判断基准目录的裸路径，例如只写 `AGENTS.md`、`CODEX.md` 或 `playbooks/<task>.md`。
 - `CON-PROTOCOL-PATH-ABSTRACT-MAPPING`：用户协议使用 `@playbooks`、`@routes`、`@checks` 等抽象入口时，必须在同一文件或协议包入口说明中声明映射；如果目标仓实际落盘到 `ai-agent-protocols/playbooks` 等目录，应自动写明映射或生成根级兼容入口。
+- `CON-PROTOCOL-PATH-CANONICAL-ENTRY`：生效用户协议中的任务分类、场景手册、工程路由和检查入口应写展开后的真实路径；路径变量只作为映射说明，不作为任务执行时的最终读取路径。
+- `CON-PROTOCOL-PATH-NO-GUESS`：读取 `@playbooks/coding.md` 等抽象入口前必须先查路径变量表；禁止把它自行猜测为根级 `playbooks/coding.md`，除非路径变量明确声明根级 `playbooks/` 是真值源。
 - `CON-PROTOCOL-PATH-ALIAS-CONTENT`：兼容入口只承载跳转和真值源说明，不复制完整正文。
 
 ## 落盘触发边界
@@ -166,8 +168,8 @@ ai-agent-workspace/
 
 - 可复制模板资产：`../../templates/user-protocol.md`。
 - 维护模板正文时，必须同步更新 `user-protocol-template.md` 与 `../../templates/user-protocol.md`，避免目标仓落盘内容漂移。
-- 目标仓建议落盘位置：`ai-agent-protocols/templates/user-protocol.md`。
-- 实际生效时，可按目标仓约定复制到根 `AGENTS.md` 或 `ai-agent-protocols/user/AGENTS.md`。
+- 目标仓建议落盘位置：`ai-agent-workspace/protocols/templates/user-protocol.md`，旧项目可兼容 `ai-agent-protocols/templates/user-protocol.md`。
+- 实际生效时，可按目标仓约定复制到根 `AGENTS.md` 或 `ai-agent-workspace/protocols/user/AGENTS.md`；旧项目可兼容 `ai-agent-protocols/user/AGENTS.md`。
 
 ## 项目级协议模板
 
@@ -179,8 +181,8 @@ ai-agent-workspace/
 - 项目级协议可以记录长期有效的项目事实和项目约束，但不要保留“已验证项目事实来源”、读取文件清单或生成过程证据；这些内容应进入生成报告、任务日志、Issue 或 PR 描述。
 - 项目级协议中的硬性规范词必须有目标仓证据支撑；证据不足的候选约束只能写成待确认、建议或条件规则。
 - OpenSpec、风险控制、规范同步、审查闭环等高频规则应优先用锚点式入口引用；如果详情章节已经展开，结构化约束中只保留锚点和项目差异，不重复全文。
-- 目标仓建议落盘位置：`ai-agent-protocols/templates/project-protocol.md`。
-- 实际生效时，应按模型入口规则复制到根 `AGENTS.md`、`CLAUDE.md` 或 `ai-agent-protocols/project/AGENTS.md`；`CODEX.md` 仅用于既有历史入口兼容、迁移或用户明确要求。
+- 目标仓建议落盘位置：`ai-agent-workspace/protocols/templates/project-protocol.md`，旧项目可兼容 `ai-agent-protocols/templates/project-protocol.md`。
+- 实际生效时，应按模型入口规则复制到根 `AGENTS.md`、`CLAUDE.md` 或 `ai-agent-workspace/protocols/project/AGENTS.md`；`CODEX.md` 仅用于既有历史入口兼容、迁移或用户明确要求，旧项目可兼容 `ai-agent-protocols/project/AGENTS.md`。
 
 ## 路由卡片模板
 
@@ -188,7 +190,7 @@ ai-agent-workspace/
 
 - 可复制模板资产：`../../templates/route-card.md`。
 - 维护路由卡片模板时，必须同步更新 `route-card-template.md` 与 `../../templates/route-card.md`，避免目标仓落盘内容漂移。
-- 目标仓建议落盘位置：`ai-agent-protocols/templates/route-card.md`。
+- 目标仓建议落盘位置：`ai-agent-workspace/protocols/templates/route-card.md`，旧项目可兼容 `ai-agent-protocols/templates/route-card.md`。
 - 新增工程路由时，可按该模板创建具体 `routes/**.md` 文件，再补充领域规则正文。
 
 ## 维护检查清单
@@ -211,15 +213,16 @@ ai-agent-workspace/
 - CHK-MAINT-014 规范词强度：项目级 `必须`、`禁止`、`默认` 或 `仅当` 是否有目标仓证据支撑？
 - CHK-MAINT-015 占位符：生效协议、协议包 README 和入口说明中是否残留 `<project>`、`<install-command>` 等模板占位符？
 - CHK-MAINT-016 入口兼容：抽象入口是否有映射或兼容入口，首次读取是否不会失败？
-- CHK-MAINT-017 压缩：OpenSpec、风险控制等高频规则是否避免结构化约束和详情章节重复展开？
-- CHK-MAINT-018 重复：同一规则是否在多个层级重复出现？
-- CHK-MAINT-019 冲突：低层级规则是否违背高优先级规则？
-- CHK-MAINT-020 新鲜度：命令、路径、工具或政策是否过期？
-- CHK-MAINT-021 风险：是否影响认证、权限、数据迁移、删除、安全控制逻辑或 Git 历史？
-- CHK-MAINT-022 生成证据：是否误把读取文件清单、已验证来源或本次审计记录写入协议正文？
-- CHK-MAINT-023 真值源：是否出现根级目录和 `ai-agent-protocols/` 同时承载同一完整正文？
-- CHK-MAINT-024 路径：嵌套文件中的路径引用是否能按声明口径解析？
-- CHK-MAINT-025 闭环：发现的问题是否归类为已解决、延后处理、明确排除或后续任务？
+- CHK-MAINT-017 路径展开：场景手册、工程路由、组合入口和检查入口是否已写成真实路径，而不是要求执行模型自行展开 `@playbooks`、`@routes` 或 `@checks`？
+- CHK-MAINT-018 压缩：OpenSpec、风险控制等高频规则是否避免结构化约束和详情章节重复展开？
+- CHK-MAINT-019 重复：同一规则是否在多个层级重复出现？
+- CHK-MAINT-020 冲突：低层级规则是否违背高优先级规则？
+- CHK-MAINT-021 新鲜度：命令、路径、工具或政策是否过期？
+- CHK-MAINT-022 风险：是否影响认证、权限、数据迁移、删除、安全控制逻辑或 Git 历史？
+- CHK-MAINT-023 生成证据：是否误把读取文件清单、已验证来源或本次审计记录写入协议正文？
+- CHK-MAINT-024 真值源：是否出现根级目录和 `ai-agent-protocols/` 同时承载同一完整正文？
+- CHK-MAINT-025 路径：嵌套文件中的路径引用是否能按声明口径解析？
+- CHK-MAINT-026 闭环：发现的问题是否归类为已解决、延后处理、明确排除或后续任务？
 
 ## 冲突处理模式
 

@@ -81,12 +81,12 @@ CHK-*  → 检查项和验收项，例如 CHK-MAINT-001、CHK-SEC-001、CHK-PERF
 
 | 类型 | 默认维护位置 | 是否进入入口索引 | 是否进入用户级/技能级触发 | 说明 |
 | --- | --- | --- | --- | --- |
-| 用户级原则 | `AGENTS.md` 或 `ai-agent-protocols/user/AGENTS.md` | 是 | 高频时是 | 只保留高频入口、优先级、任务分类和长期原则。 |
-| 项目级约束 | 项目根协议（默认 `AGENTS.md`；Claude 场景默认 `CLAUDE.md`；既有 `CODEX.md` 仅作兼容或迁移）或 `ai-agent-protocols/project/AGENTS.md` | 是 | 否 | 放仓库专属架构、命令、测试、业务边界和项目例外。 |
-| 工程域约束 | `ai-agent-protocols/routes/<domain>/` | 是 | 否 | 放 UI、后端、API、安全、性能、平台等可执行规则。 |
-| 执行流程 | 已选场景手册真值源，默认 `ai-agent-protocols/playbooks/` | 是 | 主流程时是 | 放开发、架构、安全审查、性能审查、排障、调研等步骤；若目标仓已有根级 `playbooks/` 并继续生效，则不复制同一正文。 |
-| 检查项 | `ai-agent-protocols/checks/` | 是 | 否 | 放审查和验收清单，不放长流程或教程。 |
-| 模板格式 | `ai-agent-protocols/templates/` | 由创建/维护入口引用 | 否 | 模板文件不决定主流程；模板生成请求由协议创建或维护任务触发。 |
+| 用户级原则 | `AGENTS.md` 或 `ai-agent-workspace/protocols/user/AGENTS.md`，旧项目可兼容 `ai-agent-protocols/user/AGENTS.md` | 是 | 高频时是 | 只保留高频入口、优先级、任务分类和长期原则。 |
+| 项目级约束 | 项目根协议（默认 `AGENTS.md`；Claude 场景默认 `CLAUDE.md`；既有 `CODEX.md` 仅作兼容或迁移）或 `ai-agent-workspace/protocols/project/AGENTS.md` | 是 | 否 | 放仓库专属架构、命令、测试、业务边界和项目例外。 |
+| 工程域约束 | `ai-agent-workspace/protocols/routes/<domain>/` | 是 | 否 | 放 UI、后端、API、安全、性能、平台等可执行规则；旧项目使用兼容目录时必须写明真实路径映射。 |
+| 执行流程 | 已选场景手册真值源，默认 `ai-agent-workspace/protocols/playbooks/` | 是 | 主流程时是 | 放开发、架构、安全审查、性能审查、排障、调研等步骤；若目标仓已有根级 `playbooks/` 并继续生效，则不复制同一正文。 |
+| 检查项 | `ai-agent-workspace/protocols/checks/` | 是 | 否 | 放审查和验收清单，不放长流程或教程；旧项目使用兼容目录时必须写明真实路径映射。 |
+| 模板格式 | `ai-agent-workspace/protocols/templates/` | 由创建/维护入口引用 | 否 | 模板文件不决定主流程；模板生成请求由协议创建或维护任务触发。 |
 | 业务规范 | 项目 Spec、OpenSpec 或 ADR | 视项目而定 | 否 | 涉及 API、数据结构、配置、权限或架构时优先进入规范。 |
 | 长期知识 | Wiki、ADR 或设计文档 | 否 | 否 | 存背景和经验，不替代协议约束。 |
 | 生成过程证据 | 生成报告、任务日志、Issue 或 PR 描述 | 否 | 否 | 存本次读取文件、已验证来源、检查范围和置信度；默认不写入生效协议。 |

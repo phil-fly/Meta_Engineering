@@ -63,15 +63,15 @@ P5 默认 AI 行为
 
 ## 项目约束
 
-本节只写仓库专属约束。通用工程约束应维护在 `ai-agent-protocols/routes/`，业务能力、接口、数据结构、配置、权限模型或系统架构约束应优先维护在项目 Spec、OpenSpec、ADR 或设计文档。OpenSpec 工作流应由目标仓已选 Spec 或场景手册入口承载，不在本协议重复展开。
+本节只写仓库专属约束。通用工程约束应维护在已确认的工程路由真值源，默认 `ai-agent-workspace/protocols/routes/`；业务能力、接口、数据结构、配置、权限模型或系统架构约束应优先维护在项目 Spec、OpenSpec、ADR 或设计文档。OpenSpec 工作流应由目标仓已选 Spec 或场景手册入口承载，不在本协议重复展开。
 
 约束摄入规则：
 
 ```text
 长期项目事实/约束 → 本项目协议
-工程通用规则  → ai-agent-protocols/routes/
-任务执行流程  → 已选场景手册真值源（默认 ai-agent-protocols/playbooks/）
-审查验收清单  → ai-agent-protocols/checks/
+工程通用规则  → ai-agent-workspace/protocols/routes/
+任务执行流程  → ai-agent-workspace/protocols/playbooks/
+审查验收清单  → ai-agent-workspace/protocols/checks/
 业务规范      → Spec / OpenSpec / ADR / 设计文档
 生成过程证据  → 生成报告 / 任务日志 / Issue / PR 描述
 ```
@@ -184,7 +184,7 @@ CON-RISK-002 高风险变更应先说明影响范围、回滚方式和验证方�
 
 ## 安全与数据边界
 
-本节只写项目特有的安全与数据边界。通用安全、鉴权授权、数据访问和错误日志规则应维护在 `ai-agent-protocols/routes/security/` 与 `ai-agent-protocols/routes/core/`。
+本节只写项目特有的安全与数据边界。通用安全、鉴权授权、数据访问和错误日志规则应维护在 `ai-agent-workspace/protocols/routes/security/` 与 `ai-agent-workspace/protocols/routes/core/`，旧项目如选择兼容目录，应在路径映射中写明真实路径。
 
 建议按以下结构逐条列出项目特有边界，不要只留下标题词：
 
@@ -294,7 +294,7 @@ CON-RISK-002 高风险变更应先说明影响范围、回滚方式和验证方�
 验证方式：
 ```
 
-未列出的领域默认继承用户级协议和 `ai-agent-protocols/` 下方通用路由。
+未列出的领域默认继承用户级协议和已确认工程路由真值源，默认 `ai-agent-workspace/protocols/routes/`；旧项目如使用兼容目录，必须在路径映射中写明真实路径。
 
 未发现目标仓证据的语言、框架或平台路由不要写入本节；如用户选择完整版，相关路由仅作为通用条件入口存在，并在生成报告中说明无项目证据。
 

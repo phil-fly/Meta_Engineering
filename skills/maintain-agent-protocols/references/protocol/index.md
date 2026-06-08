@@ -27,7 +27,7 @@
 - 以 Protocol Engineer 视角审查协议体系执行率、复杂度、冲突和 Token 成本。
 - 摄入原则、约束、执行流程、模板、检查项或知识，并判断维护位置与触发入口。
 - 维护 OpenSpec / Spec-first 工作流，并对齐规范前置、变更闭环、审查闭环和 Epic 拆分。
-- 维护 `ai-agent-protocols/` 目录结构。
+- 维护 `ai-agent-workspace/protocols/` 目录结构，或兼容既有 `ai-agent-protocols/` 真值源。
 - 预览、生成或裁剪最小版、项目版、完整版协议包。
 - 处理 `@playbooks`、`@routes`、`@checks` 等抽象入口映射与兼容入口。
 - 为项目版路由索引标注项目证据支持、条件适用或通用治理。

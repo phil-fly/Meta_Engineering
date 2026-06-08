@@ -24,7 +24,7 @@ scripts/
 
 这些提示对本技能不直接构成缺陷，原因是：
 
-- `templates/` 是目标仓 `ai-agent-protocols/templates/` 的可复制资产，不是执行流程引用目录。
+- `templates/` 是目标仓协议模板目录的可复制资产，新项目默认落到 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；它不是执行流程引用目录。
 - 多层 `references/` 是本技能按需加载的核心设计，用于避免一次性读取全部工程规则。
 - `SKILL.md` 已明确要求先读 `references/index.md`，再按任务场景进入对应目录。
 

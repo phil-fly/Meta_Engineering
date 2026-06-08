@@ -45,7 +45,7 @@ ai-agent-workspace/
 | 协议包 | `ai-agent-workspace/protocols/` | `ai-agent-protocols/` | 新项目默认使用推荐路径；旧项目已有 `ai-agent-protocols/` 时可继续作为真值源。 |
 | 用户/项目入口协议 | 根级 `AGENTS.md` 或 `CLAUDE.md`；正文可在 `ai-agent-workspace/protocols/user/` 或 `project/` | 根级历史入口、`ai-agent-protocols/user/`、`ai-agent-protocols/project/` | 根级入口用于模型发现；正文真值源只能有一个。 |
 | 工程路由 | `ai-agent-workspace/protocols/routes/` | `ai-agent-protocols/routes/` | 承载工程执行细节。 |
-| 场景手册 | `ai-agent-workspace/protocols/playbooks/` | `ai-agent-protocols/playbooks/`、根级 `playbooks/` | 若根级 `playbooks/` 已存在，可保留为真值源，统一入口只写索引。 |
+| 场景手册 | `ai-agent-workspace/protocols/playbooks/` | `ai-agent-protocols/playbooks/`、根级 `playbooks/` | 若根级 `playbooks/` 已存在且明确选为真值源，可保留；否则不得把协议入口自动猜到根级 `playbooks/`。 |
 | 检查清单 | `ai-agent-workspace/protocols/checks/` | `ai-agent-protocols/checks/` | 承载审查和验收项。 |
 | 协议模板 | `ai-agent-workspace/protocols/templates/` | `ai-agent-protocols/templates/` | 只放可复用模板，不放项目事实。 |
 | 产品记忆 | `ai-agent-workspace/product/memory/` | `docs/00_MEMORY/` | 记录事实快照、会话记忆和 TODO。 |
@@ -62,8 +62,9 @@ ai-agent-workspace/
 2. 目标仓已存在 `ai-agent-workspace/` 时，优先继承其目录职责。
 3. 目标仓已存在 `docs/`、`ai-agent-protocols/` 或根级 `playbooks/` 时，先判断是否继续作为真值源。
 4. 兼容旧路径时，`ai-agent-workspace/README.md` 必须声明映射；兼容入口只写跳转、映射和真值源说明，不复制完整正文。
-5. 不允许同一产物在推荐路径和兼容路径中同时保存两份可编辑正文。
-6. 用户明确指定目录时，按用户当前要求执行，但应说明与推荐布局的差异和维护风险。
+5. 生效入口中的任务手册、工程路由和检查清单路径应写成真实路径；除非映射明确声明，不得把 `@playbooks` 自动解释为根级 `playbooks/`。
+6. 不允许同一产物在推荐路径和兼容路径中同时保存两份可编辑正文。
+7. 用户明确指定目录时，按用户当前要求执行，但应说明与推荐布局的差异和维护风险。
 
 ## 生成预览要求
 

@@ -1,6 +1,6 @@
 # 场景手册
 
-本文件是技能内场景流程的单一来源。落盘到目标仓时，先确认场景手册真值源：若选择 `ai-agent-protocols/playbooks/`，应按章节拆分为独立文件；若目标仓已有根级 `playbooks/` 并继续作为真值源，则协议包内只生成索引或别名说明，不复制完整正文。
+本文件是技能内场景流程的单一来源。落盘到目标仓时，先确认场景手册真值源：新项目默认使用 `ai-agent-workspace/protocols/playbooks/` 并按章节拆分为独立文件；旧项目可兼容 `ai-agent-protocols/playbooks/`。若目标仓已有根级 `playbooks/` 并明确继续作为真值源，则协议包内只生成索引或别名说明，不复制完整正文。
 
 ## WF-CODING coding
 

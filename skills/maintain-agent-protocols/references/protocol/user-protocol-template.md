@@ -65,15 +65,17 @@ CHK-*  → 检查项和验收项
 本协议内使用以下路径变量减少重复。读取时先按本表展开，不要自行改写目录名。
 
 ```text
-@protocols  = ai-agent-protocols
-@playbooks  = <已选场景手册真值源，默认 @protocols/playbooks>
-@routes     = @protocols/routes
-@checks     = @protocols/checks
+@protocols  = ai-agent-workspace/protocols
+@playbooks  = ai-agent-workspace/protocols/playbooks
+@routes     = ai-agent-workspace/protocols/routes
+@checks     = ai-agent-workspace/protocols/checks
 ```
 
-若目标仓已有根级 `playbooks/` 并选择继续作为真值源，应把 `@playbooks` 改为 `playbooks` 或项目约定的根级路径，不要同时复制一套 `ai-agent-protocols/playbooks/` 正文。
+若目标仓已有根级 `playbooks/`、`ai-agent-protocols/playbooks/` 或其他目录并选择继续作为真值源，应把 `@playbooks` 改为已确认的真实路径，不要同时复制一套可编辑正文。
 
-若使用 `@playbooks`、`@routes` 或 `@checks` 等抽象入口，生成协议时必须保证它们能解析到真实文件；当真实文件落在 `ai-agent-protocols/` 下方时，应在本表写明映射，或生成根级兼容入口指向真值源。
+`CON-PATH-VARIABLE-RESOLVE`：读取任何 `@playbooks`、`@routes` 或 `@checks` 引用前，必须先按本表递归展开到真实仓库路径；禁止把 `@playbooks/coding.md` 自行猜测为根级 `playbooks/coding.md`。
+
+`CON-PATH-CANONICAL-ENTRIES`：生成生效协议时，下方“场景手册”“工程路由”和“检查入口”必须写展开后的真实路径；`@...` 变量只保留在本节作为映射说明，不作为任务执行时的最终读取路径。
 
 ## 任务分类
 
@@ -89,12 +91,12 @@ WF-RESEARCH            技术调研      → 问题 → 证据 → 对比 → �
 ## 场景手册
 
 ```text
-WF-CODING              → @playbooks/coding.md
-WF-ARCHITECTURE        → @playbooks/architecture.md
-WF-SECURITY-REVIEW     → @playbooks/security-review.md
-WF-PERFORMANCE-REVIEW  → @playbooks/performance-review.md
-WF-TROUBLESHOOTING     → @playbooks/troubleshooting.md
-WF-RESEARCH            → @playbooks/research.md
+WF-CODING              → ai-agent-workspace/protocols/playbooks/coding.md
+WF-ARCHITECTURE        → ai-agent-workspace/protocols/playbooks/architecture.md
+WF-SECURITY-REVIEW     → ai-agent-workspace/protocols/playbooks/security-review.md
+WF-PERFORMANCE-REVIEW  → ai-agent-workspace/protocols/playbooks/performance-review.md
+WF-TROUBLESHOOTING     → ai-agent-workspace/protocols/playbooks/troubleshooting.md
+WF-RESEARCH            → ai-agent-workspace/protocols/playbooks/research.md
 ```
 
 场景手册只提供执行方法，不替代用户当前要求、系统安全限制或项目级规范。
@@ -106,36 +108,36 @@ WF-RESEARCH            → @playbooks/research.md
 生成生效协议时，本节只能保留本次实际生成、目标仓既有存在或已生成兼容入口的路径；未采用的路由必须从生效协议中移除，并写入生成报告。
 
 ```text
-前端开发      → @routes/frontend/index.md
-后端开发      → @routes/backend/index.md
-核心工程      → @routes/core/index.md
-安全工程      → @routes/security/index.md
-性能工程      → @routes/performance/index.md
-平台工程      → @routes/platform/index.md
-Agent 治理    → @routes/governance/index.md
+前端开发      → ai-agent-workspace/protocols/routes/frontend/index.md
+后端开发      → ai-agent-workspace/protocols/routes/backend/index.md
+核心工程      → ai-agent-workspace/protocols/routes/core/index.md
+安全工程      → ai-agent-workspace/protocols/routes/security/index.md
+性能工程      → ai-agent-workspace/protocols/routes/performance/index.md
+平台工程      → ai-agent-workspace/protocols/routes/platform/index.md
+Agent 治理    → ai-agent-workspace/protocols/routes/governance/index.md
 ```
 
 常见组合入口：
 
 ```text
-后端 coding    → 后端开发入口 + 核心工程入口；涉及风险时补安全工程或性能工程入口
-前端开发       → 前端开发入口；涉及接口、权限或高影响操作时补核心工程或安全工程入口
-WF-SECURITY-REVIEW     → 场景手册的安全审查入口 + 安全工程入口；涉及语言实现时补对应工程入口
-WF-PERFORMANCE-REVIEW  → 场景手册的性能审查入口 + 性能工程入口；涉及数据访问或可观测性时补核心工程或平台工程入口
-WF-ARCHITECTURE        → 场景手册的架构入口 + 相关工程大类入口
+后端 coding    → ai-agent-workspace/protocols/routes/backend/index.md + ai-agent-workspace/protocols/routes/core/index.md；涉及风险时补 ai-agent-workspace/protocols/routes/security/index.md 或 ai-agent-workspace/protocols/routes/performance/index.md
+前端开发       → ai-agent-workspace/protocols/routes/frontend/index.md；涉及接口、权限或高影响操作时补 ai-agent-workspace/protocols/routes/core/index.md 或 ai-agent-workspace/protocols/routes/security/index.md
+WF-SECURITY-REVIEW     → ai-agent-workspace/protocols/playbooks/security-review.md + ai-agent-workspace/protocols/routes/security/index.md；涉及语言实现时补对应工程真实路径
+WF-PERFORMANCE-REVIEW  → ai-agent-workspace/protocols/playbooks/performance-review.md + ai-agent-workspace/protocols/routes/performance/index.md；涉及数据访问或可观测性时补 ai-agent-workspace/protocols/routes/core/index.md 或 ai-agent-workspace/protocols/routes/platform/index.md
+WF-ARCHITECTURE        → ai-agent-workspace/protocols/playbooks/architecture.md + 相关工程真实路径
 ```
 
 ## 检查入口
 
 ```text
-CHK-MAINT-*  规则维护       → @checks/maintenance-checklist.md
-CHK-SEC-*    安全检查       → @checks/security-checklist.md
-CHK-PERF-*   性能检查       → @checks/performance-checklist.md
+CHK-MAINT-*  规则维护       → ai-agent-workspace/protocols/checks/maintenance-checklist.md
+CHK-SEC-*    安全检查       → ai-agent-workspace/protocols/checks/security-checklist.md
+CHK-PERF-*   性能检查       → ai-agent-workspace/protocols/checks/performance-checklist.md
 ```
 
 ## 通用原则
 
-以下原则只表达长期取舍，不承载具体步骤、命令或检查清单。执行细节下沉到 `@playbooks`，工程约束下沉到 `@routes`，验收项下沉到 `@checks`。
+以下原则只表达长期取舍，不承载具体步骤、命令或检查清单。执行细节下沉到已确认的场景手册真实路径，工程约束下沉到已确认的工程路由真实路径，验收项下沉到已确认的检查清单真实路径。
 
 | 原则 | 适用判断 | 维护边界 |
 | --- | --- | --- |
