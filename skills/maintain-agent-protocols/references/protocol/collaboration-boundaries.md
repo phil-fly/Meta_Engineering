@@ -29,6 +29,13 @@
 - `CON-COLLAB-CONFIRM-LONG-TERM-RULE`：把临时偏好升级为长期规则。
 - `CON-COLLAB-CONFIRM-REPO-WIDE`：在未指定范围时输出 repo-wide 结论。
 
+问询通道规则：
+
+- `CON-COLLAB-ASK-NATIVE-FIRST`：需要用户确认或补充关键信息时，若当前 Agent App 支持原生确认、结构化问询、选择器或弹出式问题，应优先使用原生机制。
+- `CON-COLLAB-ASK-FALLBACK`：若当前环境没有原生问询机制，或原生机制不可用，应退化为普通对话问询，并明确说明需要用户确认的事项。
+- `CON-COLLAB-ASK-LIMIT`：一次问询默认不超过 3 个关键问题；能给推荐默认值时，应把推荐项放在第一位并说明影响。
+- `CON-COLLAB-ASK-GENERATION-GATE`：协议生成、协议调整、入口迁移、真值源选择、目录双写和高风险治理变更，优先进入原生确认/问询流程。
+
 通常不需要额外确认：
 
 - `CON-COLLAB-NO-CONFIRM-READ`：读取当前任务相关文件。
