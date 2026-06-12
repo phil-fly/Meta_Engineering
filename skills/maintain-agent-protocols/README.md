@@ -166,7 +166,7 @@
 
 1. 修改触发能力时同步 `SKILL.md` frontmatter description。
 2. 修改读取顺序时同步 `SKILL.md` 工作流和 `references/index.md`。
-3. 修改模板正文时同步 `templates/` 与 `references/protocol/*-template.md`。
+3. 修改模板正文时同步 `templates/` 与对应的 `references/protocol/` 模板参考文件。
 4. 运行 `scripts/check-template-sync.py` 验证模板同步。
 
 示例请求：
