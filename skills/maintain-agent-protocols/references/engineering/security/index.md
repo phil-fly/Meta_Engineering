@@ -10,7 +10,7 @@
 - `unsafe-selectors.md`：危险选择器和安全中介。
 - `sensitive-operations.md`：敏感操作控制。
 - `safe-integers.md`：安全敏感整数。
-- `dependency-and-config.md`：依赖与安全配置。
+- `dependency-and-config.md`：依赖、安全配置和配置可发现性。
 - `owasp.md`：OWASP Top 10 检查项。
 
 ## 读取顺序
@@ -20,6 +20,7 @@
 3. 安全审查或高风险变更补读 `owasp.md`。
 4. 涉及权限边界时补读 `../core/auth-and-permission.md`。
 5. 涉及审计日志时补读 `../core/error-and-logging.md`。
+6. 涉及运行配置、功能配置或外部集成配置时补读 `dependency-and-config.md`。
 
 ## 关联
 

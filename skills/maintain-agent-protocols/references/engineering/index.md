@@ -19,6 +19,7 @@ Python 服务、schema、async、依赖、验证    → backend/python.md
 登录、授权、资源归属、默认拒绝            → core/auth-and-permission.md
 Repository、事务、缓存、存储层查询        → core/data-access.md
 输入校验、密钥、审计、OWASP、敏感操作     → security/index.md
+运行配置、功能开关、外部集成、配置可发现性  → security/dependency-and-config.md
 N+1、资源泄漏、复杂度、阻塞、对象创建     → performance/common-performance.md
 命名、注释规范、状态语义、悬空引用、根因修复 → core/common-quality.md
 错误码、用户错误、结构化日志、脱敏        → core/error-and-logging.md

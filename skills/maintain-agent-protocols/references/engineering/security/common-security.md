@@ -11,7 +11,7 @@
 - `unsafe-selectors.md`：危险选择器和安全中介。
 - `sensitive-operations.md`：删除、导出、上传、权限变更等敏感操作。
 - `safe-integers.md`：安全敏感整数转换前校验。
-- `dependency-and-config.md`：依赖漏洞、失败关闭和安全配置。
+- `dependency-and-config.md`：依赖漏洞、失败关闭、安全配置和配置可发现性。
 - `owasp.md`：OWASP Top 10 检查项。
 
 验证与输出：
