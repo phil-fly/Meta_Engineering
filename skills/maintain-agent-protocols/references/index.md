@@ -20,7 +20,7 @@
 ## 工程规则路由
 
 - `engineering/index.md`：工程路由总索引，先读它决定后续加载目录。
-- `engineering/frontend/`：前端和 UI 开发。
+- `engineering/frontend/`：前端和 UI 开发，包含国际化与文案治理。
 - `engineering/backend/`：Go、Java、Rust、Python 后端开发。
 - `engineering/core/`：API、鉴权授权、数据访问、通用质量、错误与日志。
 - `engineering/security/`：通用安全、OWASP 和敏感操作。
