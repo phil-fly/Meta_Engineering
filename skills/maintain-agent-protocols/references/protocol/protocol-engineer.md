@@ -14,7 +14,7 @@
 ## 适用场景
 
 - 用户要求审查、优化或重构 AI 协作协议体系。
-- 用户提到 `Protocol Engineer`、协议复杂度、规则冲突、执行率、Token 成本或长期维护性。
+- 用户提到 `Protocol Engineer`、协议复杂度、规则冲突、执行率、触发稳定性、Token 成本或长期维护性。
 - 需要判断内容应放入用户协议、项目协议、场景手册、模板、Spec 或 Wiki。
 
 ## 审查流程
@@ -23,7 +23,7 @@
 
 1. `CHK-PROTOCOL-SCOPE`：声明检查范围、未检查范围和结论适用范围。
 2. `CHK-PROTOCOL-EVIDENCE-SOURCES`：收集协议入口、工程路由、场景手册、模板、Spec、Wiki 和项目级文档。
-3. `CHK-PROTOCOL-DIMENSION-ANALYSIS`：按审查维度逐项分析，并引用具体文件或章节证据。
+3. `CHK-PROTOCOL-DIMENSION-ANALYSIS`：按审查维度逐项分析；涉及触发稳定性时按 `trigger-stability-guide.md` 检查任务入口、场景手册、工程路由、项目约束和检查项链路，并引用具体文件或章节证据。
 4. `CHK-PROTOCOL-IMPACT-PLAN`：输出问题分级、影响范围和建议方案。
 5. `CHK-PROTOCOL-FINDING-CLOSURE`：将发现归类为已解决、延后处理、明确排除或转入后续任务。
 
@@ -78,6 +78,7 @@
 - `CHK-PROTOCOL-EXEC-FOLLOWABLE`：Agent 是否容易遵循。
 - `CHK-PROTOCOL-EXEC-LONG-DEPENDENCY`：是否存在长距离依赖。
 - `CHK-PROTOCOL-EXEC-IMPLICIT-CONSTRAINT`：是否存在隐式约束。
+- `CHK-PROTOCOL-EXEC-TRIGGER-STABILITY`：高风险约束、条件适用路由和检查项是否能被相关工作流稳定触发。
 
 输出：
 
@@ -92,6 +93,12 @@
 - `CHK-PROTOCOL-EXEC-HIGH`：高执行率，入口清晰、路径短、规则可执行、无隐式前提。
 - `CHK-PROTOCOL-EXEC-MEDIUM`：中执行率，规则基本清晰，但需要跨文件推断或存在少量重复。
 - `CHK-PROTOCOL-EXEC-LOW`：低执行率，入口分散、职责混杂、存在长距离依赖或隐式约束。
+
+触发稳定性作为执行率的子维度：
+
+- `高稳定`：任务入口、场景手册、路由和检查项路径短且可验证。
+- `中稳定`：规则存在但需要跨文件推断。
+- `低稳定`：关键约束孤立存在、路径悬空或触发条件模糊。
 
 ## 4. 冲突分析
 
@@ -193,6 +200,7 @@ Wiki
 ## 总结
 
 - 执行率：高 / 中 / 低
+- 触发稳定性：高 / 中 / 低 / 未检查
 - 主要复杂度来源：
 - 主要冲突来源：
 - Token 成本结论：

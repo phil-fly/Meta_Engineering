@@ -9,6 +9,7 @@
 - `protocol/index.md` 同时覆盖协议包升级同步场景，用于已落盘项目协议对照最新技能规则做差异审查和最小修改同步。
 - `protocol/collaboration-boundaries.md`：用户协作边界、讨论/执行/维护模式、确认门槛、证据范围和完成定义。
 - `protocol/protocol-engineer.md`：协议工程审查，覆盖角色定位、协议膨胀、执行率、冲突、结构和 Token 成本。
+- `protocol/trigger-stability-guide.md`：触发稳定性审查，覆盖任务入口、场景手册、工程路由、项目约束和检查项之间的触发链路。
 - `protocol/rule-ingestion.md`：原则、约束、执行流程、模板、检查项和知识的摄入与触发判断。
 - `protocol/openspec-workflow.md`：Spec-first 工作流，覆盖规范前置、变更闭环、审查闭环和 Epic 拆分。
 - `protocol/package-blueprint.md`：目标仓协议包落盘蓝图，说明生成方案预览、入口兼容、三档生成模式、路由状态标注、目录、内容来源和不会自动生成的边界。

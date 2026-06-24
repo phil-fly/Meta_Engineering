@@ -1,6 +1,6 @@
 # 目标仓协议包蓝图
 
-本文件说明使用本技能在目标仓落盘协议包时，应创建哪些文件、文件内容从哪里来，以及哪些行为不会自动发生。新项目默认协议包路径为 `ai-agent-workspace/protocols/`；目标仓已存在 `ai-agent-protocols/` 时可兼容继承。跨技能统一布局见仓库根 `references/target-workspace-layout.md`。
+本文件说明使用本技能在目标仓落盘协议包时，应创建哪些文件、文件内容从哪里来，以及哪些行为不会自动发生。新项目默认协议包路径为 `ai-agent-workspace/protocols/`；目标仓已存在 `ai-agent-protocols/` 时可兼容继承。跨技能统一布局见仓库共享参考 `target-workspace-layout`。
 
 ## 触发边界
 
@@ -29,6 +29,7 @@
 - 拟生成文件：列出将创建或修改的路径，标明新建、最小修改、别名或跳过。
 - 路径变量映射：若用户协议使用 `@playbooks`、`@routes` 或 `@checks`，必须说明它们映射到目标仓哪些真实目录。
 - 编号方案：说明本次工作流 `WF-*`、约束 `CON-*`、检查项 `CHK-*` 的编号范围、继承来源和冲突处理。
+- 触发稳定性检查：说明工作流、条件适用路由、项目级约束和检查项映射是否存在明显断链；若未检查，说明原因。
 - 项目事实证据表：每条项目事实、技术栈、命令、目录职责或规范入口都要标注来源文件；没有证据时标为待确认。
 - 模板内容边界：说明哪些内容来自通用模板，哪些内容来自目标仓证据。
 - 风险与确认点：列出会影响长期协议、入口迁移、双写、无关路由或占位符处理的事项。
@@ -156,6 +157,16 @@ ai-agent-workspace/protocols/templates/route-card.md
 - `CON-PACKAGE-GENERATE-DIR-DIFFERENCE`：如果目标仓已经采用不同目录名，应先说明差异并征求确认；新项目默认目录是 `ai-agent-workspace/protocols`，旧项目可兼容 `ai-agent-protocols`。
 - `CON-PACKAGE-GENERATE-PATH-BASE`：每个生成文件的路径引用必须统一口径。协议包内文件引用根级文件时，使用 `../`、`../../` 等当前文件相对路径，或明确写 `仓库根：<path>`；不要写基准不明的裸路径。
 
+## 触发链路规则
+
+生成或升级协议包时，按 `trigger-stability-guide.md` 做轻量触发链路检查。检查结果进入预览或报告，不写入生效协议正文。
+
+- `CON-PACKAGE-TRIGGER-STABILITY-CHECK`：创建、升级同步或协议工程审查时，应检查任务入口、场景手册、工程路由、项目级约束和检查项之间是否存在明显断链。
+- `CON-PACKAGE-TRIGGER-STABILITY-NO-ENGINE`：除非另有脚本实现，不声称已运行自动验证引擎；结论应标注来自已读文件、`rg` 搜索结果或待确认推断。
+- `CON-PACKAGE-TRIGGER-STABILITY-PREVIEW`：升级同步时若建议强化 playbooks、routes 或 checks，必须在升级预览中列出拟修改文件和强化原因，并让用户选择“只同步规则”或“同步规则 + 强化触发链路”。
+- `CON-PACKAGE-TRIGGER-STABILITY-GENERATE`：新建协议包时，可以把通用触发条件直接写入新生成的 playbooks 或 routes/index；仍需保持短引用，不复制完整约束正文。
+- `CON-PACKAGE-TRIGGER-STABILITY-REPORT`：生成报告应说明高/中/低稳定触发结论、不能稳定触发的约束或路由、已强化项、未强化项和剩余风险。
+
 ## 三档生成模式
 
 ```text
@@ -180,6 +191,8 @@ ai-agent-workspace/protocols/templates/route-card.md
 - `通用治理`：协议维护、证据范围、Agent 边界、生成报告等治理类路由。
 
 项目版 `routes/index.md` 和各子目录索引必须标注以上三类之一；不允许只列路径而不说明适用状态。
+
+条件适用路由还应写明触发条件；高风险或高频条件路由应能从相关 playbook 读到短触发语句。若目标仓已有 playbook 真值源，默认最小修改补充引用；若用户选择只升级规则，不修改 playbook，则在报告中把该项归为延后处理。
 
 锚点式引用规则：
 
@@ -248,5 +261,6 @@ ai-agent-workspace/
 - 占位符处理结果。
 - 无关技术栈路由检查结果。
 - 路由索引三类标注结果。
+- 触发稳定性检查结果、强化选择和剩余断链风险。
 - 重复展开压缩结果。
 - 使用者下一步，例如确认入口文件名、审阅待确认事实、删除未采用路由或在 `git add` 前复查生成报告。

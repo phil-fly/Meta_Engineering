@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, protocol-package upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-workspace/protocols and compatible ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, enterprise SaaS/admin-console product design protocol routing, UI/frontend i18n governance/JavaScript/TypeScript/project structure/state cache/testing/accessibility/UI stability/component system/tooling/performance, Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, ordinary product design, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, upgrading, or maintaining agent collaboration protocols or rule routing."
+description: "创建、审查、升级和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, trigger-stability reviews, rule ingestion, protocol-package creation/upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware entry selection, ai-agent-workspace/protocols or compatible ai-agent-protocols layout, user/project protocol templates, route-based engineering rules, execution-rate/token-cost/conflict analysis, UI/frontend/backend/API/security/performance/platform route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, product design, normal code review, generic architecture discussion, external spec governance, service onboarding, or project debugging unless the user is maintaining agent collaboration protocols or rule routing."
 ---
 
 # Maintain Agent Protocols
@@ -29,6 +29,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - `维护`：更新、合并、拆分或重构已有规则。
    - `升级同步`：对照最新技能规则，审查并升级已落盘的项目协议包，保持现有真值源并按最小修改同步新增或变更约束。
    - `审查`：检查规则是否存在遗漏、歧义、冲突、范围缺失或过期约束。
+   - `触发稳定性审查`：检查任务类型、场景手册、工程路由、项目约束和检查项之间的触发链路是否稳定。
    - `转换`：把零散说明、口头约定或草稿转成结构化协议和路由文件。
    - `协议工程`：从执行率、复杂度、冲突、Token 成本和长期维护性审查协议体系。
    - `规则摄入`：判断原则、约束、执行流程、模板、检查项和知识应维护在哪里，是否作为触发入口。
@@ -48,13 +49,15 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - 升级同步类任务先识别当前项目的生效入口、正文真值源和兼容入口，再对照最新技能 `references/` 做差异审查，区分新增约束、变更约束、项目特例和不适用规则。
    - 生成协议包前必须先输出生成方案预览，说明生效入口、生成模式、拟生成文件、项目事实证据和待确认项。
    - 升级同步类任务在修改前也必须先输出升级预览，说明当前真值源、拟修改文件、编号变化、规则来源、待确认项和潜在冲突。
-   - 预览后对关键决策使用交互式选择（AskUserQuestion）：模型入口文件、生成模式、真值源冲突解决、工程路由裁剪策略；详见仓库根 `references/interactive-decision-protocol.md`。
+   - 创建、升级同步和协议工程审查类任务应检查触发链路：工作流是否能读到必要场景手册、条件适用路由是否有触发条件、项目级约束是否能被相关流程触达、闭环是否映射检查项。
+   - 预览后对关键决策使用交互式选择（AskUserQuestion）：模型入口文件、生成模式、真值源冲突解决、工程路由裁剪策略；交互式选择规则见仓库共享参考 `interactive-decision-protocol`。
    - 交互式选择不可用时降级为结构化文本问询。
    - 审查类任务必须说明检查范围、未检查范围和结论适用范围。
 
 4. 应用协议设计规则。
    - 读取 `references/protocol/index.md`，再按场景读取 `references/protocol/guide.md`。
    - 涉及协议工程审查、执行率、Token 成本、协议膨胀或冲突分析时，读取 `references/protocol/protocol-engineer.md`。
+   - 涉及触发稳定性审查、条件适用路由触发、项目约束嵌入流程或检查项映射时，读取 `references/protocol/trigger-stability-guide.md`。
    - 涉及原则摄入、约束摄入、执行流程摄入或触发入口判断时，读取 `references/protocol/rule-ingestion.md`。
    - 涉及 OpenSpec、Spec-first、规范驱动开发、审查修复闭环或 Epic/Subtask 拆分时，读取 `references/protocol/openspec-workflow.md`。
    - 涉及目标仓统一产物入口、跨技能产物目录或新旧路径兼容时，读取本仓库共享参考 `target-workspace-layout`。
@@ -72,6 +75,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - 用户协议使用 `@playbooks`、`@routes` 或 `@checks` 时，必须声明真实路径映射或生成兼容入口；任务分类、场景手册、工程路由和检查入口应写展开后的真实路径，避免模型把抽象入口误猜成根级目录。
    - 默认采用项目版生成模式：按当前仓库已验证技术栈裁剪 `routes/`，只为有证据的语言、框架和工程域生成入口。
    - 项目版路由索引必须标注 `项目证据支持`、`条件适用` 或 `通用治理`，并尽量裁剪到文件级路由。
+   - 条件适用路由应在路由索引、对应路由或场景手册中写明触发条件；不要求把所有约束原文复制进 playbooks，但高风险或易漏读约束应有短路径引用。
    - 完整路由覆盖仅在用户明确要求完整版时采用；未验证、跨项目通用或架构未启用的规则只能写成 `应`、`建议` 或 `如项目采用...`。
    - OpenSpec、风险控制等高频规则优先用锚点式引用压缩，避免在结构化约束和详情章节重复展开。
    - 默认采用最小修改，避免大范围重写。
@@ -79,7 +83,8 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 5. 闭环。
    - 创建类任务：先给生成方案预览；落盘后给出生成报告、验收清单和使用者下一步。
    - 维护类任务：把每个发现归类为已解决、延后处理、明确排除或转入后续任务。
-   - 升级同步类任务：输出升级前后差异、编号变更和适用性结论；把每个发现归类为已解决、延后处理、明确排除或转入后续任务。
+   - 升级同步类任务：输出升级前后差异、编号变更、适用性结论和触发稳定性变化；把每个发现归类为已解决、延后处理、明确排除或转入后续任务。
+   - 触发稳定性审查类任务：输出高/中/低稳定触发清单、不能稳定触发的约束或路由、建议强化位置和剩余风险。
    - 高风险治理变更：编辑前说明影响和验证方式。
    - 若结构校验出现 `templates/` 或多层 `references/` warning，先按 `references/protocol/skill-structure.md` 判断是显式结构例外还是真缺陷，并在结果中说明。
    - 除非用户或项目协议明确要求，不自动提交。
