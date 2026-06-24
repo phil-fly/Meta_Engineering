@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, protocol-package upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-workspace/protocols and compatible ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/frontend i18n governance/JavaScript/TypeScript/project structure/state cache/testing/accessibility/UI stability/component system/tooling/performance, Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, upgrading, or maintaining agent collaboration protocols or rule routing."
+description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, protocol-package upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-workspace/protocols and compatible ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, enterprise SaaS/admin-console product design protocol routing, UI/frontend i18n governance/JavaScript/TypeScript/project structure/state cache/testing/accessibility/UI stability/component system/tooling/performance, Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, ordinary product design, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, upgrading, or maintaining agent collaboration protocols or rule routing."
 ---
 
 # Maintain Agent Protocols
@@ -16,7 +16,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 按任务场景读取以下目录，不要默认全量加载。需要总览时先读 `references/index.md`。
 
 - `references/protocol/`：协议生成与维护场景，包含层级、目标仓目录结构、入口模板和冲突处理。
-- `references/engineering/`：工程规则路由场景；前端、后端、安全、性能、平台、治理必须用目录隔离。
+- `references/engineering/`：工程规则路由场景；企业级 SaaS 设计、前端、后端、安全、性能、平台、治理必须用目录隔离。
 - `references/scenarios/`：任务流程场景，覆盖开发、架构、安全审查、性能审查、排障和调研。
 - `references/checks/`：审查检查场景，覆盖维护、安全与性能检查清单。
 - `templates/`：可复制到目标仓统一产物目录的协议模板资产；新项目默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；维护模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。

@@ -6,6 +6,7 @@
 
 ```text
 UI 页面、组件、交互、表单、Design Token、紧凑布局、UI 稳定性、国际化、文案治理、JS/TS、权限渲染、前端请求、项目结构、状态缓存、测试、可访问性、工具链、前端性能 → frontend/index.md
+企业级 SaaS 产品设计、管理后台、控制台、运维平台、安全平台、云管平台、AI 平台、数据平台、设备管理系统、线框图、视觉稿 Prompt → frontend/enterprise-saas-design.md
 JavaScript、TypeScript、JSX、TSX、Electron 渲染进程 → frontend/javascript-typescript.md
 前端目录、feature 边界、共享层、导入方向、文件命名 → frontend/project-structure.md
 共享组件、页面局部组件、第三方组件包装、Storybook → frontend/component-system.md
@@ -44,6 +45,7 @@ Agent 边界、证据、不确定性、按需加载      → governance/agent-go
 ## 多路由任务
 
 - UI 列表查询任务：先读 `frontend/list-query.md`，再按查询类型补 `core/api-design.md`、`core/common-quality.md`、`security/index.md` 或 `performance/index.md`。
+- 企业级 SaaS 产品设计、管理后台、控制台、运维/安全/云管/AI/数据平台页面设计：先读 `../scenarios/playbooks.md` 的 `WF-ENTERPRISE-SAAS-DESIGN`，再读 `frontend/enterprise-saas-design.md`，并按页面类型补 `frontend/compact-ui.md`、`frontend/ui-stability.md`、`frontend/component-system.md`、`frontend/list-query.md`、`frontend/form-validation.md`、`frontend/styling-and-tokens.md` 或 `frontend/accessibility.md`。
 - UI 页面、弹窗、表单、表格、菜单或提示反馈任务：先读 `frontend/i18n-governance.md`，再按任务类型补 `frontend/form-validation.md`、`frontend/interaction-and-permission.md`、`core/error-and-logging.md` 或其他相关路由。
 - 前端结构、组件、状态、测试、UI 稳定性、可访问性、工具链或性能任务：先读 `frontend/index.md`，再按任务类型补 `frontend/project-structure.md`、`frontend/component-system.md`、`frontend/state-and-cache.md`、`frontend/testing.md`、`frontend/ui-stability.md`、`frontend/accessibility.md`、`frontend/tooling-and-verification.md` 或 `frontend/frontend-performance.md`。
 - 删除接口任务：先读 `core/api-design.md`、`core/auth-and-permission.md`、`core/data-access.md`，再读 `security/index.md`。

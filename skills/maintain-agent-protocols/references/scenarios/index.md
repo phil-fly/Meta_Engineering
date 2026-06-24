@@ -12,6 +12,7 @@
 
 - `WF-CODING` 开发任务。
 - `WF-ARCHITECTURE` 架构设计。
+- `WF-ENTERPRISE-SAAS-DESIGN` 企业级 SaaS、管理后台、控制台、运维平台、安全平台、云管平台、AI 平台、数据平台或设备管理系统的产品与页面设计。
 - `WF-SECURITY-REVIEW` 安全审查。
 - `WF-PERFORMANCE-REVIEW` 性能审查。
 - `WF-TROUBLESHOOTING` 故障排查。

@@ -21,7 +21,7 @@
 ## 工程规则路由
 
 - `engineering/index.md`：工程路由总索引，先读它决定后续加载目录。
-- `engineering/frontend/`：前端和 UI 开发，包含项目结构、组件系统、状态缓存、请求数据、表单、国际化、样式 token、紧凑 UI、UI 稳定性、可访问性、测试、工具链和前端性能。
+- `engineering/frontend/`：前端和 UI 开发，包含企业级 SaaS 设计、项目结构、组件系统、状态缓存、请求数据、表单、国际化、样式 token、紧凑 UI、UI 稳定性、可访问性、测试、工具链和前端性能。
 - `engineering/backend/`：Go、Java、Rust、Python 后端开发。
 - `engineering/core/`：API、鉴权授权、数据访问、通用质量、错误与日志。
 - `engineering/security/`：通用安全、OWASP 和敏感操作。
@@ -32,9 +32,9 @@
 ## 场景流程
 
 - `scenarios/index.md`：场景流程入口与读取顺序。
-- `scenarios/playbooks.md`：开发、架构、安全审查、性能审查、排障和调研流程。
+- `scenarios/playbooks.md`：开发、架构、企业级 SaaS 产品设计、安全审查、性能审查、排障和调研流程。
 
 ## 审查检查
 
 - `checks/index.md`：检查场景入口与读取顺序。
-- `checks/checklists.md`：维护、安全、前端国际化、前端可访问性、前端测试、前端性能、前端 UI 稳定性、前端组件、前端结构与通用性能检查清单。
+- `checks/checklists.md`：维护、安全、前端国际化、前端可访问性、前端测试、前端性能、前端 UI 稳定性、企业级 SaaS 设计、前端组件、前端结构与通用性能检查清单。

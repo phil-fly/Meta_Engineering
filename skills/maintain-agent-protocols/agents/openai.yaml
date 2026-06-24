@@ -1,4 +1,4 @@
 interface:
   display_name: "维护 Agent 协作协议"
   short_description: "生成、审查、升级和维护 AGENTS/CLAUDE 协作协议与工程规则路由"
-  default_prompt: "使用 $maintain-agent-protocols 生成、维护或升级我的 AI Agent 协作协议，按模型选择 AGENTS.md/CLAUDE.md，识别现有协议真值源，判断原则、约束、工作流、检查项，以及前端结构、状态缓存、I18N、UI 稳定性、可访问性、测试、组件系统、工具链和性能规则应维护在哪里，并优化编号、触发入口、规则路由与协议包升级同步。"
+  default_prompt: "使用 $maintain-agent-protocols 生成、维护或升级我的 AI Agent 协作协议，按模型选择 AGENTS.md/CLAUDE.md，识别现有协议真值源，判断原则、约束、工作流、检查项，以及企业级 SaaS 产品设计、管理后台/控制台设计、前端结构、状态缓存、I18N、UI 稳定性、可访问性、测试、组件系统、工具链和性能规则应维护在哪里，并优化编号、触发入口、规则路由与协议包升级同步。"

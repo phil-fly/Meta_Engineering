@@ -27,6 +27,7 @@
 | 规则摄入 | `这条规则应该放在哪里` | `references/protocol/rule-ingestion.md` |
 | 工作流整理 | `把这些任务流程整理成 playbook` | `references/scenarios/index.md`、`references/scenarios/playbooks.md` |
 | 工程路由 | `给前端/API/安全规则做路由` | `references/engineering/index.md` |
+| 企业级 SaaS 设计协议 | `把企业级 SaaS 控制台设计规则吸收到协议里` | `references/scenarios/playbooks.md`、`references/engineering/frontend/enterprise-saas-design.md`、`references/checks/checklists.md` |
 | 前端路由 | `补充前端结构、状态、测试、UI 稳定性、可访问性或组件系统规则` | `references/engineering/frontend/index.md` |
 | Spec-first | `开发任务是否需要先更新规范` | `references/protocol/openspec-workflow.md` |
 | 技能结构维护 | `检查这个技能目录结构是否合理` | `references/protocol/skill-structure.md` |
@@ -183,14 +184,15 @@
 
 ### 7. 生成工程路由
 
-适用：想把 UI、前端结构、状态缓存、测试、UI 稳定性、可访问性、组件系统、工具链、API、安全、性能、后端语言等执行细节做成按需加载的路由。
+适用：想把企业级 SaaS 产品设计、管理后台/控制台设计、UI、前端结构、状态缓存、测试、UI 稳定性、可访问性、组件系统、工具链、API、安全、性能、后端语言等执行细节做成按需加载的路由。
 
 快速做法：
 
 1. 读取 `references/engineering/index.md`；前端任务再进入 `references/engineering/frontend/index.md`。
-2. 只为项目已有证据支持的技术栈生成入口。
-3. 路由中标注规则状态：项目证据支持、条件适用或通用治理。
-4. 用户级协议只保留入口，不复制工程细则正文。
+2. 企业级 SaaS、管理后台或控制台设计任务先读取 `references/scenarios/playbooks.md` 的 `WF-ENTERPRISE-SAAS-DESIGN`，再读取 `references/engineering/frontend/enterprise-saas-design.md` 和对应检查清单。
+3. 只为项目已有证据支持的技术栈生成入口。
+4. 路由中标注规则状态：项目证据支持、条件适用或通用治理。
+5. 用户级协议只保留入口，不复制工程细则正文。
 
 示例请求：
 

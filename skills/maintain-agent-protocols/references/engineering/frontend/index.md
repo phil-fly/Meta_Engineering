@@ -5,6 +5,7 @@
 ## 文件
 
 - `ui-development.md`：前端开发总检查摘要，不作为路由索引。
+- `enterprise-saas-design.md`：企业级 SaaS、管理后台、控制台、运维/安全/云管/AI/数据平台的产品设计、页面职责、布局、组件、线框图和视觉稿规则。
 - `project-structure.md`：前端目录、feature 边界、共享层、导入方向和命名。
 - `component-system.md`：共享组件、页面局部组件、第三方组件包装、组件工坊和复用边界。
 - `javascript-typescript.md`：JavaScript/TypeScript 类型边界、异步生命周期和安全输入规则。
@@ -28,6 +29,7 @@
 ## 关联
 
 - 列表、表格、选择器、枚举、远程搜索：先读取 `list-query.md`。
+- 企业级 SaaS 产品设计、管理后台、控制台、运维/安全/云管/AI/数据平台页面设计、线框图或视觉稿 Prompt：先读取 `enterprise-saas-design.md`，并补读 `compact-ui.md`、`ui-stability.md`、`component-system.md`、`styling-and-tokens.md` 和 `accessibility.md`。
 - 提交型表单、弹窗表单、配置表单和表单错误展示：先读取 `form-validation.md`。
 - 页面、弹窗、表单、表格、菜单、Tooltip、Notification、Empty 状态、Error 状态或任何用户可见文案：读取 `i18n-governance.md`。
 - 前端目录、新文件落点、feature 边界、共享层、路径别名和导入方向：读取 `project-structure.md`。
