@@ -13,23 +13,25 @@ const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '../../..');
 const SKILLS_DIR = join(ROOT, 'skills');
 
-const PATTERNS = {
-  WF: /\bWF-[A-Z0-9_-]+\b/g,
-  CON: /\bCON-[A-Z0-9_-]+\b/g,
-  CHK: /\bCHK-[A-Z0-9_-]+\b/g,
-};
+const DEFINITION_LINE = /^\s*(?:-\s+|#{1,6}\s+|\|\s*`?)(WF-[A-Z0-9_-]+|CON-[A-Z0-9_-]+|CHK-[A-Z0-9_-]+)\b/;
 
 function extractRuleIds(content: string): Record<string, string> {
   const ids: Record<string, string> = {};
+  const lines = content.split('\n');
 
-  for (const [prefix, pattern] of Object.entries(PATTERNS)) {
-    const matches = content.matchAll(pattern);
-    for (const match of matches) {
-      ids[match[0]] = prefix;
-    }
+  for (const line of lines) {
+    const match = line.match(DEFINITION_LINE);
+    if (!match) continue;
+
+    const ruleId = match[1];
+    ids[ruleId] = ruleId.split('-')[0];
   }
 
   return ids;
+}
+
+function shouldCheck(filePath: string): boolean {
+  return !filePath.includes('/templates/');
 }
 
 function* walkDir(dir: string): Generator<string> {
@@ -49,6 +51,8 @@ function checkUniqueness() {
   const allIds: Record<string, string[]> = {};
 
   for (const mdFile of walkDir(SKILLS_DIR)) {
+    if (!shouldCheck(mdFile)) continue;
+
     const content = readFileSync(mdFile, 'utf-8');
     const ids = extractRuleIds(content);
 
@@ -62,6 +66,8 @@ function checkUniqueness() {
   const refsDir = join(ROOT, 'references');
   try {
     for (const mdFile of walkDir(refsDir)) {
+      if (!shouldCheck(mdFile)) continue;
+
       const content = readFileSync(mdFile, 'utf-8');
       const ids = extractRuleIds(content);
 
@@ -85,7 +91,8 @@ function checkUniqueness() {
 const { allIds, duplicates } = checkUniqueness();
 
 console.log(`检查范围: ${ROOT}\n`);
-console.log(`发现规则编号: ${Object.keys(allIds).length} 个`);
+console.log(`发现规则定义编号: ${Object.keys(allIds).length} 个`);
+console.log('扫描规则: 只统计列表项、标题或表格首列中的规则定义；忽略模板资产、正文引用和示例。');
 
 const byType: Record<string, number> = {};
 for (const ruleId of Object.keys(allIds)) {

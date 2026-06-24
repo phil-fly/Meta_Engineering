@@ -59,6 +59,50 @@
 - CHK-FE-I18N-014 新页面、新菜单或新业务域是否同步语言资源？
 - CHK-FE-I18N-015 Error 信息、业务异常、表单错误和 Notification 是否已国际化？
 
+## frontend-accessibility-checklist
+
+- CHK-FE-A11Y-001 是否使用正确语义元素或等价 ARIA，并避免用无语义容器模拟核心交互？
+- CHK-FE-A11Y-002 核心操作、导航、弹窗、菜单、下拉和批量操作是否可键盘访问且焦点可见？
+- CHK-FE-A11Y-003 Dialog、Drawer、Popover、Menu、Combobox 等浮层是否处理打开焦点、焦点约束、关闭返回和 Esc 语义？
+- CHK-FE-A11Y-004 表单 label、辅助说明、必填状态和错误提示是否与字段建立可感知关联？
+- CHK-FE-A11Y-005 成功、警告、危险、选中、禁用或错误状态是否不只依赖颜色表达？
+- CHK-FE-A11Y-006 紧凑布局是否保持可读性、可点击目标、触控间距和焦点可见性？
+
+## frontend-testing-checklist
+
+- CHK-FE-TEST-001 测试是否优先验证用户可见行为、业务结果和可访问入口，而不是组件内部实现细节？
+- CHK-FE-TEST-002 本次变更是否说明 unit、integration、E2E、visual/story 或人工验证的适用层级？
+- CHK-FE-TEST-003 使用 mock server、fixture 或 MSW 时，是否标明数据契约假设且未伪装成真实后端能力？
+- CHK-FE-TEST-004 测试选择器是否优先使用 role、label、text、placeholder 或稳定 test id？
+- CHK-FE-TEST-005 缺陷修复是否补充失败路径测试，或说明无法补测试的原因和替代验证？
+
+## frontend-performance-checklist
+
+- CHK-FE-PERF-001 前端性能优化是否说明目标指标、关键路径、影响范围和验证方式？
+- CHK-FE-PERF-002 是否评估路由级 code splitting、chunk 数量和首屏关键路径影响？
+- CHK-FE-PERF-003 新增组件库、图表库、编辑器、地图、polyfill 或运行时样式方案时是否说明体积影响？
+- CHK-FE-PERF-004 图片、图标、字体和媒体资源是否有尺寸、格式、懒加载、预加载或响应式策略？
+- CHK-FE-PERF-005 高频更新、长列表、复杂图表和全局状态变化是否控制渲染范围或使用虚拟化、节流、防抖、选择器策略？
+- CHK-FE-PERF-006 数据或代码预取是否服务明确下一步旅程，且没有全局无界预取或缓存？
+
+## frontend-component-checklist
+
+- CHK-FE-COMPONENT-001 新共享组件前是否检查已有组件、组合模式、配置扩展、样式 token 和第三方包装层？
+- CHK-FE-COMPONENT-002 页面局部组件和共享组件的边界是否清晰，且共享组件具备稳定复用场景？
+- CHK-FE-COMPONENT-003 第三方 UI 组件是否通过项目组件层适配主题、i18n、a11y、错误状态和业务默认值？
+- CHK-FE-COMPONENT-004 props 过多、状态分支过多或 slot 复杂时，是否采用组合、配置对象、上下文边界或子组件拆分？
+- CHK-FE-COMPONENT-005 高复用组件是否覆盖默认、hover、focus、disabled、loading、empty、error、success、长文本和移动端状态？
+- CHK-FE-COMPONENT-006 如项目使用 Storybook 或等价组件工坊，是否同步组件示例、状态或文档？
+
+## frontend-structure-checklist
+
+- CHK-FE-STRUCTURE-001 新增或移动文件前是否识别项目既有目录、别名、组件层、路由层和测试布局？
+- CHK-FE-STRUCTURE-002 如项目采用 feature-based structure，feature 内代码是否保持业务域内聚并避免默认跨 feature 互引？
+- CHK-FE-STRUCTURE-003 共享层、feature 层和 app 层是否保持单向依赖，避免共享层反向依赖业务或应用层？
+- CHK-FE-STRUCTURE-004 新增共享 hook、utils、service、types 或组件是否具备明确复用场景和维护边界？
+- CHK-FE-STRUCTURE-005 文件名、组件名、Hook 名、store 名和实际职责是否一致？
+- CHK-FE-STRUCTURE-006 移动公共能力时是否同步导入、路由注册、测试、文档和类型引用？
+
 ## performance-checklist
 
 - CHK-PERF-001 是否存在 N+1 查询？

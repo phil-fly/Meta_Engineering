@@ -8,6 +8,7 @@
 - `skills/<skill-name>/agents/`：技能的 UI 元数据。
 - `skills/<skill-name>/references/`：按需加载的技能参考资料。
 - `skills/<skill-name>/scripts/`：技能维护或执行脚本。
+- `skills/<skill-name>/assets/`：可复制模板、前后端代码资产和其他输出资源。
 - `skills/<skill-name>/templates/`：技能可复制模板资产。
 - `references/`：跨技能共享参考资料，例如目标仓统一产物布局。
 

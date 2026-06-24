@@ -234,30 +234,7 @@ ai-agent-workspace/
 
 ## 闭环检查
 
-落盘后必须检查：
-
-- CHK-MAINT-001 用户协议中的每个入口路径是否存在。
-- CHK-MAINT-002 `@playbooks`、`@routes`、`@checks` 等抽象入口是否有真实路径映射或兼容入口。
-- CHK-MAINT-003 用户协议是否只列实际生成、既有存在或已兼容的场景手册、工程路由和检查入口。
-- CHK-MAINT-004 需要确认时是否优先使用当前 Agent App 支持的原生确认/问询机制；不可用时是否退化为普通文本问询。
-- CHK-MAINT-005 生成模式是否符合用户确认；默认项目版是否没有无证据语言/框架路由。
-- CHK-MAINT-006 工作流、约束和检查项是否分别使用 `WF-*`、`CON-*`、`CHK-*` 编号，且同一真值源内唯一。
-- CHK-MAINT-007 路由索引是否按 `项目证据支持`、`条件适用`、`通用治理` 标注。
-- CHK-MAINT-008 工作区状态是否清楚；如存在未跟踪文件或无关修改，应在生成报告中说明但不擅自处理。
-- CHK-MAINT-009 `playbooks/` 中是否覆盖用户协议声明的任务分类。
-- CHK-MAINT-010 `templates/` 中是否有用户级、项目级和路由卡片模板。
-- CHK-MAINT-011 `checks/` 中是否有维护、安全和性能检查清单。
-- CHK-MAINT-012 是否误把项目专属命令、业务规则或一次性约定写入通用模板。
-- CHK-MAINT-013 是否误把生成过程证据、读取文件清单或“已验证项目事实来源”写入协议正文。
-- CHK-MAINT-014 是否误把生成依据写入 `ai-agent-protocols/README.md`、`project/AGENTS.md` 或其他入口说明。
-- CHK-MAINT-015 生效协议、协议包 README 和入口说明是否仍残留 `<...>` 模板占位符。
-- CHK-MAINT-016 Codex 场景是否默认选择 `AGENTS.md`，且未新建 `codex.md` 或 `CODEX.md`。
-- CHK-MAINT-017 Claude 场景是否默认选择 `CLAUDE.md`，且与 `AGENTS.md` 或既有入口的真值源关系清楚。
-- CHK-MAINT-018 项目级 `必须`、`禁止`、`默认` 或 `仅当` 是否都有目标仓证据支撑。
-- CHK-MAINT-019 OpenSpec、风险控制等高频规则是否只保留入口锚点，避免结构化约束和详情章节重复展开。
-- CHK-MAINT-020 是否存在根级 `playbooks/` 与 `ai-agent-protocols/playbooks/` 的同内容全文双写；若存在，应明确一个为真值源，另一个改为索引或别名。
-- CHK-MAINT-021 嵌套入口文件中的 `AGENTS.md`、`CODEX.md`、`playbooks/`、`routes/`、`checks/` 路径是否按当前文件位置可解析。
-- CHK-MAINT-022 任务分类、场景手册、工程路由、组合入口和检查入口是否已展开为真实路径，避免执行模型把 `@playbooks`、`@routes` 或 `@checks` 猜成未声明目录。
+落盘后必须使用 `../checks/checklists.md` 的 `maintenance-checklist` 执行闭环检查。本文件只说明协议包生成场景，不复制检查项正文。
 
 生成报告应与生效协议分离，至少包含：
 
