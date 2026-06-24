@@ -22,6 +22,7 @@
 | --- | --- | --- |
 | 创建协议 | `帮这个仓库生成 AI Agent 协作协议` | `references/protocol/index.md`、`references/protocol/package-blueprint.md` |
 | 维护协议 | `把这些规则合并进现有 AGENTS.md` | `references/protocol/index.md`、`references/protocol/guide.md` |
+| 协议升级同步 | `对照最新协议技能，升级当前项目协议包` | `references/protocol/index.md`、`references/protocol/guide.md`、`references/protocol/package-blueprint.md` |
 | 审查协议 | `审查这套协议有没有冲突和遗漏` | `references/protocol/protocol-engineer.md`、`references/checks/index.md` |
 | 规则摄入 | `这条规则应该放在哪里` | `references/protocol/rule-ingestion.md` |
 | 工作流整理 | `把这些任务流程整理成 playbook` | `references/scenarios/index.md`、`references/scenarios/playbooks.md` |
@@ -107,7 +108,45 @@
 把下面这些协作规则摄入当前协议，说明每条规则应该放在哪里。
 ```
 
-### 4. 审查协议体系
+### 4. 协议包升级同步
+
+适用：项目仓库已经用本技能生成过 `AGENTS.md`、`CLAUDE.md`、根级 `playbooks/`、`ai-agent-workspace/protocols/` 或兼容 `ai-agent-protocols/`，现在技能新增或更新了长期约束，需要把项目仓库同步到新规则。
+
+快速做法：
+
+1. 先识别当前项目的生效入口、真值源和兼容入口，不假设目录结构。
+2. 对照最新技能 `references/` 与目标仓现有协议做差异审查，区分新增约束、变更约束、项目特例和不适用规则。
+3. 先输出升级预览，说明拟修改文件、编号变化、待确认项和不适用项。
+4. 确认后按最小修改同步，保持单一真值源，不重建整包，不平行生成两套正文。
+5. 最后按已解决、延后处理、明确排除、转入后续任务归类发现，并说明验证结果和剩余风险。
+
+标准提示词：
+
+```text
+对照最新的 maintain-agent-protocols 技能规则，审查并升级当前项目仓库的协议包。
+
+要求：
+1. 先识别当前项目的生效入口和真值源，包括 AGENTS.md、CLAUDE.md、根级 playbooks/、ai-agent-workspace/protocols/ 或 ai-agent-protocols/，不要假设路径。
+2. 保持现有真值源不变，除非我明确要求迁移；不要生成两套可编辑正文。
+3. 先输出升级预览，再执行修改。预览中说明：
+   - 当前真值源和兼容入口
+   - 拟修改文件
+   - 新增、变更、迁移或弃用的 WF-*、CON-*、CHK-* 编号
+   - 新增约束来自哪些技能 reference
+   - 待确认项、不适用项和潜在冲突
+4. 只按最小修改同步新增或变更的长期约束，不重写无关内容，不覆盖项目特有规则。
+5. 如果新约束涉及 API、数据结构、配置、权限模型或系统架构，先检查是否需要同步项目规范、OpenSpec、ADR 或设计文档。
+6. 如目标仓已有根级 playbooks/ 或既有兼容目录，继续沿用现有真值源；除非我明确要求迁移，不要复制同一正文到新目录。
+7. 最终按 已解决 / 延后处理 / 明确排除 / 转入后续任务 归类所有发现，并给出验证结果、剩余风险和未覆盖范围。
+```
+
+示例请求：
+
+```text
+对照最新协议技能，升级当前项目仓库的协议包，保持现有真值源不变，先给升级预览，再按最小修改同步新增约束。
+```
+
+### 5. 审查协议体系
 
 适用：担心协议膨胀、冲突、误触发、执行率低或维护成本高。
 
@@ -124,7 +163,7 @@
 审查当前技能的协议设计，重点看执行率、冲突和 Token 成本。
 ```
 
-### 5. 判断原则、约束与工作流
+### 6. 判断原则、约束与工作流
 
 适用：有一条新规则，不确定它应如何分类、放在哪里、是否需要进入触发入口。
 
@@ -142,7 +181,7 @@
 判断这条规则属于原则、约束还是工作流，并建议维护位置。
 ```
 
-### 6. 生成工程路由
+### 7. 生成工程路由
 
 适用：想把 UI、前端结构、状态缓存、测试、UI 稳定性、可访问性、组件系统、工具链、API、安全、性能、后端语言等执行细节做成按需加载的路由。
 
@@ -159,7 +198,7 @@
 按当前仓库技术栈生成工程规则路由，只覆盖有项目证据的领域。
 ```
 
-### 7. 维护技能自身
+### 8. 维护技能自身
 
 适用：修改本技能的 `SKILL.md`、`references/`、`templates/`、`agents/` 或 `scripts/`。
 

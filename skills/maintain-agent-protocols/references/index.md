@@ -6,6 +6,7 @@
 
 - `protocol/index.md`：协议场景入口与读取顺序。
 - `protocol/guide.md`：协议层级、目标仓目录结构、入口模板、维护检查和冲突处理。
+- `protocol/index.md` 同时覆盖协议包升级同步场景，用于已落盘项目协议对照最新技能规则做差异审查和最小修改同步。
 - `protocol/collaboration-boundaries.md`：用户协作边界、讨论/执行/维护模式、确认门槛、证据范围和完成定义。
 - `protocol/protocol-engineer.md`：协议工程审查，覆盖角色定位、协议膨胀、执行率、冲突、结构和 Token 成本。
 - `protocol/rule-ingestion.md`：原则、约束、执行流程、模板、检查项和知识的摄入与触发判断。

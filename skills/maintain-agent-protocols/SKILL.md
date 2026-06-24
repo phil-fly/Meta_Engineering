@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-workspace/protocols and compatible ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/frontend i18n governance/JavaScript/TypeScript/project structure/state cache/testing/accessibility/UI stability/component system/tooling/performance, Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, or maintaining agent collaboration protocols or rule routing."
+description: "创建、审查、重构和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, rule ingestion, principle/constraint/workflow ingestion, protocol-package upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware protocol entry selection, ai-agent-workspace/protocols and compatible ai-agent-protocols directory design, user/project protocol templates, route-based engineering rules, execution-rate analysis, token-cost analysis, conflict reduction, UI/frontend i18n governance/JavaScript/TypeScript/project structure/state cache/testing/accessibility/UI stability/component system/tooling/performance, Go/Java/Rust/Python/API/auth/data/security/performance/platform/observability route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, normal code review, general architecture discussion, external specification repository governance, service onboarding to external specs, or project debugging unless the user is creating, reviewing, restructuring, upgrading, or maintaining agent collaboration protocols or rule routing."
 ---
 
 # Maintain Agent Protocols
@@ -27,6 +27,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 1. 识别请求类型。
    - `创建`：起草新的用户级协议、项目级协议或目标仓协议包。
    - `维护`：更新、合并、拆分或重构已有规则。
+   - `升级同步`：对照最新技能规则，审查并升级已落盘的项目协议包，保持现有真值源并按最小修改同步新增或变更约束。
    - `审查`：检查规则是否存在遗漏、歧义、冲突、范围缺失或过期约束。
    - `转换`：把零散说明、口头约定或草稿转成结构化协议和路由文件。
    - `协议工程`：从执行率、复杂度、冲突、Token 成本和长期维护性审查协议体系。
@@ -44,7 +45,9 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - 优先检查 `AGENTS.md`、`CODEX.md`、`CLAUDE.md`、`.cursor/rules`、`.github/copilot-instructions.md`、`ai-agent-protocols/**/*.md`、历史 `playbooks/*.md`、项目文档和用户当前指令。
    - 保留历史决策和项目术语，除非它们已经明确过期或冲突。
    - 仓库扫描得到的来源证据、文件清单和生成过程记录只用于本轮判断，默认不写入生效协议正文。
+   - 升级同步类任务先识别当前项目的生效入口、正文真值源和兼容入口，再对照最新技能 `references/` 做差异审查，区分新增约束、变更约束、项目特例和不适用规则。
    - 生成协议包前必须先输出生成方案预览，说明生效入口、生成模式、拟生成文件、项目事实证据和待确认项。
+   - 升级同步类任务在修改前也必须先输出升级预览，说明当前真值源、拟修改文件、编号变化、规则来源、待确认项和潜在冲突。
    - 预览后对关键决策使用交互式选择（AskUserQuestion）：模型入口文件、生成模式、真值源冲突解决、工程路由裁剪策略；详见仓库根 `references/interactive-decision-protocol.md`。
    - 交互式选择不可用时降级为结构化文本问询。
    - 审查类任务必须说明检查范围、未检查范围和结论适用范围。
@@ -59,6 +62,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
    - 涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理时，读取 `references/protocol/skill-structure.md`。
    - 需要工程规则细节时先读取 `references/engineering/index.md`，再进入对应领域目录读取路由文件。
    - 区分“入口”和“执行细节”：用户协议定义路由，工程路由和场景手册定义执行细节。
+   - 升级同步类任务默认保持目标仓既有真值源不变；除非用户明确要求迁移，不生成两套可编辑正文，不重建整包。
    - 落盘前必须先声明唯一生效入口和各资产真值源，例如项目协议、用户协议、playbooks、routes、checks 和 templates 分别由哪个目录维护。
    - 生成协作协议时必须按用户明确要求、当前模型/工具环境、既有协议文件和默认规则选择入口文件；Codex 场景默认生成或维护 `AGENTS.md`，Claude 场景默认生成或维护 `CLAUDE.md`，不得为 Codex 新建 `codex.md` 或 `CODEX.md`。
    - 工作流、约束和检查项必须使用分类编号，便于管理和引用；工作流使用 `WF-*`，约束使用 `CON-*`，检查项使用 `CHK-*`。
@@ -75,6 +79,7 @@ description: "创建、审查、重构和维护 AI Agent 协作协议与规则�
 5. 闭环。
    - 创建类任务：先给生成方案预览；落盘后给出生成报告、验收清单和使用者下一步。
    - 维护类任务：把每个发现归类为已解决、延后处理、明确排除或转入后续任务。
+   - 升级同步类任务：输出升级前后差异、编号变更和适用性结论；把每个发现归类为已解决、延后处理、明确排除或转入后续任务。
    - 高风险治理变更：编辑前说明影响和验证方式。
    - 若结构校验出现 `templates/` 或多层 `references/` warning，先按 `references/protocol/skill-structure.md` 判断是显式结构例外还是真缺陷，并在结果中说明。
    - 除非用户或项目协议明确要求，不自动提交。
