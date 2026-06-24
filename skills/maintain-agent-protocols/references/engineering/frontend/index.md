@@ -1,6 +1,6 @@
 # 前端工程入口
 
-前端、UI、页面、组件、交互、表单、Design Token、紧凑布局、国际化、文案治理、JavaScript、TypeScript、导航、权限渲染、前端请求、项目结构、状态缓存、测试、可访问性、工具链和前端性能任务先读本文件。
+前端、UI、页面、组件、交互、表单、Design Token、紧凑布局、UI 稳定性、国际化、文案治理、JavaScript、TypeScript、导航、权限渲染、前端请求、项目结构、状态缓存、测试、可访问性、工具链和前端性能任务先读本文件。
 
 ## 文件
 
@@ -16,6 +16,7 @@
 - `styling-and-tokens.md`：颜色、间距、字号、圆角、阴影、motion 和组件 token。
 - `design-tokens.md`：颜色 token 兼容入口。
 - `compact-ui.md`：首屏核心任务可见、布局密度、文案压缩、图表高度和留白节奏。
+- `ui-stability.md`：运行态 UI 稳定性、多分辨率、浏览器缩放、长文本、表格列宽、浮层溢出和极限数据验收。
 - `layering-and-size.md`：分层、文件规模、函数规模、props 控制。
 - `navigation-and-state.md`：导航、路由状态、命名和页面状态。
 - `interaction-and-permission.md`：交互、格式化、小眉标、高影响操作和权限渲染。
@@ -34,6 +35,7 @@
 - 状态拥有者、服务端缓存、URL 状态、缓存失效和本地持久化：读取 `state-and-cache.md`。
 - 颜色、主题、品牌色、状态色、中性色、间距、字号、圆角、阴影、motion 和视觉 token：读取 `styling-and-tokens.md`；只涉及历史颜色 token 时可读取 `design-tokens.md`。
 - 首屏核心任务、紧凑布局、图表高度、重复文案和容器层级压缩：先读取 `compact-ui.md`。
+- UI 稳定性、分辨率、浏览器缩放、长文本、表格列宽、Dialog/Drawer 溢出、极限数据或运行态 UI Review：读取 `ui-stability.md`。
 - JavaScript、TypeScript、JSX、TSX、Electron 渲染进程和前端构建脚本：读取 `javascript-typescript.md`。
 - 键盘、焦点、ARIA、复杂组件、只靠颜色表达状态或紧凑布局可访问性：读取 `accessibility.md`。
 - 单元、集成、E2E、mock server、用户行为测试和回归验证：读取 `testing.md`。

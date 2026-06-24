@@ -25,10 +25,11 @@ Visual/Story → 高复用组件、视觉状态、主题、响应式和组件文
 - 工具链和验证入口：读取 `tooling-and-verification.md`。
 - 组件系统和 Storybook：读取 `component-system.md`。
 - 表单校验和错误展示：读取 `form-validation.md`。
+- 多分辨率、浏览器缩放、长文本、极限数据和运行态 UI Review：读取 `ui-stability.md`。
 - 权限展示和高影响操作：读取 `interaction-and-permission.md`。
 
 ## 输出要求
 
 - 说明本次变更对应的测试层级和未覆盖原因。
 - 说明是否使用 mock server、fixture 或真实后端；若使用 mock，说明契约假设。
-- 说明验证关注用户行为、业务结果、可访问入口还是内部逻辑，并说明执行结果或无法执行原因。
+- 说明验证关注用户行为、业务结果、可访问入口、UI 稳定性还是内部逻辑，并说明执行结果或无法执行原因。

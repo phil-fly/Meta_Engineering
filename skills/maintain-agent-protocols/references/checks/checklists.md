@@ -85,6 +85,17 @@
 - CHK-FE-PERF-005 高频更新、长列表、复杂图表和全局状态变化是否控制渲染范围或使用虚拟化、节流、防抖、选择器策略？
 - CHK-FE-PERF-006 数据或代码预取是否服务明确下一步旅程，且没有全局无界预取或缓存？
 
+## frontend-ui-stability-checklist
+
+- CHK-FE-STABILITY-001 页面完成是否基于实际运行 UI 验收，而不是只依赖静态截图或单一开发设备效果？
+- CHK-FE-STABILITY-002 桌面后台页面是否说明最小支持宽度、分辨率和浏览器缩放验证结果；响应式产品是否继承项目断点策略？
+- CHK-FE-STABILITY-003 是否验证长中文、长英文、URL、JSON、IP、IPv6、域名等内容不会遮挡、重叠或不可查看？
+- CHK-FE-STABILITY-004 表格列宽、长文本列、横向滚动和完整内容查看方式是否明确，且没有无限压缩到不可读？
+- CHK-FE-STABILITY-005 卡片、网格、表单 label、输入框和操作按钮是否在缩放和长文本下保持对齐、可读和可操作？
+- CHK-FE-STABILITY-006 Dialog、Drawer、Popover 等浮层是否有视口约束、内部滚动和超长内容可达性？
+- CHK-FE-STABILITY-007 是否覆盖空数据、少量数据、大量数据、长文本和异常数据；未覆盖项是否说明原因和风险？
+- CHK-FE-STABILITY-008 是否避免用固定主体宽高、absolute 拼页面、删除字段、缩小字体或 overflow hidden 掩盖布局问题？
+
 ## frontend-component-checklist
 
 - CHK-FE-COMPONENT-001 新共享组件前是否检查已有组件、组合模式、配置扩展、样式 token 和第三方包装层？

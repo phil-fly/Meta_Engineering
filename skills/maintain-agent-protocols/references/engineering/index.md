@@ -5,7 +5,7 @@
 ## 路由选择
 
 ```text
-UI 页面、组件、交互、表单、Design Token、紧凑布局、国际化、文案治理、JS/TS、权限渲染、前端请求、项目结构、状态缓存、测试、可访问性、工具链、前端性能 → frontend/index.md
+UI 页面、组件、交互、表单、Design Token、紧凑布局、UI 稳定性、国际化、文案治理、JS/TS、权限渲染、前端请求、项目结构、状态缓存、测试、可访问性、工具链、前端性能 → frontend/index.md
 JavaScript、TypeScript、JSX、TSX、Electron 渲染进程 → frontend/javascript-typescript.md
 前端目录、feature 边界、共享层、导入方向、文件命名 → frontend/project-structure.md
 共享组件、页面局部组件、第三方组件包装、Storybook → frontend/component-system.md
@@ -15,6 +15,7 @@ JavaScript、TypeScript、JSX、TSX、Electron 渲染进程 → frontend/javascr
 用户可见文案、翻译 Key、语言资源、硬编码文案 → frontend/i18n-governance.md
 颜色 token、品牌色、状态色、中性色、间距、字号、圆角、阴影、motion、组件 token → frontend/styling-and-tokens.md
 首屏核心任务、紧凑布局、图表高度            → frontend/compact-ui.md
+UI 稳定性、分辨率、浏览器缩放、长文本、表格列宽、Dialog/Drawer 溢出、极限数据 → frontend/ui-stability.md
 键盘、焦点、ARIA、语义、复杂组件可访问性、a11y → frontend/accessibility.md
 前端单元测试、集成测试、E2E、MSW、用户行为测试 → frontend/testing.md
 ESLint、Prettier、TypeScript、typecheck、lint、test、build、CI、前端依赖 → frontend/tooling-and-verification.md
@@ -37,14 +38,14 @@ N+1、资源泄漏、复杂度、阻塞、对象创建     → performance/commo
 Agent 边界、证据、不确定性、按需加载      → governance/agent-governance.md
 技能提示语、模板、元数据一致性             → governance/asset-alignment.md
 开发、架构、安全审查、性能审查流程        → ../scenarios/playbooks.md
-安全检查、前端国际化检查、前端可访问性检查、前端测试检查、前端组件检查、前端结构检查、性能检查 → ../checks/checklists.md
+安全检查、前端国际化检查、前端可访问性检查、前端测试检查、前端 UI 稳定性检查、前端组件检查、前端结构检查、性能检查 → ../checks/checklists.md
 ```
 
 ## 多路由任务
 
 - UI 列表查询任务：先读 `frontend/list-query.md`，再按查询类型补 `core/api-design.md`、`core/common-quality.md`、`security/index.md` 或 `performance/index.md`。
 - UI 页面、弹窗、表单、表格、菜单或提示反馈任务：先读 `frontend/i18n-governance.md`，再按任务类型补 `frontend/form-validation.md`、`frontend/interaction-and-permission.md`、`core/error-and-logging.md` 或其他相关路由。
-- 前端结构、组件、状态、测试、可访问性、工具链或性能任务：先读 `frontend/index.md`，再按任务类型补 `frontend/project-structure.md`、`frontend/component-system.md`、`frontend/state-and-cache.md`、`frontend/testing.md`、`frontend/accessibility.md`、`frontend/tooling-and-verification.md` 或 `frontend/frontend-performance.md`。
+- 前端结构、组件、状态、测试、UI 稳定性、可访问性、工具链或性能任务：先读 `frontend/index.md`，再按任务类型补 `frontend/project-structure.md`、`frontend/component-system.md`、`frontend/state-and-cache.md`、`frontend/testing.md`、`frontend/ui-stability.md`、`frontend/accessibility.md`、`frontend/tooling-and-verification.md` 或 `frontend/frontend-performance.md`。
 - 删除接口任务：先读 `core/api-design.md`、`core/auth-and-permission.md`、`core/data-access.md`，再读 `security/index.md`。
 - Go/Java/Rust/Python 后端任务：先读 `backend/index.md` 和对应语言文件，再按需要补充 `core/`、`security/`、`performance/`。
 - 安全审查任务：先读 `../scenarios/playbooks.md` 的安全审查流程，再读 `security/index.md` 与相关语言路由。

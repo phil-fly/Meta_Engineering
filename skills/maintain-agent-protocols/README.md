@@ -26,7 +26,7 @@
 | 规则摄入 | `这条规则应该放在哪里` | `references/protocol/rule-ingestion.md` |
 | 工作流整理 | `把这些任务流程整理成 playbook` | `references/scenarios/index.md`、`references/scenarios/playbooks.md` |
 | 工程路由 | `给前端/API/安全规则做路由` | `references/engineering/index.md` |
-| 前端路由 | `补充前端结构、状态、测试、可访问性或组件系统规则` | `references/engineering/frontend/index.md` |
+| 前端路由 | `补充前端结构、状态、测试、UI 稳定性、可访问性或组件系统规则` | `references/engineering/frontend/index.md` |
 | Spec-first | `开发任务是否需要先更新规范` | `references/protocol/openspec-workflow.md` |
 | 技能结构维护 | `检查这个技能目录结构是否合理` | `references/protocol/skill-structure.md` |
 
@@ -144,7 +144,7 @@
 
 ### 6. 生成工程路由
 
-适用：想把 UI、前端结构、状态缓存、测试、可访问性、组件系统、工具链、API、安全、性能、后端语言等执行细节做成按需加载的路由。
+适用：想把 UI、前端结构、状态缓存、测试、UI 稳定性、可访问性、组件系统、工具链、API、安全、性能、后端语言等执行细节做成按需加载的路由。
 
 快速做法：
 

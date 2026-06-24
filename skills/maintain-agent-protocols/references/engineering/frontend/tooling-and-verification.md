@@ -27,6 +27,7 @@ CI / hook               → 提交或合并前的自动质量门
 - JS/TS 类型边界：读取 `javascript-typescript.md`。
 - 项目结构和导入方向：读取 `project-structure.md`。
 - 前端测试：读取 `testing.md`。
+- 运行态 UI 稳定性、多分辨率、浏览器缩放和极限数据验收：读取 `ui-stability.md`。
 - 前端性能和 bundle 风险：读取 `frontend-performance.md`。
 - 依赖安全：读取 `../security/dependency-and-config.md`。
 
@@ -34,4 +35,5 @@ CI / hook               → 提交或合并前的自动质量门
 
 - 说明项目已有的验证入口和本次实际运行或无法运行的命令。
 - 说明是否涉及 lint、format、typecheck、test、build、依赖或路径别名。
+- 涉及页面或复杂组件时，说明是否运行或人工完成 UI 稳定性验证；无法验证时说明替代证据和剩余风险。
 - 说明新增依赖、插件或 polyfill 的价值、体积、安全和维护风险。
