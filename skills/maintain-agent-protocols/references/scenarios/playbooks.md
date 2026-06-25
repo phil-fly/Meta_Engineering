@@ -24,7 +24,7 @@
 
 ## WF-ENTERPRISE-SAAS-DESIGN enterprise-saas-design
 
-企业级 SaaS、管理后台、控制台、运维平台、安全平台、云管平台、AI 平台、数据平台或设备管理系统的产品与页面设计默认流程：
+企业级 SaaS、安全产品、管理后台、控制台、运维平台、安全平台、云管平台、AI 平台、数据平台或设备管理系统的产品与页面设计默认流程：
 
 1. 先判断任务是否属于企业级产品设计；官网、活动页、品牌宣传、营销落地页、游戏化界面或纯概念稿不使用本流程。
 2. 读取 `../engineering/frontend/enterprise-saas-design.md`，并按页面类型补读紧凑布局、UI 稳定性、组件系统、表格列表、表单、Design Token、可访问性和测试相关路由。
