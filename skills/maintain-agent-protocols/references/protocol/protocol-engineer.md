@@ -23,7 +23,7 @@
 
 1. `CHK-PROTOCOL-SCOPE`：声明检查范围、未检查范围和结论适用范围。
 2. `CHK-PROTOCOL-EVIDENCE-SOURCES`：收集协议入口、工程路由、场景手册、模板、Spec、Wiki 和项目级文档。
-3. `CHK-PROTOCOL-DIMENSION-ANALYSIS`：按审查维度逐项分析；涉及触发稳定性时按 `trigger-stability-guide.md` 检查任务入口、场景手册、工程路由、项目约束和检查项链路，并引用具体文件或章节证据。
+3. `CHK-PROTOCOL-DIMENSION-ANALYSIS`：按审查维度逐项分析；涉及触发稳定性时按 `trigger-stability-guide.md` 检查任务入口、场景手册、工程路由、项目约束、约束门禁和检查项链路，并引用具体文件或章节证据。
 4. `CHK-PROTOCOL-IMPACT-PLAN`：输出问题分级、影响范围和建议方案。
 5. `CHK-PROTOCOL-FINDING-CLOSURE`：将发现归类为已解决、延后处理、明确排除或转入后续任务。
 
@@ -79,6 +79,7 @@
 - `CHK-PROTOCOL-EXEC-LONG-DEPENDENCY`：是否存在长距离依赖。
 - `CHK-PROTOCOL-EXEC-IMPLICIT-CONSTRAINT`：是否存在隐式约束。
 - `CHK-PROTOCOL-EXEC-TRIGGER-STABILITY`：高风险约束、条件适用路由和检查项是否能被相关工作流稳定触发。
+- `CHK-PROTOCOL-EXEC-WF-GATE`：高频或高风险约束是否绑定到 `WF-*` 的预检门、变更门、验证门或报告门，而不是只作为原则正文出现。
 
 输出：
 
@@ -96,7 +97,7 @@
 
 触发稳定性作为执行率的子维度：
 
-- `高稳定`：任务入口、场景手册、路由和检查项路径短且可验证。
+- `高稳定`：任务入口、场景手册、约束门禁、路由和检查项路径短且可验证。
 - `中稳定`：规则存在但需要跨文件推断。
 - `低稳定`：关键约束孤立存在、路径悬空或触发条件模糊。
 

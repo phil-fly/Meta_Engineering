@@ -227,6 +227,19 @@ python3 skills/maintain-agent-protocols/scripts/check-template-sync.py
 
 如果本轮没有修改模板，仍应说明未运行或运行结果，并标注剩余风险。
 
+## 协议包工具链
+
+创建或补齐目标仓协议包时，优先用脚本把生成过程结构化：
+
+```bash
+python3 skills/maintain-agent-protocols/scripts/protocol-package.py detect <target-repo>
+python3 skills/maintain-agent-protocols/scripts/protocol-package.py plan <target-repo> --mode project
+python3 skills/maintain-agent-protocols/scripts/protocol-package.py scaffold <target-repo> --mode project
+python3 skills/maintain-agent-protocols/scripts/protocol-package.py validate <target-repo>
+```
+
+`detect` 输出项目证据，`plan` 输出拟生成文件和路由裁剪结果，`scaffold` 默认跳过既有文件，`validate` 检查协议包目录、模板资产、路由索引状态和占位符泄漏。用户确认预览后再运行 `scaffold`。
+
 ## 输出闭环
 
 最终回复建议包含：

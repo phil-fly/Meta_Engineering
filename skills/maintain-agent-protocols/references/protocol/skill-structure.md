@@ -33,7 +33,7 @@ scripts/
 - 不因通用 warning 删除 `templates/` 或压平 `references/`。
 - 若模板正文变化，必须同步 `templates/` 与 `references/protocol/` 下对应模板参考文件。
 - 若新增目录，必须同时更新 `SKILL.md` 的技能内部分层和 `references/index.md`。
-- 若新增目标仓落盘资产，必须同时更新 `references/protocol/package-blueprint.md`。
+- 若新增目标仓落盘资产，必须同时更新 `references/protocol/package-blueprint.md` 和 `scripts/protocol-package-manifest.json`。
 
 ## 验证方式
 
@@ -41,6 +41,7 @@ scripts/
 
 ```bash
 python3 scripts/check-template-sync.py
+python3 scripts/protocol-package.py plan . --mode project
 ```
 
 脚本不可用时，手动检查：

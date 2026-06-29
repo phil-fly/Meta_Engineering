@@ -20,6 +20,15 @@
 
 `WF-PACKAGE-PREVIEW`：落盘前必须先给用户一份生成方案预览，并等待确认。预览只说明计划，不创建文件。
 
+可执行工具链：
+
+- `scripts/protocol-package.py detect <target-repo>`：把目标仓入口、协议目录和技术栈证据输出为 JSON。
+- `scripts/protocol-package.py plan <target-repo> --mode minimal|project|full`：按 `scripts/protocol-package-manifest.json` 生成拟落盘文件、路由裁剪和检查清单计划。
+- `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖。
+- `scripts/protocol-package.py validate <target-repo>`：检查目标仓协议包目录、模板资产、路由索引状态标注和占位符泄漏。
+
+脚本输出用于生成方案预览和生成报告，不替代用户确认，也不自动维护根级生效入口。
+
 预览必须包含：
 
 - 生效入口：项目协议、用户协议、场景手册、工程路由、检查清单和模板分别选择哪个真值源。
@@ -30,6 +39,7 @@
 - 路径变量映射：若用户协议使用 `@playbooks`、`@routes` 或 `@checks`，必须说明它们映射到目标仓哪些真实目录。
 - 编号方案：说明本次工作流 `WF-*`、约束 `CON-*`、检查项 `CHK-*` 的编号范围、继承来源和冲突处理。
 - 触发稳定性检查：说明工作流、条件适用路由、项目级约束和检查项映射是否存在明显断链；若未检查，说明原因。
+- 约束门禁检查：说明高频或高风险 `CON-*` 是否绑定到相关 `WF-*` 的预检门、变更门、验证门或报告门；若未绑定，说明是延后处理、低频项目事实还是待确认候选。
 - 项目事实证据表：每条项目事实、技术栈、命令、目录职责或规范入口都要标注来源文件；没有证据时标为待确认。
 - 模板内容边界：说明哪些内容来自通用模板，哪些内容来自目标仓证据。
 - 风险与确认点：列出会影响长期协议、入口迁移、双写、无关路由或占位符处理的事项。
@@ -162,6 +172,7 @@ ai-agent-workspace/protocols/templates/route-card.md
 生成或升级协议包时，按 `trigger-stability-guide.md` 做轻量触发链路检查。检查结果进入预览或报告，不写入生效协议正文。
 
 - `CON-PACKAGE-TRIGGER-STABILITY-CHECK`：创建、升级同步或协议工程审查时，应检查任务入口、场景手册、工程路由、项目级约束和检查项之间是否存在明显断链。
+- `CON-PACKAGE-TRIGGER-WF-GATE`：创建、升级同步或协议工程审查时，应检查高频和高风险约束是否被相关场景手册门禁节点触达；只在项目协议中孤立出现的关键约束应列为断链或延后强化项。
 - `CON-PACKAGE-TRIGGER-STABILITY-NO-ENGINE`：除非另有脚本实现，不声称已运行自动验证引擎；结论应标注来自已读文件、`rg` 搜索结果或待确认推断。
 - `CON-PACKAGE-TRIGGER-STABILITY-PREVIEW`：升级同步时若建议强化 playbooks、routes 或 checks，必须在升级预览中列出拟修改文件和强化原因，并让用户选择“只同步规则”或“同步规则 + 强化触发链路”。
 - `CON-PACKAGE-TRIGGER-STABILITY-GENERATE`：新建协议包时，可以把通用触发条件直接写入新生成的 playbooks 或 routes/index；仍需保持短引用，不复制完整约束正文。
@@ -262,5 +273,6 @@ ai-agent-workspace/
 - 无关技术栈路由检查结果。
 - 路由索引三类标注结果。
 - 触发稳定性检查结果、强化选择和剩余断链风险。
+- 约束门禁绑定结果，以及未绑定约束的处理分类。
 - 重复展开压缩结果。
 - 使用者下一步，例如确认入口文件名、审阅待确认事实、删除未采用路由或在 `git add` 前复查生成报告。

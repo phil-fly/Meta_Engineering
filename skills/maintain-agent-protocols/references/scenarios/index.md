@@ -4,7 +4,7 @@
 
 ## 读取顺序
 
-1. 读取 `playbooks.md` 判断任务流程和 `WF-*` 工作流编号。
+1. 读取 `playbooks.md` 判断任务流程、`WF-*` 工作流编号和约束门禁节点。
 2. 按任务类型读取 `../engineering/index.md` 和对应工程规则。
 3. 审查类任务补读 `../checks/checklists.md`。
 

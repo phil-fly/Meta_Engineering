@@ -1,0 +1,140 @@
+{
+  "schema": "maintain-agent-protocols.protocol-package-manifest.v1",
+  "default_package_dir": "ai-agent-workspace/protocols",
+  "compat_package_dir": "ai-agent-protocols",
+  "templates": [
+    {
+      "source": "templates/user-protocol.md",
+      "target": "templates/user-protocol.md"
+    },
+    {
+      "source": "templates/project-protocol.md",
+      "target": "templates/project-protocol.md"
+    },
+    {
+      "source": "templates/route-card.md",
+      "target": "templates/route-card.md"
+    }
+  ],
+  "playbooks": {
+    "source": "references/scenarios/playbooks.md",
+    "target_dir": "playbooks",
+    "sections": {
+      "coding": "coding.md",
+      "architecture": "architecture.md",
+      "enterprise-saas-design": "enterprise-saas-design.md",
+      "security-review": "security-review.md",
+      "performance-review": "performance-review.md",
+      "troubleshooting": "troubleshooting.md",
+      "research": "research.md"
+    }
+  },
+  "checks": {
+    "source": "references/checks/checklists.md",
+    "target_dir": "checks",
+    "sections": {
+      "maintenance-checklist": "maintenance-checklist.md",
+      "security-checklist": "security-checklist.md",
+      "frontend-i18n-checklist": "frontend-i18n-checklist.md",
+      "frontend-accessibility-checklist": "frontend-accessibility-checklist.md",
+      "frontend-testing-checklist": "frontend-testing-checklist.md",
+      "frontend-performance-checklist": "frontend-performance-checklist.md",
+      "frontend-ui-stability-checklist": "frontend-ui-stability-checklist.md",
+      "frontend-enterprise-saas-design-checklist": "frontend-enterprise-saas-design-checklist.md",
+      "frontend-component-checklist": "frontend-component-checklist.md",
+      "frontend-structure-checklist": "frontend-structure-checklist.md",
+      "performance-checklist": "performance-checklist.md"
+    }
+  },
+  "route_rules": [
+    {
+      "id": "frontend",
+      "status": "项目证据支持",
+      "source_globs": ["references/engineering/frontend/*.md"],
+      "target_prefix": "routes/frontend",
+      "evidence_keys": ["frontend"],
+      "always_include": ["index.md", "javascript-typescript.md"]
+    },
+    {
+      "id": "backend-go",
+      "status": "项目证据支持",
+      "source_globs": ["references/engineering/backend/go.md", "references/engineering/backend/go/*.md"],
+      "target_prefix": "routes/backend/go",
+      "evidence_keys": ["go"]
+    },
+    {
+      "id": "backend-java",
+      "status": "项目证据支持",
+      "source_globs": ["references/engineering/backend/java.md", "references/engineering/backend/java/*.md"],
+      "target_prefix": "routes/backend/java",
+      "evidence_keys": ["java"]
+    },
+    {
+      "id": "backend-rust",
+      "status": "项目证据支持",
+      "source_globs": ["references/engineering/backend/rust.md", "references/engineering/backend/rust/*.md"],
+      "target_prefix": "routes/backend/rust",
+      "evidence_keys": ["rust"]
+    },
+    {
+      "id": "backend-python",
+      "status": "项目证据支持",
+      "source_globs": ["references/engineering/backend/python.md"],
+      "target_prefix": "routes/backend/python",
+      "evidence_keys": ["python"]
+    },
+    {
+      "id": "core",
+      "status": "项目证据支持",
+      "source_globs": ["references/engineering/core/*.md"],
+      "target_prefix": "routes/core",
+      "evidence_keys": ["api", "database", "auth", "logging", "config"]
+    },
+    {
+      "id": "security",
+      "status": "条件适用",
+      "source_globs": ["references/engineering/security/*.md"],
+      "target_prefix": "routes/security",
+      "evidence_keys": ["security"],
+      "conditional": true
+    },
+    {
+      "id": "performance",
+      "status": "条件适用",
+      "source_globs": ["references/engineering/performance/*.md"],
+      "target_prefix": "routes/performance",
+      "evidence_keys": ["performance"],
+      "conditional": true
+    },
+    {
+      "id": "platform",
+      "status": "项目证据支持",
+      "source_globs": ["references/engineering/platform/*.md"],
+      "target_prefix": "routes/platform",
+      "evidence_keys": ["deployment", "observability", "gateway"]
+    },
+    {
+      "id": "governance",
+      "status": "通用治理",
+      "source_globs": ["references/engineering/governance/index.md", "references/engineering/governance/evidence-and-scope.md", "references/engineering/governance/agent-governance.md"],
+      "target_prefix": "routes/governance",
+      "evidence_keys": ["governance"],
+      "conditional": true
+    }
+  ],
+  "minimal_playbooks": ["coding", "architecture", "security-review", "troubleshooting", "research"],
+  "minimal_checks": ["maintenance-checklist", "security-checklist"],
+  "project_checks_by_route": {
+    "frontend": [
+      "frontend-i18n-checklist",
+      "frontend-accessibility-checklist",
+      "frontend-testing-checklist",
+      "frontend-performance-checklist",
+      "frontend-ui-stability-checklist",
+      "frontend-enterprise-saas-design-checklist",
+      "frontend-component-checklist",
+      "frontend-structure-checklist"
+    ],
+    "performance": ["performance-checklist"]
+  }
+}
