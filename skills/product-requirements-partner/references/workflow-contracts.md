@@ -13,8 +13,8 @@
 | Scene | 最小输入 | 标准输出 | 可写文件 | 不可写条件 |
 | --- | --- | --- | --- | --- |
 | 价值发现 | 想法、痛点或目标用户线索 | 价值锚点、目标用户、痛点、替代方案、待确认项 | `ai-agent-workspace/product/memory/`、`ai-agent-workspace/product/strategy/`，兼容 `docs/00_MEMORY/`、`docs/01_STRATEGY/` | 用户仍在自由讲述且未确认方向 |
-| 流程与范围 | 已确认价值锚点或核心痛点 | 关键用户旅程、MVP 支持/延后范围 | `ai-agent-workspace/product/prd/framework-prd.md`、`ai-agent-workspace/product/memory/TODO.md`，兼容 `docs/02_PRD/`、`docs/TODO.md` | 痛点未闭环或范围仍明显发散 |
-| 交互结构 | 核心旅程和 MVP 边界 | Screen Tree、信息层级、主操作 | Framework PRD 或 `ai-agent-workspace/product/design/ui_ux/`，兼容 `docs/03_DESIGN/ui_ux/` | 旅程还未稳定 |
+| 流程与范围 | 已确认价值锚点或核心痛点 | 关键用户旅程、MVP 支持/延后范围；若涉及 UI，则包含 PRD 页面设计需求与低保真线稿 | `ai-agent-workspace/product/prd/framework-prd.md`、`ai-agent-workspace/product/memory/TODO.md`，兼容 `docs/02_PRD/`、`docs/TODO.md` | 痛点未闭环或范围仍明显发散 |
+| 交互结构 | 核心旅程和 MVP 边界，且需求涉及 UI | Screen Tree、页面设计需求、低保真线稿、信息层级、主操作 | Framework PRD 或 `ai-agent-workspace/product/design/ui_ux/`，兼容 `docs/03_DESIGN/ui_ux/` | 旅程还未稳定，或需求不涉及 UI |
 | 实体定义 | 页面结构和关键操作 | 实体清单、状态机、操作矩阵、字段行为 | Framework PRD 或 Feature PRD | 页面结构尚未成形 |
 | 设计与交付 | 交互结构、实体状态、设计方向 | 设计指导、mockup、handoff note | `ai-agent-workspace/product/design/`，兼容 `docs/03_DESIGN/` | 待定项影响页面结构或实体逻辑 |
 | PRD 评审 | PRD 文本或文件路径 | blocker、clarification、suggestion、可执行性判断 | 原 PRD 或新版本 PRD | 未读目标文档或用户只要求口头反馈 |
@@ -42,7 +42,7 @@
 2. 先画理想端到端流程，再切 MVP。
 3. MVP 用“支持哪些旅程”定义，不用孤立功能清单定义。
 4. 每个核心旅程都记录 `{入口场景} -> {可见信息} -> {用户动作} -> {结果}`。
-5. 写入或更新产品 PRD 目录的 `framework-prd.md` 或项目约定的 Framework PRD。
+5. 写入或更新产品 PRD 目录的 `framework-prd.md` 或项目约定的 Framework PRD；若需求涉及 UI，同步沉淀页面设计需求与低保真线稿，信息不足时写入稳定待定项；若不涉及 UI，标注页面设计与线稿不适用。
 
 退出条件：痛点覆盖关系和 MVP 延后项都被明确记录。
 
@@ -52,10 +52,11 @@
 
 1. 定义 Screen Tree、信息层级、主操作和关键入口。
 2. 把 Scene 2 的旅程映射到页面结构。
-3. 以目标用户视角走查：是否看得懂、知道下一步、能回到上下文。
-4. 发现冲突时调整页面结构并记录重要设计转向。
+3. 为 UI 相关核心页面生成可评审的低保真线稿，并标注内容区块、主操作、状态和导航关系。
+4. 以目标用户视角走查：是否看得懂、知道下一步、能回到上下文。
+5. 发现冲突时调整页面结构并记录重要设计转向。
 
-退出条件：核心旅程在页面结构中都有明确落点。
+退出条件：UI 相关核心旅程在页面结构中都有明确落点，关键页面均有设计需求和线稿或稳定待定项。
 
 ### Scene 4 · 实体定义
 

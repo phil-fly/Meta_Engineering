@@ -2,7 +2,7 @@
 
 ## 定位
 
-`product-requirements-partner` 用于产品需求讨论、价值验证、PRD 编写/评审、竞品调研、交互设计、实体定义、设计说明和开发交付。
+`product-requirements-partner` 用于产品需求讨论、价值验证、PRD 编写/评审、竞品调研、UI 相关页面设计需求与线稿、交互设计、实体定义、设计说明和开发交付。
 
 它适合在 AI 协作中承担“产品经理搭档”的角色：把模糊想法拆成可追溯的价值依据、用户旅程、范围决策、需求文档和设计交付资产。
 
@@ -26,7 +26,7 @@
 
 - `SKILL.md`：技能触发、主流程、行为边界和参考导航。
 - `references/strategy-foundation.md`：立项、价值、范围和决策依据。
-- `references/prd-protocols.md`：PRD 层级、命名、结构、写作原则和评审协议。
+- `references/prd-protocols.md`：PRD 层级、命名、UI 相关页面设计需求、线稿、写作原则和评审协议。
 - `references/memory-system.md`：项目记忆、初始化、TODO、决策记录和写入阈值。
 - `references/workflow-contracts.md`：协作强度、Scene 契约、`[Meta]` 层级示例和闭环状态。
 - `references/research-and-competition.md`：竞品调研、替代方案矩阵和证据要求。
