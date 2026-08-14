@@ -4,24 +4,26 @@
 
 ## 读取顺序
 
-1. 读取 `guide.md` 判断目标层级、目录结构和用户协议入口规则。
-2. 如涉及协议工程审查、执行率、Token 成本、协议膨胀或冲突分析，再读取 `protocol-engineer.md`。
-3. 如涉及触发稳定性、条件适用路由、项目约束漏触发、约束门禁或检查项映射，再读取 `trigger-stability-guide.md`。
-4. 如涉及原则、约束、约束触发项、执行流程、模板、检查项或知识摄入，再读取 `rule-ingestion.md`。
-5. 如涉及 OpenSpec、Spec-first、规范驱动开发、审查修复闭环或 Epic/Subtask 拆分，再读取 `openspec-workflow.md`。
-6. 如涉及协议包落盘、生成方案预览、入口兼容、三档生成模式、路由状态标注、模板目录、playbooks 内容来源或目标仓文件生成，再读取 `package-blueprint.md`。
-7. 如涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理，再读取 `skill-structure.md`。
-8. 如创建或补充用户级协议，再读取 `user-protocol-template.md`。
-9. 如创建或补充项目级协议，再读取 `project-protocol-template.md`。
-10. 如创建或补充路由模板，再读取 `route-card-template.md`。
-11. 如涉及用户协作边界、模式切换、确认门槛、证据范围或完成定义，再读取 `collaboration-boundaries.md`。
-12. 如涉及工程规则路由，再读取 `../engineering/index.md`。
-13. 如涉及任务流程，再读取 `../scenarios/playbooks.md`。
-14. 如涉及审查验收，再读取 `../checks/checklists.md`。
+1. 同时命中多个请求类型时，先读取 `workflow-routing.md` 选出唯一主流程和必要的辅助流程。
+2. 读取 `guide.md` 判断目标层级、目录结构和用户协议入口规则。
+3. 如涉及协议工程审查、执行率、Token 成本、协议膨胀或冲突分析，再读取 `protocol-engineer.md`。
+4. 如涉及触发稳定性、条件适用路由、项目约束漏触发、约束门禁或检查项映射，再读取 `trigger-stability-guide.md`。
+5. 如涉及原则、约束、约束触发项、执行流程、模板、检查项或知识摄入，再读取 `rule-ingestion.md`。
+6. 如涉及 OpenSpec、Spec-first、规范驱动开发、审查修复闭环或 Epic/Subtask 拆分，再读取 `openspec-workflow.md`。
+7. 如涉及协议包落盘、生成方案预览、入口兼容、三档生成模式、路由状态标注、模板目录、playbooks 内容来源或目标仓文件生成，再读取 `package-blueprint.md`。
+8. 如涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理，再读取 `skill-structure.md`。
+9. 如创建或补充用户级协议，再读取 `user-protocol-template.md`。
+10. 如创建或补充项目级协议，再读取 `project-protocol-template.md`。
+11. 如创建或补充路由模板，再读取 `route-card-template.md`。
+12. 如涉及用户协作边界、模式切换、确认门槛、证据范围或完成定义，再读取 `collaboration-boundaries.md`。
+13. 如涉及工程规则路由，再读取 `../engineering/index.md`。
+14. 如涉及任务流程，再读取 `../scenarios/playbooks.md`。
+15. 如涉及审查验收，再读取 `../checks/checklists.md`。
 
 ## 适用任务
 
 - 创建用户级 AI Agent 协作协议。
+- 为同时命中多个请求类型的任务仲裁唯一主流程和辅助流程。
 - 补充或裁剪用户级协议模板。
 - 创建项目级 AI Agent 协作协议。
 - 补充或裁剪项目级协议模板。

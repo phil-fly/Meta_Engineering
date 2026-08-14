@@ -55,6 +55,11 @@ TEXT_EXTENSIONS = {
     ".ini",
     ".cfg",
 }
+ENTRY_CANDIDATES = ("AGENTS.md", "CLAUDE.md", "CODEX.md", "codex.md")
+RULE_ID_PATTERNS = {
+    "playbook": re.compile(r"^#{1,6}\s+WF-[A-Z0-9]+(?:-[A-Z0-9]+)*\b", re.MULTILINE),
+    "check": re.compile(r"^\s*-\s+CHK-[A-Z0-9]+(?:-[A-Z0-9]+)*\b", re.MULTILINE),
+}
 
 
 @dataclass(frozen=True)
@@ -136,8 +141,7 @@ def strip_inline_code(content: str) -> str:
 
 
 def collect_protocol_entries(root: Path) -> dict[str, Any]:
-    candidates = ["AGENTS.md", "CLAUDE.md", "CODEX.md", "codex.md"]
-    existing = [path for path in candidates if (root / path).exists()]
+    existing = [path for path in ENTRY_CANDIDATES if (root / path).is_file()]
     package_dirs = [path for path in ["ai-agent-workspace/protocols", "ai-agent-protocols"] if (root / path).exists()]
     playbooks = [path for path in ["playbooks", "ai-agent-workspace/protocols/playbooks", "ai-agent-protocols/playbooks"] if (root / path).exists()]
     default_entry = "AGENTS.md"
@@ -373,11 +377,71 @@ def scaffold_package(root: Path, manifest: dict[str, Any], mode: str, overwrite:
     return {"plan": plan, "written": written, "skipped": skipped}
 
 
+def find_local_markdown_references(content: str) -> list[str]:
+    references: list[str] = []
+
+    def add(raw: str) -> None:
+        value = raw.strip()
+        if value.startswith("<") and ">" in value:
+            value = value[1:value.index(">")]
+        else:
+            value = value.split(maxsplit=1)[0]
+        value = value.split("#", 1)[0].split("?", 1)[0]
+        if not value or not value.lower().endswith(".md"):
+            return
+        if value.startswith(("http://", "https://", "mailto:", "#")):
+            return
+        if value not in references:
+            references.append(value)
+
+    for match in re.finditer(r"\[[^\]]+\]\(([^)]+)\)", content):
+        add(match.group(1))
+    for match in re.finditer(r"`((?:/|\.{1,2}/|[^`\s/]+/)[^`\s]*\.md(?:#[^`\s]+)?)`", content):
+        add(match.group(1))
+    return references
+
+
+def validate_entries(root: Path) -> tuple[list[str], list[str]]:
+    entry_files = [name for name in ENTRY_CANDIDATES if (root / name).is_file()]
+    errors: list[str] = []
+    if not entry_files:
+        errors.append("缺少根级生效入口；需要 AGENTS.md、CLAUDE.md 或既有 CODEX.md/codex.md 兼容入口")
+        return entry_files, errors
+
+    resolved_root = root.resolve()
+    for entry_name in entry_files:
+        entry_path = root / entry_name
+        content = entry_path.read_text(encoding="utf-8", errors="ignore")
+        for reference in find_local_markdown_references(content):
+            candidate = root / reference.lstrip("/") if reference.startswith("/") else entry_path.parent / reference
+            resolved = candidate.resolve()
+            try:
+                resolved.relative_to(resolved_root)
+            except ValueError:
+                errors.append(f"{entry_name} 引用超出目标仓范围：{reference}")
+                continue
+            if not resolved.is_file():
+                errors.append(f"{entry_name} 引用不存在：{reference}")
+    return entry_files, errors
+
+
+def directory_contains_rule_id(directory: Path, pattern: re.Pattern[str]) -> bool:
+    if not directory.exists():
+        return False
+    for path in directory.rglob("*.md"):
+        if pattern.search(path.read_text(encoding="utf-8", errors="ignore")):
+            return True
+    return False
+
+
 def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | None = None) -> dict[str, Any]:
+    root = root.resolve()
     package_dir = package_dir or (manifest["compat_package_dir"] if (root / manifest["compat_package_dir"]).exists() else manifest["default_package_dir"])
     base = root / package_dir
     missing: list[str] = []
     warnings: list[str] = []
+    entry_files, entry_errors = validate_entries(root)
+    content_errors: list[str] = []
     required_dirs = ["templates", "playbooks", "checks", "routes"]
     for directory in required_dirs:
         if not (base / directory).exists():
@@ -396,6 +460,11 @@ def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | No
     else:
         missing.append(f"{package_dir}/routes/index.md")
 
+    if not directory_contains_rule_id(base / "playbooks", RULE_ID_PATTERNS["playbook"]):
+        content_errors.append(f"{package_dir}/playbooks/ 未包含 WF-* 工作流")
+    if not directory_contains_rule_id(base / "checks", RULE_ID_PATTERNS["check"]):
+        content_errors.append(f"{package_dir}/checks/ 未包含 CHK-* 检查项")
+
     placeholder_re = re.compile(r"<(?:project|install-command|package-manager|framework|language|path)>", re.IGNORECASE)
     placeholders: list[str] = []
     if base.exists():
@@ -406,11 +475,14 @@ def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | No
             if placeholder_re.search(strip_inline_code(content)):
                 placeholders.append(path.relative_to(root).as_posix())
 
-    ok = not missing and not placeholders
+    ok = not missing and not placeholders and not entry_errors and not content_errors
     return {
         "ok": ok,
         "package_dir": package_dir,
+        "entry_files": entry_files,
+        "entry_errors": entry_errors,
         "missing": missing,
+        "content_errors": content_errors,
         "warnings": warnings,
         "placeholder_files": placeholders,
     }

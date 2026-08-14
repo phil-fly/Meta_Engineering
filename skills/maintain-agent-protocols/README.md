@@ -23,6 +23,7 @@
 | 创建协议 | `帮这个仓库生成 AI Agent 协作协议` | `references/protocol/index.md`、`references/protocol/package-blueprint.md` |
 | 维护协议 | `把这些规则合并进现有 AGENTS.md` | `references/protocol/index.md`、`references/protocol/guide.md` |
 | 协议升级同步 | `对照最新协议技能，升级当前项目协议包` | `references/protocol/index.md`、`references/protocol/guide.md`、`references/protocol/package-blueprint.md` |
+| 多类型请求仲裁 | `先审查触发问题，再修复当前协议` | `references/protocol/workflow-routing.md` |
 | 审查协议 | `审查这套协议有没有冲突和遗漏` | `references/protocol/protocol-engineer.md`、`references/checks/index.md` |
 | 规则摄入 | `这条规则应该放在哪里` | `references/protocol/rule-ingestion.md` |
 | 工作流整理 | `把这些任务流程整理成 playbook` | `references/scenarios/index.md`、`references/scenarios/playbooks.md` |
@@ -34,12 +35,14 @@
 
 ## 通用使用流程
 
-1. 先识别请求类型：创建、维护、审查、转换、协议工程、规则摄入或工程路由。
+1. 先识别请求类型；同时命中多个类型时按最终交付物选一个主流程，审查维度作为辅助流程。
 2. 再判断目标层级：用户级、项目级、工程域、场景手册、检查项、模板、知识或临时约定。
 3. 只读取对应参考文件，避免一次性加载全部资料。
 4. 修改前声明生效入口、真值源和影响范围。
 5. 修改时采用最小变更，避免重复写同一规则正文。
 6. 结束时说明变更范围、验证结果、剩余风险和未覆盖范围。
+
+主流程仲裁规则：写入任务以创建、升级同步、维护或转换为主流程；一般审查、触发稳定性审查和协议工程只作为辅助分析维度。只读任务依次优先选择触发稳定性审查、协议工程、一般审查。只有候选流程会改变写入范围、覆盖策略或真值源且证据无法裁决时才询问用户。
 
 入口文件默认规则：
 
@@ -223,9 +226,13 @@
 
 ```bash
 python3 skills/maintain-agent-protocols/scripts/check-template-sync.py
+node skills/maintain-agent-protocols/scripts/check-cross-references.ts
+node skills/maintain-agent-protocols/scripts/check-rule-ids.ts
+node skills/maintain-agent-protocols/scripts/check-placeholders.ts
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s skills/maintain-agent-protocols/scripts -p 'test_*.py' -v
 ```
 
-如果本轮没有修改模板，仍应说明未运行或运行结果，并标注剩余风险。
+如果本轮没有修改模板、共享运行时资产或协议包工具链，仍应说明哪些检查未运行及其剩余风险。
 
 ## 协议包工具链
 
@@ -238,7 +245,7 @@ python3 skills/maintain-agent-protocols/scripts/protocol-package.py scaffold <ta
 python3 skills/maintain-agent-protocols/scripts/protocol-package.py validate <target-repo>
 ```
 
-`detect` 输出项目证据，`plan` 输出拟生成文件和路由裁剪结果，`scaffold` 默认跳过既有文件，`validate` 检查协议包目录、模板资产、路由索引状态和占位符泄漏。用户确认预览后再运行 `scaffold`。
+`detect` 输出项目证据，`plan` 输出拟生成文件和路由裁剪结果，`scaffold` 默认跳过既有文件。`validate` 还会检查根级生效入口、本地 Markdown 引用、`WF-*` 工作流、`CHK-*` 检查项、协议包目录、模板资产、路由索引状态和占位符泄漏。`scaffold` 不写根级入口，因此入口维护完成前验证会失败；用户确认预览后再运行 `scaffold`。
 
 ## 输出闭环
 

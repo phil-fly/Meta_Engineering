@@ -11,6 +11,7 @@ references/protocol/
 references/engineering/
 references/scenarios/
 references/checks/
+references/shared/
 templates/
 scripts/
 ```
@@ -26,6 +27,7 @@ scripts/
 
 - `templates/` 是目标仓协议模板目录的可复制资产，新项目默认落到 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；它不是执行流程引用目录。
 - 多层 `references/` 是本技能按需加载的核心设计，用于避免一次性读取全部工程规则。
+- `references/shared/` 保存随 Skill 安装的精确副本或当前 Skill 专用投影，避免独立安装后依赖源码仓根目录或其他 Skill。
 - `SKILL.md` 已明确要求先读 `references/index.md`，再按任务场景进入对应目录。
 
 处理规则：
@@ -34,6 +36,7 @@ scripts/
 - 若模板正文变化，必须同步 `templates/` 与 `references/protocol/` 下对应模板参考文件。
 - 若新增目录，必须同时更新 `SKILL.md` 的技能内部分层和 `references/index.md`。
 - 若新增目标仓落盘资产，必须同时更新 `references/protocol/package-blueprint.md` 和 `scripts/protocol-package-manifest.json`。
+- 若修改源码仓根级共享参考，必须同步 `references/shared/`；`scripts/check-template-sync.py` 会检查精确副本一致性，并确认专用投影具备必要章节且不依赖其他 Skill。
 
 ## 验证方式
 
@@ -41,6 +44,10 @@ scripts/
 
 ```bash
 python3 scripts/check-template-sync.py
+node scripts/check-cross-references.ts
+node scripts/check-rule-ids.ts
+node scripts/check-placeholders.ts
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py' -v
 python3 scripts/protocol-package.py plan . --mode project
 ```
 

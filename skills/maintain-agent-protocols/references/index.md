@@ -39,3 +39,9 @@
 
 - `checks/index.md`：检查场景入口与读取顺序。
 - `checks/checklists.md`：维护、安全、前端国际化、前端可访问性、前端测试、前端性能、前端 UI 稳定性、企业级 SaaS 设计、前端组件、前端结构与通用性能检查清单。
+
+## 安装态共享规则
+
+- `shared/interactive-decision-protocol.md`：关键决策的原生问询、选项设计和降级规则；仅保留本 Skill 所需内容的安装态投影。
+- `shared/target-workspace-layout.md`：目标仓统一产物目录、兼容路径和真值源规则。
+- 这两个文件是随 Skill 安装的运行时资产；源码仓根级 `references/` 是跨技能编辑真值源，使用 `scripts/check-template-sync.py` 检查精确副本或当前 Skill 专用投影同步。

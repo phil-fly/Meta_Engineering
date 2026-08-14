@@ -19,6 +19,7 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
 - `references/engineering/`：工程规则路由场景；企业级 SaaS 设计、前端、后端、安全、性能、平台、治理必须用目录隔离。
 - `references/scenarios/`：任务流程场景，覆盖开发、架构、安全审查、性能审查、排障和调研。
 - `references/checks/`：审查检查场景，覆盖维护、安全与性能检查清单。
+- `references/shared/`：随 Skill 安装的跨技能规则运行时资产；源码仓根级 `references/` 是跨技能编辑真值源，发布前必须验证精确副本或当前 Skill 专用投影同步。
 - `templates/`：可复制到目标仓统一产物目录的协议模板资产；新项目默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；维护模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
 - `scripts/`：技能维护验证脚本与协议包工具链；`protocol-package.py` 用于目标仓探测、生成计划、协议包 scaffold 和结果验证，其他检查脚本用于模板同步、编号、占位符和引用校验。
 
@@ -33,6 +34,9 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - `转换`：把零散说明、口头约定或草稿转成结构化协议和路由文件。
    - `协议工程`：从执行率、复杂度、冲突、Token 成本和长期维护性审查协议体系。
    - `规则摄入`：判断原则、约束、执行流程、模板、检查项和知识应维护在哪里，是否作为触发入口。
+   - 请求命中多个类型时，读取 `references/protocol/workflow-routing.md`，按最终交付物选出唯一主流程；写入任务以创建、升级同步、维护或转换为主，审查、触发稳定性审查和协议工程只作为辅助分析维度。
+   - 只读任务依次优先选择触发稳定性审查、协议工程、一般审查；规则只问“放哪里”时走规则摄入，要求直接合并时走维护主流程并以规则摄入为辅助流程。
+   - 首次进度说明和最终回复必须声明主流程及必要的辅助流程；只有候选主流程会改变写入范围、覆盖策略或真值源且证据无法裁决时才询问用户，否则按保守范围继续。
    - 仅当用户明确要求创建、落盘、补齐或维护目标仓协议包时，才进入生成流程；读取或触发技能本身不会自动生成任何文件。
 
 2. 判断目标层级。
@@ -48,10 +52,10 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - 仓库扫描得到的来源证据、文件清单和生成过程记录只用于本轮判断，默认不写入生效协议正文。
    - 升级同步类任务先识别当前项目的生效入口、正文真值源和兼容入口，再对照最新技能 `references/` 做差异审查，区分新增约束、变更约束、项目特例和不适用规则。
    - 生成协议包前必须先输出生成方案预览，说明生效入口、生成模式、拟生成文件、项目事实证据和待确认项。
-   - 创建或补齐协议包时，优先使用 `scripts/protocol-package.py detect` 和 `scripts/protocol-package.py plan` 生成结构化项目证据和生成计划；用户确认后再使用 `scaffold` 落盘，并用 `validate` 检查目标仓结果。
+   - 创建或补齐协议包时，优先使用 `scripts/protocol-package.py detect` 和 `scripts/protocol-package.py plan` 生成结构化项目证据和生成计划；用户确认后再使用 `scaffold` 落盘，维护根级生效入口，最后用 `validate` 检查入口、引用和协议包结果。`scaffold` 不写入口，入口未维护时验证失败是预期门禁。
    - 升级同步类任务在修改前也必须先输出升级预览，说明当前真值源、拟修改文件、编号变化、规则来源、待确认项和潜在冲突。
    - 创建、升级同步和协议工程审查类任务应检查触发链路：工作流是否能读到必要场景手册、条件适用路由是否有触发条件、项目级约束是否能被相关流程节点门禁触达、闭环是否映射检查项。
-   - 预览后对关键决策使用交互式选择（AskUserQuestion）：模型入口文件、生成模式、真值源冲突解决、工程路由裁剪策略；交互式选择规则见仓库共享参考 `interactive-decision-protocol`。
+   - 预览后对关键决策使用交互式选择（AskUserQuestion）：模型入口文件、生成模式、真值源冲突解决、工程路由裁剪策略；读取 `references/shared/interactive-decision-protocol.md`。
    - 交互式选择不可用时降级为结构化文本问询。
    - 审查类任务必须说明检查范围、未检查范围和结论适用范围。
 
@@ -61,7 +65,7 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - 涉及触发稳定性审查、条件适用路由触发、项目约束嵌入流程、工作流节点门禁或检查项映射时，读取 `references/protocol/trigger-stability-guide.md`。
    - 涉及原则摄入、约束摄入、执行流程摄入、约束触发项绑定或触发入口判断时，读取 `references/protocol/rule-ingestion.md`。
    - 涉及 OpenSpec、Spec-first、规范驱动开发、审查修复闭环或 Epic/Subtask 拆分时，读取 `references/protocol/openspec-workflow.md`。
-   - 涉及目标仓统一产物入口、跨技能产物目录或新旧路径兼容时，读取本仓库共享参考 `target-workspace-layout`。
+   - 涉及目标仓统一产物入口、跨技能产物目录或新旧路径兼容时，读取 `references/shared/target-workspace-layout.md`。
    - 涉及协议包落盘、三档生成模式、模板目录、playbooks 内容来源或目标仓文件生成时，读取 `references/protocol/package-blueprint.md`。
    - 涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理时，读取 `references/protocol/skill-structure.md`。
    - 需要工程规则细节时先读取 `references/engineering/index.md`，再进入对应领域目录读取路由文件。
@@ -90,6 +94,17 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - 若结构校验出现 `templates/` 或多层 `references/` warning，先按 `references/protocol/skill-structure.md` 判断是显式结构例外还是真缺陷，并在结果中说明。
    - 除非用户或项目协议明确要求，不自动提交。
 
+## 工作流 Checkpoints
+
+每完成一步必须先输出对应 Checkpoint 的实际计数再进入下一步，以下中间门禁不可跳过：
+
+- Step 1：`主流程数 == 1`；输出主流程及辅助流程，无法唯一仲裁且会改变写入范围时停在写入前询问。
+- Step 2：`已分类目标层级数 == 已识别目标层级总数`；归属不明项标为待确认，不静默丢弃。
+- Step 3：`已读取必要来源数 == 上下文清单中的必要来源总数`；文件缺失或不可读时记录证据缺口并限制结论。
+- Step 4：`已读取参考数 == 已选择参考数`；未读参考不得作为强结论依据。
+- Step 5：`已解决数 + 延后数 + 排除数 + 后续任务数 == 发现总数`；等式不成立时不得宣告闭环。
+- 任一 Checkpoint 失败时回到对应步骤；若用户改变最终交付物，必须从 Step 1 重新仲裁，禁止沿用旧写入范围。
+
 ## 行为准则
 
 以下规则在整个会话期间有效，不因对话长度而放松：
@@ -105,7 +120,7 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
 | 查找文件 | `rg --files` / `find` | 首选命令不可用 | `ls` |
 | 搜索规则 | `rg` | `rg` 不可用 | `grep` |
 | 修改文件 | `apply_patch` | patch 无法唯一匹配 | 缩小上下文后重试 |
-| 验证技能 | `skill-craft` 验证脚本 + `scripts/check-template-sync.py` | 脚本缺失、不可运行或连续 2 次失败 | 手动引用检查 |
+| 验证技能 | `skill-craft` 验证脚本 + `scripts/check-template-sync.py` + `scripts/check-cross-references.ts` | 脚本缺失、不可运行或连续 2 次失败 | 手动同步与引用检查 |
 
 - 单次失败不等于工具不可用；先重试或缩小范围，连续 2 次同类失败后才降级。
 - 降级时说明原因。
@@ -113,11 +128,13 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
 ## 依赖链
 
 - Step 2 的目标层级判断必须继承 Step 1 的请求类型，不能重新猜测任务。
-- Step 4 的参考文件选择必须继承 Step 2 的目标层级和 Step 3 的上下文证据。
-- Step 5 的闭环分类必须覆盖本轮所有发现；已解决、延后处理、明确排除、转入后续任务的数量之和应等于发现总数。
+- Step 1 必须只有一个主流程；审查维度不得与写入动作并列为主流程。
+- Step 4 的输入 = Step 2 的完整层级分类 + Step 3 的完整证据清单；不得脱离前序产出重新猜测，出现新证据时先回到 Step 3 更新清单。
+- Step 5 的输入 = Step 4 的全部决定与发现；不得重新生成问题清单，闭环分类数量之和必须等于发现总数。
 - 写入或修改协议前，先核对规则类型、维护位置、触发入口和反证检查是否一致。
 - 新增、移动或重命名工作流、约束和检查项前，先核对编号前缀、唯一性和引用是否同步。
 - 修改模板正文后，必须验证 `templates/` 与 `references/protocol/` 下对应模板参考文件同步；自动脚本不可用时执行手动 `cmp` 检查。
+- 修改跨技能共享规则后，必须验证源码仓根级 `references/` 与 `references/shared/` 的精确副本或当前 Skill 专用投影同步；独立安装态要求运行时资产存在、自包含且引用可达。
 
 ## 输出约束
 

@@ -1,6 +1,6 @@
 # 目标仓协议包蓝图
 
-本文件说明使用本技能在目标仓落盘协议包时，应创建哪些文件、文件内容从哪里来，以及哪些行为不会自动发生。新项目默认协议包路径为 `ai-agent-workspace/protocols/`；目标仓已存在 `ai-agent-protocols/` 时可兼容继承。跨技能统一布局见仓库共享参考 `target-workspace-layout`。
+本文件说明使用本技能在目标仓落盘协议包时，应创建哪些文件、文件内容从哪里来，以及哪些行为不会自动发生。新项目默认协议包路径为 `ai-agent-workspace/protocols/`；目标仓已存在 `ai-agent-protocols/` 时可兼容继承。跨技能统一布局见 `../shared/target-workspace-layout.md`。
 
 ## 触发边界
 
@@ -25,9 +25,9 @@
 - `scripts/protocol-package.py detect <target-repo>`：把目标仓入口、协议目录和技术栈证据输出为 JSON。
 - `scripts/protocol-package.py plan <target-repo> --mode minimal|project|full`：按 `scripts/protocol-package-manifest.json` 生成拟落盘文件、路由裁剪和检查清单计划。
 - `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖。
-- `scripts/protocol-package.py validate <target-repo>`：检查目标仓协议包目录、模板资产、路由索引状态标注和占位符泄漏。
+- `scripts/protocol-package.py validate <target-repo>`：检查根级生效入口及其本地 Markdown 引用、协议包目录、模板资产、`WF-*`/`CHK-*` 核心内容、路由索引状态标注和占位符泄漏。
 
-脚本输出用于生成方案预览和生成报告，不替代用户确认，也不自动维护根级生效入口。
+脚本输出用于生成方案预览和生成报告，不替代用户确认。`scaffold` 不自动维护根级生效入口，因此执行者完成入口维护前，`validate` 应返回失败；这表示协议包尚未生效，不是可忽略 warning。
 
 预览必须包含：
 
