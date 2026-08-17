@@ -2,6 +2,8 @@
 
 前端、UI、页面、组件、交互、表单、Design Token、紧凑布局、UI 稳定性、国际化、文案治理、JavaScript、TypeScript、导航、权限渲染、前端请求、项目结构、状态缓存、测试、可访问性、工具链和前端性能任务先读本文件。
 
+目标仓存在真实前端实现时，任何前端设计或开发任务先读取仓库根 `ai-agent-workspace/product/design/design-tokens.md` 或已确认的兼容 `docs/03_DESIGN/design-tokens.md`。缺失、未回填或出现双真值源时，只补读 `design-system-maintenance.md` 处理；不要用加载大量其他路由代替 `design-tokens.md` 的参数明细。
+
 ## 文件
 
 - `ui-development.md`：前端开发总检查摘要，不作为路由索引。
@@ -14,6 +16,7 @@
 - `list-query.md`：列表查询接口组合路由与查询类型分类策略。
 - `form-validation.md`：提交型表单、字段校验、错误展示和服务端业务错误保留。
 - `i18n-governance.md`：国际化、文案资源、翻译 Key、硬编码文案和错误信息本地化。
+- `design-system-maintenance.md`：目标仓前端规范基线、Token 真值源、组件与页面模式盘点、设计/开发左移门禁和视觉漂移审查。
 - `styling-and-tokens.md`：颜色、间距、字号、圆角、阴影、motion 和组件 token。
 - `design-tokens.md`：颜色 token 兼容入口。
 - `compact-ui.md`：首屏核心任务可见、布局密度、文案压缩、图表高度和留白节奏。
@@ -35,7 +38,8 @@
 - 前端目录、新文件落点、feature 边界、共享层、路径别名和导入方向：读取 `project-structure.md`。
 - 共享组件、页面局部组件、第三方组件包装和 Storybook：读取 `component-system.md`。
 - 状态拥有者、服务端缓存、URL 状态、缓存失效和本地持久化：读取 `state-and-cache.md`。
-- 颜色、主题、品牌色、状态色、中性色、间距、字号、圆角、阴影、motion 和视觉 token：读取 `styling-and-tokens.md`；只涉及历史颜色 token 时可读取 `design-tokens.md`。
+- 全面调查或维护目标仓前端设计规范、Token 真值源、组件/页面模式、Layout/Grid、Breakpoint、主题或 Vibe Coding 视觉漂移：先读取 `design-system-maintenance.md`。
+- 颜色、主题、品牌色、状态色、中性色、间距、字号、圆角、阴影、motion 和视觉 token：读取 `styling-and-tokens.md`；若真值源、既有值或影响范围不清，先补读 `design-system-maintenance.md`；只涉及历史颜色 token 时可读取 `design-tokens.md`。
 - 首屏核心任务、紧凑布局、图表高度、重复文案和容器层级压缩：先读取 `compact-ui.md`。
 - UI 稳定性、分辨率、浏览器缩放、长文本、表格列宽、Dialog/Drawer 溢出、极限数据或运行态 UI Review：读取 `ui-stability.md`。
 - JavaScript、TypeScript、JSX、TSX、Electron 渲染进程和前端构建脚本：读取 `javascript-typescript.md`。

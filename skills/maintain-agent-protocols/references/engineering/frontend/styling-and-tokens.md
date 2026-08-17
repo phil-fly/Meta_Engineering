@@ -14,6 +14,7 @@
 
 ## 关联路由
 
+- 目标仓基线盘点、真值源确认、参数演进和独立审查：读取 `design-system-maintenance.md`。
 - 历史颜色 token 规则兼容：读取 `design-tokens.md`。
 - 可访问性：读取 `accessibility.md`。
 - 组件系统：读取 `component-system.md`。
@@ -22,6 +23,8 @@
 
 ## 输出要求
 
+- 目标仓存在前端实现时，先读取仓库根 `ai-agent-workspace/product/design/design-tokens.md` 或已确认的兼容 `docs/03_DESIGN/design-tokens.md`；缺失时先按 `design-system-maintenance.md` 创建或回填。
 - 说明本次样式来自哪个 token、主题变量、组件变量或项目语义变量。
+- 说明真值源是否已确认；未确认时先完成 `design-system-maintenance.md` 的范围门、证据门和基线门，不得直接补值。
 - 说明是否新增或修改 token；若是，说明语义、适用场景、影响范围和回归验证。
 - 说明状态色、焦点、禁用、错误和对比度是否保持一致与可访问。

@@ -14,6 +14,7 @@ JavaScript、TypeScript、JSX、TSX、Electron 渲染进程 → frontend/javascr
 列表、表格、选择器、枚举、远程搜索        → frontend/list-query.md
 提交型表单、字段校验、表单错误展示          → frontend/form-validation.md
 用户可见文案、翻译 Key、语言资源、硬编码文案 → frontend/i18n-governance.md
+目标仓前端设计规范盘点、Token 真值源、组件与页面模式维护、视觉漂移审查 → frontend/design-system-maintenance.md
 颜色 token、品牌色、状态色、中性色、间距、字号、圆角、阴影、motion、组件 token → frontend/styling-and-tokens.md
 首屏核心任务、紧凑布局、图表高度            → frontend/compact-ui.md
 UI 稳定性、分辨率、浏览器缩放、长文本、表格列宽、Dialog/Drawer 溢出、极限数据 → frontend/ui-stability.md
@@ -46,7 +47,7 @@ Agent 边界、证据、不确定性、按需加载      → governance/agent-go
 
 - UI 列表查询任务：先读 `frontend/list-query.md`，再按查询类型补 `core/api-design.md`、`core/common-quality.md`、`security/index.md` 或 `performance/index.md`。
 - 企业级 SaaS 产品设计、管理后台、控制台、运维/安全/云管/AI/数据平台页面设计：先读 `../scenarios/playbooks.md` 的 `WF-ENTERPRISE-SAAS-DESIGN`，再读 `frontend/enterprise-saas-design.md`，并按页面类型补 `frontend/compact-ui.md`、`frontend/ui-stability.md`、`frontend/component-system.md`、`frontend/list-query.md`、`frontend/form-validation.md`、`frontend/styling-and-tokens.md` 或 `frontend/accessibility.md`。
-- UI 页面、弹窗、表单、表格、菜单或提示反馈任务：先读 `frontend/i18n-governance.md`，再按任务类型补 `frontend/form-validation.md`、`frontend/interaction-and-permission.md`、`core/error-and-logging.md` 或其他相关路由。
+- UI 页面、弹窗、表单、表格、菜单或提示反馈任务：先读 `frontend/i18n-governance.md`；涉及新页面、共享组件、主题、布局、响应式或视觉参数时补读 `frontend/design-system-maintenance.md`，再按任务类型补 `frontend/form-validation.md`、`frontend/interaction-and-permission.md`、`core/error-and-logging.md` 或其他相关路由。
 - 前端结构、组件、状态、测试、UI 稳定性、可访问性、工具链或性能任务：先读 `frontend/index.md`，再按任务类型补 `frontend/project-structure.md`、`frontend/component-system.md`、`frontend/state-and-cache.md`、`frontend/testing.md`、`frontend/ui-stability.md`、`frontend/accessibility.md`、`frontend/tooling-and-verification.md` 或 `frontend/frontend-performance.md`。
 - 删除接口任务：先读 `core/api-design.md`、`core/auth-and-permission.md`、`core/data-access.md`，再读 `security/index.md`。
 - Go/Java/Rust/Python 后端任务：先读 `backend/index.md` 和对应语言文件，再按需要补充 `core/`、`security/`、`performance/`。

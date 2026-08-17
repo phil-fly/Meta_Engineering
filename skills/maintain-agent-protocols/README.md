@@ -30,6 +30,7 @@
 | 工程路由 | `给前端/API/安全规则做路由` | `references/engineering/index.md` |
 | 企业级 SaaS 设计协议 | `把企业级 SaaS 控制台设计规则吸收到协议里` | `references/scenarios/playbooks.md`、`references/engineering/frontend/enterprise-saas-design.md`、`references/checks/checklists.md` |
 | 前端路由 | `补充前端结构、状态、测试、UI 稳定性、可访问性或组件系统规则` | `references/engineering/frontend/index.md` |
+| 前端设计系统维护 | `存在前端实现时，帮我建立并持续维护 design-tokens.md` | `references/engineering/frontend/design-system-maintenance.md`、`templates/design-tokens.md`；独立审查再读 `templates/frontend-design-system-review-prompt.md` |
 | Spec-first | `开发任务是否需要先更新规范` | `references/protocol/openspec-workflow.md` |
 | 技能结构维护 | `检查这个技能目录结构是否合理` | `references/protocol/skill-structure.md` |
 
@@ -212,7 +213,9 @@
 1. 修改触发能力时同步 `SKILL.md` frontmatter description。
 2. 修改读取顺序时同步 `SKILL.md` 工作流和 `references/index.md`。
 3. 修改模板正文时同步 `templates/` 与对应的 `references/protocol/` 模板参考文件。
-4. 运行 `scripts/check-template-sync.py` 验证模板同步。
+4. 运行 `scripts/check-template-sync.py` 验证镜像模板同步、共享投影和独立审查模板的必备调查维度。
+
+前端设计系统维护规则的完整流程以 `references/engineering/frontend/design-system-maintenance.md` 为真值源。真实前端实现证据成立时，`templates/design-tokens.md` 直接实例化到目标仓 `ai-agent-workspace/product/design/design-tokens.md` 或继承兼容旧路径，并在前端设计和开发前读取；只有 `package.json`、设计稿或文档时不创建。`templates/frontend-design-system-review-prompt.md` 是独立、自包含的只读审查执行模板，不替代设计和开发过程中的门禁。审查项左移时只提炼短门禁，不删除模板中的逐域问题和报告契约。
 
 示例请求：
 
@@ -245,7 +248,7 @@ python3 skills/maintain-agent-protocols/scripts/protocol-package.py scaffold <ta
 python3 skills/maintain-agent-protocols/scripts/protocol-package.py validate <target-repo>
 ```
 
-`detect` 输出项目证据，`plan` 输出拟生成文件和路由裁剪结果，`scaffold` 默认跳过既有文件。`validate` 还会检查根级生效入口、本地 Markdown 引用、`WF-*` 工作流、`CHK-*` 检查项、协议包目录、模板资产、路由索引状态和占位符泄漏。`scaffold` 不写根级入口，因此入口维护完成前验证会失败；用户确认预览后再运行 `scaffold`。
+`detect` 输出项目证据，`plan` 输出拟生成文件、条件设计产物和路由裁剪结果，`scaffold` 默认跳过既有文件，并且即使使用 `--overwrite` 也不会用模板覆盖既有 `design-tokens.md`。`validate` 还会检查根级生效入口、本地 Markdown 引用、`WF-*` 工作流、`CHK-*` 检查项、协议包目录、模板资产、路由索引状态和占位符泄漏；存在前端实现时还检查唯一 `design-tokens.md`、必备明细和回填状态。`scaffold` 不写根级入口，也不会替 Agent 猜测项目实际 Token，因此这些门禁完成前验证会失败；用户确认预览后再运行 `scaffold`。
 
 ## 输出闭环
 

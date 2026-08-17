@@ -20,6 +20,55 @@ SHARED_COPY_PAIRS = [
 
 INTERACTIVE_RUNTIME = "references/shared/interactive-decision-protocol.md"
 INTERACTIVE_SOURCE = "references/interactive-decision-protocol.md"
+FRONTEND_REVIEW_PROMPT = "templates/frontend-design-system-review-prompt.md"
+FRONTEND_REVIEW_REQUIRED_MARKERS = [
+    "## 0. 执行边界与证据规则",
+    "## 1. 调查目标",
+    "## 2. 扫描项目结构与真实来源",
+    "## 3. 建立规范来源地图",
+    "### 4.1 Color",
+    "### 4.2 Typography",
+    "### 4.3 Spacing",
+    "### 4.4 Radius",
+    "### 4.5 Border 与 Shadow",
+    "## 5. Layout / Grid",
+    "## 6. Component 规范与状态",
+    "## 7. Page Pattern",
+    "## 8. Responsive 与真实运行行为",
+    "## 9. Accessibility、Theme 与工程验证",
+    "## 10. AI / Vibe Coding 机制",
+    "## 11. 协议优先级、继承与演进",
+    "## 12. 问题分析",
+    "## 13. 最终报告",
+    "## 14. 完成门",
+    "已有实际值 / 仅语义规则 / 模板占位 / 分散实现 / 未发现 / 不适用",
+    "Inherit、Override、Extend 和 Exception",
+    "反证检查：none / mitigated / contradicted / scope_limited / unknown",
+    "P0 数 + P1 数 + P2 数 == 已确认问题总数",
+]
+DESIGN_TOKENS_TEMPLATE = "templates/design-tokens.md"
+DESIGN_TOKENS_REQUIRED_MARKERS = [
+    "初始化状态：待回填",
+    "## 1. 文档状态",
+    "## 2. 真值源关系",
+    "## 3. Color",
+    "## 4. Typography",
+    "## 5. Spacing",
+    "## 6. Size And Density",
+    "## 7. Radius",
+    "## 8. Border",
+    "## 9. Shadow And Elevation",
+    "## 10. Layout And Grid",
+    "## 11. Breakpoints And Responsive Behavior",
+    "## 12. Z-index And Layering",
+    "## 13. Motion",
+    "## 14. Icons",
+    "## 15. Component Tokens",
+    "## 16. Theme And Brand Modes",
+    "## 17. Exceptions And Debt",
+    "## 18. Maintenance Contract",
+    "## 19. Change Log",
+]
 INTERACTIVE_REQUIRED_HEADINGS = [
     "## 设计原则",
     "#### 场景 1: 模型入口文件选择",
@@ -96,6 +145,22 @@ def validate_interactive_runtime(runtime_content: str, source_content: str | Non
     return issues
 
 
+def validate_frontend_review_prompt(content: str) -> list[str]:
+    return [
+        f"missing frontend review marker: {marker}"
+        for marker in FRONTEND_REVIEW_REQUIRED_MARKERS
+        if marker not in content
+    ]
+
+
+def validate_design_tokens_template(content: str) -> list[str]:
+    return [
+        f"missing design tokens marker: {marker}"
+        for marker in DESIGN_TOKENS_REQUIRED_MARKERS
+        if marker not in content
+    ]
+
+
 def read_bytes(path: str) -> bytes:
     full_path = ROOT / path
     if not full_path.exists():
@@ -138,6 +203,22 @@ def main() -> int:
         for issue in validate_interactive_runtime(runtime_content, source_content):
             mismatches.append((INTERACTIVE_RUNTIME, issue))
 
+    frontend_review_path = ROOT / FRONTEND_REVIEW_PROMPT
+    if not frontend_review_path.exists():
+        missing.append(FRONTEND_REVIEW_PROMPT)
+    else:
+        frontend_review_content = frontend_review_path.read_text(encoding="utf-8")
+        for issue in validate_frontend_review_prompt(frontend_review_content):
+            mismatches.append((FRONTEND_REVIEW_PROMPT, issue))
+
+    design_tokens_path = ROOT / DESIGN_TOKENS_TEMPLATE
+    if not design_tokens_path.exists():
+        missing.append(DESIGN_TOKENS_TEMPLATE)
+    else:
+        design_tokens_content = design_tokens_path.read_text(encoding="utf-8")
+        for issue in validate_design_tokens_template(design_tokens_content):
+            mismatches.append((DESIGN_TOKENS_TEMPLATE, issue))
+
     if missing:
         print("FAIL: missing template file(s):", file=sys.stderr)
         for path in missing:
@@ -145,7 +226,7 @@ def main() -> int:
         return 1
 
     if mismatches:
-        print("FAIL: template/reference pairs differ:", file=sys.stderr)
+        print("FAIL: template/reference validation failed:", file=sys.stderr)
         for left, right in mismatches:
             print(f"  - {left} != {right}", file=sys.stderr)
         return 1

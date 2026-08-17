@@ -68,10 +68,51 @@ class EvidenceRule:
     globs: tuple[str, ...] = ()
     content_patterns: tuple[str, ...] = ()
     max_hits: int = 12
+    content_extensions: tuple[str, ...] = ()
 
 
 EVIDENCE_RULES = [
-    EvidenceRule("frontend", ("package.json", "vite.config.*", "next.config.*", "src/**/*.tsx", "src/**/*.jsx", "app/**/*.tsx", "pages/**/*.tsx")),
+    EvidenceRule(
+        "frontend_implementation",
+        (
+            "index.html",
+            "**/index.html",
+            "**/*.tsx",
+            "**/*.jsx",
+            "**/*.vue",
+            "**/*.svelte",
+            "**/*.astro",
+            "src/**/*.tsx",
+            "src/**/*.jsx",
+            "src/**/*.vue",
+            "src/**/*.svelte",
+            "src/**/*.css",
+            "src/**/*.scss",
+            "src/**/*.sass",
+            "src/**/*.less",
+            "app/**/*.tsx",
+            "app/**/*.jsx",
+            "pages/**/*.tsx",
+            "pages/**/*.jsx",
+            "components/**/*.tsx",
+            "components/**/*.jsx",
+            "frontend/**/*.tsx",
+            "frontend/**/*.jsx",
+            "frontend/**/*.vue",
+            "frontend/**/*.svelte",
+            "client/**/*.tsx",
+            "client/**/*.jsx",
+            "web/**/*.tsx",
+            "web/**/*.jsx",
+            "templates/**/*.html",
+            "views/**/*.html",
+        ),
+        (
+            r"\b(?:ReactDOM|createRoot|createApp|bootstrapApplication|customElements\.define|LitElement)\b",
+            r"from\s+['\"](?:react|react-dom|vue|svelte|lit|@angular/core)['\"]",
+        ),
+        content_extensions=(".js", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".astro"),
+    ),
     EvidenceRule("javascript_typescript", ("package.json", "tsconfig.json", "**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx")),
     EvidenceRule("go", ("go.mod", "**/*.go")),
     EvidenceRule("java", ("pom.xml", "build.gradle", "build.gradle.kts", "**/*.java")),
@@ -178,6 +219,8 @@ def detect_repo(root: Path) -> dict[str, Any]:
             for path, rel_file in zip(files, rel_files):
                 if rel_file in hits or not is_text_candidate(path):
                     continue
+                if rule.content_extensions and path.suffix.lower() not in rule.content_extensions:
+                    continue
                 if path not in text_cache:
                     text_cache[path] = read_text_safely(path)
                 content = text_cache[path]
@@ -230,11 +273,24 @@ def evidence_supports(rule: dict[str, Any], evidence: dict[str, list[str]], mode
     return any(evidence.get(key) for key in rule.get("evidence_keys", []))
 
 
+def artifact_evidence_supports(artifact: dict[str, Any], evidence: dict[str, list[str]]) -> bool:
+    return any(evidence.get(key) for key in artifact.get("evidence_keys", []))
+
+
+def resolve_artifact_target(root: Path, artifact: dict[str, Any]) -> tuple[str | None, list[str]]:
+    candidates = [artifact["default_target"], *artifact.get("compat_targets", [])]
+    existing = [target for target in candidates if (root / target).is_file()]
+    if len(existing) > 1:
+        return None, existing
+    return (existing[0] if existing else artifact["default_target"]), existing
+
+
 def plan_package(root: Path, manifest: dict[str, Any], mode: str = "project") -> dict[str, Any]:
     detection = detect_repo(root)
     evidence = detection["evidence"]
     package_dir = manifest["compat_package_dir"] if (root / manifest["compat_package_dir"]).exists() else manifest["default_package_dir"]
     selected_routes: list[dict[str, Any]] = []
+    artifact_conflicts: list[dict[str, Any]] = []
     files: list[dict[str, Any]] = []
 
     files.append({"target": f"{package_dir}/README.md", "source": "generated", "kind": "readme", "action": "create"})
@@ -245,6 +301,21 @@ def plan_package(root: Path, manifest: dict[str, Any], mode: str = "project") ->
             "source": template["source"],
             "kind": "template",
             "action": "copy",
+        })
+
+    for artifact in manifest.get("conditional_artifacts", []):
+        if not artifact_evidence_supports(artifact, evidence):
+            continue
+        target, existing = resolve_artifact_target(root, artifact)
+        if target is None:
+            artifact_conflicts.append({"id": artifact["id"], "existing_targets": existing})
+            continue
+        files.append({
+            "target": target,
+            "source": artifact["source"],
+            "kind": "conditional-artifact",
+            "action": "maintain-and-verify" if existing else "create-and-backfill",
+            "evidence_keys": [key for key in artifact.get("evidence_keys", []) if evidence.get(key)],
         })
 
     playbook_keys = list(manifest["playbooks"]["sections"].keys()) if mode == "full" else manifest["minimal_playbooks"]
@@ -297,9 +368,12 @@ def plan_package(root: Path, manifest: dict[str, Any], mode: str = "project") ->
         "entry": detection["protocol_entries"],
         "evidence": detection["summary"],
         "selected_routes": selected_routes,
+        "artifact_conflicts": artifact_conflicts,
         "files": files,
         "notes": [
             "scaffold 默认跳过既有文件；使用 --overwrite 才会覆盖。",
+            "仅在发现真实前端实现时创建或维护 design-tokens.md；package.json 单独存在不构成前端实现证据。",
+            "新建 design-tokens.md 后必须按生产实现回填；模板的待回填状态不能作为完成结果。",
             "项目事实证据只输出到计划，不写入生成的协议正文。",
             "生效入口文件仍需由执行者按预览确认后维护。",
         ],
@@ -350,6 +424,13 @@ def make_route_index(selected_routes: list[dict[str, Any]]) -> str:
 
 def scaffold_package(root: Path, manifest: dict[str, Any], mode: str, overwrite: bool) -> dict[str, Any]:
     plan = plan_package(root, manifest, mode)
+    if plan["artifact_conflicts"]:
+        return {
+            "plan": plan,
+            "written": [],
+            "skipped": [],
+            "errors": ["存在未裁决的条件产物真值源冲突，scaffold 已停止。"],
+        }
     package_dir = plan["package_dir"]
     written: list[str] = []
     skipped: list[str] = []
@@ -362,7 +443,7 @@ def scaffold_package(root: Path, manifest: dict[str, Any], mode: str, overwrite:
             content = make_readme(package_dir)
         elif item["kind"] == "route-index":
             content = make_route_index(plan["selected_routes"])
-        elif item["kind"] == "template" or item["kind"] == "route":
+        elif item["kind"] in {"template", "route", "conditional-artifact"}:
             content = (SKILL_ROOT / item["source"]).read_text(encoding="utf-8")
         elif item["kind"] == "playbook":
             key = item["source"].split("#", 1)[1]
@@ -372,9 +453,10 @@ def scaffold_package(root: Path, manifest: dict[str, Any], mode: str, overwrite:
             content = check_sections[key]
         else:
             raise ValueError(f"Unknown file kind: {item['kind']}")
-        write_file(target, content, overwrite, written, skipped)
+        item_overwrite = overwrite and item["kind"] != "conditional-artifact"
+        write_file(target, content, item_overwrite, written, skipped)
 
-    return {"plan": plan, "written": written, "skipped": skipped}
+    return {"plan": plan, "written": written, "skipped": skipped, "errors": []}
 
 
 def find_local_markdown_references(content: str) -> list[str]:
@@ -442,6 +524,7 @@ def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | No
     warnings: list[str] = []
     entry_files, entry_errors = validate_entries(root)
     content_errors: list[str] = []
+    evidence = detect_repo(root)["evidence"]
     required_dirs = ["templates", "playbooks", "checks", "routes"]
     for directory in required_dirs:
         if not (base / directory).exists():
@@ -450,6 +533,27 @@ def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | No
     for template in manifest["templates"]:
         if not (base / template["target"]).exists():
             missing.append(f"{package_dir}/{template['target']}")
+
+    for artifact in manifest.get("conditional_artifacts", []):
+        if not artifact_evidence_supports(artifact, evidence):
+            continue
+        target, existing = resolve_artifact_target(root, artifact)
+        if target is None:
+            content_errors.append(
+                f"{artifact['id']} 存在多个可编辑真值源：{', '.join(existing)}"
+            )
+            continue
+        artifact_path = root / target
+        if not artifact_path.is_file():
+            missing.append(target)
+            continue
+        artifact_content = artifact_path.read_text(encoding="utf-8", errors="ignore")
+        for marker in artifact.get("required_markers", []):
+            if marker not in artifact_content:
+                content_errors.append(f"{target} 缺少必备章节：{marker}")
+        for marker in artifact.get("incomplete_markers", []):
+            if marker in artifact_content:
+                content_errors.append(f"{target} 仍包含待回填标记：{marker}")
 
     route_index = base / "routes" / "index.md"
     if route_index.exists():
@@ -503,7 +607,7 @@ def cmd_scaffold(args: argparse.Namespace) -> int:
     manifest = load_json(Path(args.manifest))
     result = scaffold_package(Path(args.repo), manifest, args.mode, args.overwrite)
     dump_json(result)
-    return 0
+    return 1 if result["errors"] else 0
 
 
 def cmd_validate(args: argparse.Namespace) -> int:

@@ -46,6 +46,26 @@
 - CHK-SEC-007 是否覆盖 OWASP Top 10 相关风险？
 - CHK-SEC-008 涉及运行、功能或外部集成配置时，是否已完成配置可发现性评审要求自检？
 
+## frontend-design-system-checklist
+
+- CHK-FE-DS-001 是否声明本次是仓库级基线调查、范围变更预检还是独立变更审查，并限制结论适用范围？
+- CHK-FE-DS-002 是否读取目标仓实际协议入口、设计文档、Token/Theme、样式配置、组件层、页面入口和验证入口，而不是按目录名或模板推测？
+- CHK-FE-DS-003 颜色、Typography、Spacing、Radius、Border、Shadow、Layout/Grid、Breakpoint、组件状态、Theme、motion、icon 和 z-index 是否都标为已有值、仅语义、模板占位、分散实现、未发现或不适用？
+- CHK-FE-DS-004 每类适用参数是否有唯一可编辑真值源，并说明生成、派生、覆盖、兼容和例外关系？
+- CHK-FE-DS-005 设计阶段是否继承已确认的 Token、组件、页面模式和响应式约束，并把缺失项标为待确认而不是静默补值？
+- CHK-FE-DS-006 开发前是否确认受影响参数、现有组件、Variant、Size、State、Responsive 行为和 Token 映射？
+- CHK-FE-DS-007 是否检查硬编码视觉值、同义或近似 Token、重复组件、平行主题和第二套 UI Framework，并区分允许的隔离例外？
+- CHK-FE-DS-008 全局 Token、主题、断点、布局原语或组件默认值变更是否完成消费者影响、兼容/迁移、废弃和回归分析？
+- CHK-FE-DS-009 是否验证实际页面或组件状态、目标视口、浏览器缩放、长文本、数据规模和可访问性，而不是只检查静态源码？
+- CHK-FE-DS-010 未读取生产实现时是否避免把设计模板当实际值，未运行页面时是否避免断言响应式或交互已通过？
+- CHK-FE-DS-011 存在前端实现但缺少规范时，是否先创建并据生产实现回填唯一 `design-tokens.md`，并把没有依据的新值保持为待回填、未发现或不适用？
+- CHK-FE-DS-012 最终报告是否说明继承或修改的真值源、Token/组件决策、验证证据、未确认项、例外、迁移状态和剩余风险？
+- CHK-FE-DS-013 是否只有真实前端实现或当前任务将首次引入前端实现时才要求 `design-tokens.md`，并排除仅有 `package.json`、设计稿、文档或未来规划的仓库？
+- CHK-FE-DS-014 是否只存在一份可编辑 `design-tokens.md`，且新路径与兼容旧路径没有双写？
+- CHK-FE-DS-015 `design-tokens.md` 是否直接包含真值源关系及 Color、Typography、Spacing、Size/Density、Radius、Border、Shadow/Elevation、Layout/Grid、Breakpoint/Responsive、z-index、Motion、Icon、Component Token、Theme、例外和维护契约明细，而不是只列路由链接？
+- CHK-FE-DS-016 Agent 是否在前端设计或开发开始前读取 `design-tokens.md`，缺失时是否在实施前完成创建或生产回填？
+- CHK-FE-DS-017 修改 Token、Theme、Breakpoint、Layout/Grid、组件默认值或生产真值源时，是否在同一变更中同步 `design-tokens.md` 并验证消费者？
+
 ## frontend-i18n-checklist
 
 - CHK-FE-I18N-001 本次变更是否新增、修改或展示用户可见文案？若否则记录为不适用，并跳过仅由新增文案触发的后续资源同步检查。

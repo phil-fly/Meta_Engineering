@@ -29,42 +29,41 @@ Production implementation → only after the screen's handoff note exists and is
 
 ## Design Tokens
 
-Start every project by defining `ai-agent-workspace/product/design/design-tokens.md` or compatible `docs/03_DESIGN/design-tokens.md`. All mockups reference these values — never hardcode one-off colors or sizes in individual screens.
+Only require `design-tokens.md` when the target repository already contains a real frontend implementation or the current work will introduce the first frontend implementation. A `package.json`, design file, prototype, or product document alone is not frontend implementation evidence. When no frontend implementation exists and none will be introduced, do not create the file.
+
+When the condition applies, locate and read the single editable `ai-agent-workspace/product/design/design-tokens.md` or compatible `docs/03_DESIGN/design-tokens.md` before frontend design or development. If an existing frontend has no file, create it and backfill it from production Token, Theme, component, layout, and responsive sources before producing mockups. Do not create a parallel token set. Missing values remain explicit `pending`, `not found`, or `not applicable` entries until confirmed.
+
+The file must contain actual detail rather than route links. At minimum it records document status; production source-of-truth and derivation relationships; Color; Typography; Spacing; Size/Density; Radius; Border; Shadow/Elevation; Layout/Grid; Breakpoint/Responsive behavior; z-index; Motion; Icon; Component Token; Theme; exceptions; maintenance rules; and long-lived changes. Each applicable domain records the semantic name, current value or formula, production definition, consumers, override priority, status, and exceptions.
 
 ```markdown
-# Design Tokens — {project_id}
+# Design Tokens
+
+## Source Of Truth
+| Domain | Production source | Derived consumers | Priority | Status | Exceptions |
+| --- | --- | --- | --- | --- | --- |
+| Color | pending | pending | pending | pending | pending |
 
 ## Color
-- Primary: #______
-- Primary hover: #______
-- Surface: #______
-- Surface raised: #______
-- Border: #______
-- Text primary: #______
-- Text secondary: #______
-- Text disabled: #______
-- Destructive: #______
-- Success: #______
+| Semantic name | Token | Light | Dark | Usage | Status |
+| --- | --- | --- | --- | --- | --- |
+| primary | pending | pending | pending | pending | pending |
 
 ## Typography
-- Font family: ______
-- Size scale: 12 / 14 / 16 / 20 / 24 / 32px
-- Weight: Regular (400) / Medium (500) / Bold (700)
-- Line height: 1.4 body / 1.2 headings
-
 ## Spacing
-- Base unit: 4px
-- Scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64px
-
-## Border radius
-- Small: ___px (inputs, chips)
-- Medium: ___px (cards)
-- Large: ___px (modals, sheets)
-
-## Elevation / Shadow
-- Level 1 (card): ______
-- Level 2 (dropdown): ______
-- Level 3 (modal): ______
+## Size And Density
+## Radius
+## Border
+## Shadow And Elevation
+## Layout And Grid
+## Breakpoints And Responsive Behavior
+## Z-index And Layering
+## Motion
+## Icons
+## Component Tokens
+## Theme And Brand Modes
+## Exceptions And Debt
+## Maintenance Contract
+## Change Log
 ```
 
 ---
@@ -143,7 +142,7 @@ Examples: `home.html`, `onboarding-step-1.html`, `settings-notifications.html`
 Mockups should be **opinionated and specific** — not wireframes, not generic UI. Apply a clear aesthetic direction:
 
 - Choose a visual tone and commit to it (minimal / editorial / utilitarian / etc.)
-- Typography choices should feel intentional — avoid system fonts
+- Typography choices should inherit the confirmed project standard. For a new project, choose an intentional family and record loading, fallback, and performance implications instead of rejecting system fonts by default.
 - Color usage should create hierarchy, not just fill space
 - Spacing should feel designed, not default
 
@@ -156,7 +155,7 @@ The goal: a stakeholder looking at the mockup should immediately understand what
 ```
 1. Scene 3 (Interaction Design) + Scene 4 (Entity Definition) produce: page list, information hierarchy, entity model
         ↓
-2. Scene 5 produces: design-tokens.md + first-pass HTML mockups
+2. Scene 5 reads the single design-tokens.md when frontend implementation exists; it backfills a missing file from production or creates one before the first frontend implementation, then creates first-pass HTML mockups
         ↓
 3. Visual review: open in browser, discuss, edit HTML only
         ↓
@@ -212,6 +211,8 @@ Before starting mockups, confirm this checklist is complete from Scene 3 (Intera
 - [ ] Each screen's information hierarchy described
 - [ ] Primary interactions per screen listed
 - [ ] Entity model defined and validated against page structure
-- [ ] Design tokens drafted (colors, type, spacing)
+- [ ] Existing frontend implementation: the single `design-tokens.md` was read, or a missing file was backfilled from production Token/Theme, component, layout, responsive, and design-artifact sources
+- [ ] First frontend implementation: the detailed `design-tokens.md` was created before UI code; repositories without frontend implementation and without frontend scope did not create it
+- [ ] Component states, long-text behavior, permissions, and applicable responsive behavior described for handoff
 
 If any item is missing, return to the relevant scene before generating HTML.

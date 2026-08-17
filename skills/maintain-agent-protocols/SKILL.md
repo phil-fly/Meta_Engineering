@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、升级和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, trigger-stability reviews, constraint-to-workflow gate design, rule ingestion, protocol-package creation/upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, model-aware entry selection, ai-agent-workspace/protocols or compatible ai-agent-protocols layout, user/project protocol templates, route-based engineering rules, execution-rate/token-cost/conflict analysis, UI/frontend/backend/API/security/performance/platform route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, product design, normal code review, generic architecture discussion, external spec governance, service onboarding, or project debugging unless the user is maintaining agent collaboration protocols or rule routing."
+description: "创建、审查、升级和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, trigger-stability reviews, constraint-to-workflow gate design, rule ingestion, protocol-package creation/upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, ai-agent-workspace/protocols or compatible ai-agent-protocols layout, user/project protocol templates, target-repository frontend design-system maintenance rules, conditional design-tokens.md creation/backfill/read/update gates, review prompts, route-based engineering rules, execution-rate/token-cost/conflict analysis, UI/frontend/backend/API/security/performance/platform route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, product design, normal code review, generic architecture discussion, external spec governance, service onboarding, or project debugging unless the user is maintaining agent collaboration protocols or rule routing."
 ---
 
 # Maintain Agent Protocols
@@ -20,7 +20,7 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
 - `references/scenarios/`：任务流程场景，覆盖开发、架构、安全审查、性能审查、排障和调研。
 - `references/checks/`：审查检查场景，覆盖维护、安全与性能检查清单。
 - `references/shared/`：随 Skill 安装的跨技能规则运行时资产；源码仓根级 `references/` 是跨技能编辑真值源，发布前必须验证精确副本或当前 Skill 专用投影同步。
-- `templates/`：可复制到目标仓统一产物目录的协议模板资产；新项目默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；维护模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
+- `templates/`：可复制到目标仓统一产物目录的协议模板资产；协议模板默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；`design-tokens.md` 仅在目标仓存在真实前端实现时实例化到产品设计目录；维护镜像模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
 - `scripts/`：技能维护验证脚本与协议包工具链；`protocol-package.py` 用于目标仓探测、生成计划、协议包 scaffold 和结果验证，其他检查脚本用于模板同步、编号、占位符和引用校验。
 
 ## 工作流
@@ -42,7 +42,7 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
 2. 判断目标层级。
    - `用户级`：长期有效的个人协作偏好、默认任务路由、全局安全边界、回复风格、跨项目原则。
    - `项目级`：仓库专属架构、命令、测试要求、编码约定、发布流程、业务领域约束。
-   - `工程路由`：UI、JavaScript/TypeScript、Go、Java、Rust、Python、API、安全、性能等功能类型的执行细节入口。
+   - `工程路由`：UI、目标仓前端设计系统维护、JavaScript/TypeScript、Go、Java、Rust、Python、API、安全、性能等功能类型的执行细节入口。
    - `场景手册`：开发、架构、安全审查、性能审查、排障、调研等任务方法。
    - `临时规则`：短期本地约定，除非变成可复用规则，否则不要沉淀为长期协议。
 
@@ -52,7 +52,7 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - 仓库扫描得到的来源证据、文件清单和生成过程记录只用于本轮判断，默认不写入生效协议正文。
    - 升级同步类任务先识别当前项目的生效入口、正文真值源和兼容入口，再对照最新技能 `references/` 做差异审查，区分新增约束、变更约束、项目特例和不适用规则。
    - 生成协议包前必须先输出生成方案预览，说明生效入口、生成模式、拟生成文件、项目事实证据和待确认项。
-   - 创建或补齐协议包时，优先使用 `scripts/protocol-package.py detect` 和 `scripts/protocol-package.py plan` 生成结构化项目证据和生成计划；用户确认后再使用 `scaffold` 落盘，维护根级生效入口，最后用 `validate` 检查入口、引用和协议包结果。`scaffold` 不写入口，入口未维护时验证失败是预期门禁。
+   - 创建或补齐协议包时，优先使用 `scripts/protocol-package.py detect` 和 `scripts/protocol-package.py plan` 生成结构化项目证据和生成计划；用户确认后再使用 `scaffold` 落盘，维护根级生效入口，最后用 `validate` 检查入口、引用和协议包结果。存在真实前端实现时，计划还必须创建或继承唯一 `design-tokens.md` 并要求生产回填；`package.json` 单独存在不得触发。`scaffold` 不写入口，入口未维护或设计 Token 模板未回填时验证失败是预期门禁。
    - 升级同步类任务在修改前也必须先输出升级预览，说明当前真值源、拟修改文件、编号变化、规则来源、待确认项和潜在冲突。
    - 创建、升级同步和协议工程审查类任务应检查触发链路：工作流是否能读到必要场景手册、条件适用路由是否有触发条件、项目级约束是否能被相关流程节点门禁触达、闭环是否映射检查项。
    - 预览后对关键决策使用交互式选择（AskUserQuestion）：模型入口文件、生成模式、真值源冲突解决、工程路由裁剪策略；读取 `references/shared/interactive-decision-protocol.md`。
@@ -68,7 +68,7 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - 涉及目标仓统一产物入口、跨技能产物目录或新旧路径兼容时，读取 `references/shared/target-workspace-layout.md`。
    - 涉及协议包落盘、三档生成模式、模板目录、playbooks 内容来源或目标仓文件生成时，读取 `references/protocol/package-blueprint.md`。
    - 涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理时，读取 `references/protocol/skill-structure.md`。
-   - 需要工程规则细节时先读取 `references/engineering/index.md`，再进入对应领域目录读取路由文件。
+   - 需要工程规则细节时先读取 `references/engineering/index.md`，再进入对应领域目录读取路由文件；维护目标仓前端规范时读取 `references/engineering/frontend/design-system-maintenance.md`，参数明细直接落入目标仓 `design-tokens.md`，不得用增加大量路由替代。
    - 区分“入口”和“执行细节”：用户协议定义路由，工程路由和场景手册定义执行细节。
    - 升级同步类任务默认保持目标仓既有真值源不变；除非用户明确要求迁移，不生成两套可编辑正文，不重建整包。
    - 落盘前必须先声明唯一生效入口和各资产真值源，例如项目协议、用户协议、playbooks、routes、checks 和 templates 分别由哪个目录维护。

@@ -17,12 +17,14 @@
 - `protocol/user-protocol-template.md`：用户级协议模板，可直接复用后按项目裁剪。
 - `protocol/project-protocol-template.md`：项目级协议模板，可直接复用后按仓库约束裁剪。
 - `protocol/route-card-template.md`：工程路由卡片模板，可落盘到 `ai-agent-protocols/templates/route-card.md`。
-- `../templates/`：可直接复制到目标仓 `ai-agent-protocols/templates/` 的模板文件。
+- `../templates/user-protocol.md`、`project-protocol.md`、`route-card.md`：复制到目标仓 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`。
+- `../templates/frontend-design-system-review-prompt.md`：复制到目标仓协议模板目录，作为前端设计系统基线调查与变更审查的独立只读提示语；它不在 `references/protocol/` 维护镜像正文。
+- `../templates/design-tokens.md`：仅在目标仓存在或将首次引入真实前端实现时，实例化为 `ai-agent-workspace/product/design/design-tokens.md` 或继承兼容 `docs/03_DESIGN/design-tokens.md`；不得复制到协议模板或路由目录。
 
 ## 工程规则路由
 
 - `engineering/index.md`：工程路由总索引，先读它决定后续加载目录。
-- `engineering/frontend/`：前端和 UI 开发，包含企业级 SaaS 设计、项目结构、组件系统、状态缓存、请求数据、表单、国际化、样式 token、紧凑 UI、UI 稳定性、可访问性、测试、工具链和前端性能。
+- `engineering/frontend/`：前端和 UI 开发，包含目标仓设计系统维护、企业级 SaaS 设计、项目结构、组件系统、状态缓存、请求数据、表单、国际化、样式 token、紧凑 UI、UI 稳定性、可访问性、测试、工具链和前端性能。
 - `engineering/backend/`：Go、Java、Rust、Python 后端开发。
 - `engineering/core/`：API、鉴权授权、数据访问、通用质量、错误与日志。
 - `engineering/security/`：通用安全、OWASP 和敏感操作。
@@ -38,7 +40,7 @@
 ## 审查检查
 
 - `checks/index.md`：检查场景入口与读取顺序。
-- `checks/checklists.md`：维护、安全、前端国际化、前端可访问性、前端测试、前端性能、前端 UI 稳定性、企业级 SaaS 设计、前端组件、前端结构与通用性能检查清单。
+- `checks/checklists.md`：维护、安全、前端设计系统、前端国际化、前端可访问性、前端测试、前端性能、前端 UI 稳定性、企业级 SaaS 设计、前端组件、前端结构与通用性能检查清单。
 
 ## 安装态共享规则
 

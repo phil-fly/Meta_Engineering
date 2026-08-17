@@ -34,6 +34,8 @@ scripts/
 
 - 不因通用 warning 删除 `templates/` 或压平 `references/`。
 - 若模板正文变化，必须同步 `templates/` 与 `references/protocol/` 下对应模板参考文件。
+- `frontend-design-system-review-prompt.md` 是无镜像的独立审查模板；左移审查项时必须保留逐域调查和报告契约，并通过 `check-template-sync.py` 的必备标记校验。
+- `design-tokens.md` 是无镜像的目标仓设计基线模板；只在存在真实前端实现时实例化到产品设计目录，参数明细不拆成更多工程路由，并通过 `check-template-sync.py` 的必备章节校验。
 - 若新增目录，必须同时更新 `SKILL.md` 的技能内部分层和 `references/index.md`。
 - 若新增目标仓落盘资产，必须同时更新 `references/protocol/package-blueprint.md` 和 `scripts/protocol-package-manifest.json`。
 - 若修改源码仓根级共享参考，必须同步 `references/shared/`；`scripts/check-template-sync.py` 会检查精确副本一致性，并确认专用投影具备必要章节且不依赖其他 Skill。

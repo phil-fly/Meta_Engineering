@@ -38,6 +38,40 @@ class ValidatePackageTests(unittest.TestCase):
             encoding="utf-8",
         )
 
+    def write_frontend_implementation(self) -> None:
+        source = self.repo / "src" / "App.tsx"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_text("export function App() { return <main>App</main>; }\n", encoding="utf-8")
+
+    def backfill_design_tokens(self, content: str) -> str:
+        replacements = {
+            "初始化状态：待回填": "初始化状态：已建立",
+            "| 项目 | 待回填 |": "| 项目 | Example |",
+            "| 状态 | 待回填 |": "| 状态 | 已建立 |",
+            "| 适用前端 | 待回填 |": "| 适用前端 | src/App.tsx |",
+            "| 维护路径 | 待回填 |": (
+                "| 维护路径 | ai-agent-workspace/product/design/design-tokens.md |"
+            ),
+            "| 最近核对日期 | 待回填 |": "| 最近核对日期 | 2026-08-17 |",
+            "| 最近核对范围 | 待回填 |": "| 最近核对范围 | src/App.tsx |",
+            "| Color | 待回填 |": "| Color | authoritative |",
+            "| Typography | 待回填 |": "| Typography | authoritative |",
+            "| Spacing | 待回填 |": "| Spacing | authoritative |",
+            "| Radius | 待回填 |": "| Radius | authoritative |",
+            "| Border | 待回填 |": "| Border | authoritative |",
+            "| Shadow / Elevation | 待回填 |": "| Shadow / Elevation | authoritative |",
+            "| Layout / Grid | 待回填 |": "| Layout / Grid | authoritative |",
+            "| Breakpoint | 待回填 |": "| Breakpoint | authoritative |",
+            "| Size / Density | 待回填 |": "| Size / Density | authoritative |",
+            "| Motion | 待回填 |": "| Motion | authoritative |",
+            "| Icon | 待回填 |": "| Icon | authoritative |",
+            "| Z-index / Layer | 待回填 |": "| Z-index / Layer | authoritative |",
+            "| Component Token | 待回填 |": "| Component Token | authoritative |",
+        }
+        for old, new in replacements.items():
+            content = content.replace(old, new)
+        return content
+
     def test_validate_fails_without_effective_entry(self) -> None:
         self.scaffold()
 
@@ -57,6 +91,190 @@ class ValidatePackageTests(unittest.TestCase):
         self.assertEqual(result["entry_files"], ["AGENTS.md"])
         self.assertEqual(result["entry_errors"], [])
         self.assertEqual(result["content_errors"], [])
+
+    def test_minimal_scaffold_copies_frontend_design_system_review_prompt(self) -> None:
+        self.scaffold()
+
+        prompt = (
+            self.repo
+            / "ai-agent-workspace"
+            / "protocols"
+            / "templates"
+            / "frontend-design-system-review-prompt.md"
+        )
+
+        self.assertTrue(prompt.is_file())
+        prompt_content = prompt.read_text(encoding="utf-8")
+        self.assertIn("# Frontend Design System Review Prompt", prompt_content)
+        self.assertIn("### 4.1 Color", prompt_content)
+        self.assertIn("## 8. Responsive 与真实运行行为", prompt_content)
+        self.assertIn("## 10. AI / Vibe Coding 机制", prompt_content)
+        self.assertIn("## 14. 完成门", prompt_content)
+
+    def test_project_frontend_scaffold_copies_design_system_route_and_checklist(self) -> None:
+        self.write_frontend_implementation()
+
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+
+        package = self.repo / "ai-agent-workspace" / "protocols"
+        route = package / "routes" / "frontend" / "design-system-maintenance.md"
+        checklist = package / "checks" / "frontend-design-system-checklist.md"
+        prompt = package / "templates" / "frontend-design-system-review-prompt.md"
+        design_tokens = (
+            self.repo
+            / "ai-agent-workspace"
+            / "product"
+            / "design"
+            / "design-tokens.md"
+        )
+        self.assertTrue(route.is_file())
+        self.assertIn("CON-FE-DS-001", route.read_text(encoding="utf-8"))
+        self.assertIn(
+            "frontend-design-system-review-prompt.md",
+            route.read_text(encoding="utf-8"),
+        )
+        self.assertTrue(checklist.is_file())
+        self.assertIn("CHK-FE-DS-001", checklist.read_text(encoding="utf-8"))
+        self.assertTrue(prompt.is_file())
+        self.assertTrue(design_tokens.is_file())
+        design_tokens_content = design_tokens.read_text(encoding="utf-8")
+        self.assertIn("## 2. 真值源关系", design_tokens_content)
+        self.assertIn("## 10. Layout And Grid", design_tokens_content)
+        self.assertIn("## 15. Component Tokens", design_tokens_content)
+
+    def test_package_json_alone_does_not_trigger_frontend_assets(self) -> None:
+        (self.repo / "package.json").write_text(
+            '{"dependencies":{"react":"latest"}}\n',
+            encoding="utf-8",
+        )
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        targets = {item["target"] for item in plan["files"]}
+        self.assertNotIn("frontend_implementation", plan["evidence"]["evidence_keys"])
+        self.assertNotIn(
+            "ai-agent-workspace/product/design/design-tokens.md",
+            targets,
+        )
+        self.assertFalse(any(route["id"] == "frontend" for route in plan["selected_routes"]))
+
+    def test_typescript_ui_entry_triggers_frontend_assets(self) -> None:
+        source = self.repo / "src" / "main.ts"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_text(
+            "import { createApp } from 'vue';\ncreateApp({}).mount('#app');\n",
+            encoding="utf-8",
+        )
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        targets = {item["target"] for item in plan["files"]}
+        self.assertIn("frontend_implementation", plan["evidence"]["evidence_keys"])
+        self.assertIn(
+            "ai-agent-workspace/product/design/design-tokens.md",
+            targets,
+        )
+
+    def test_frontend_plan_reuses_existing_legacy_design_tokens(self) -> None:
+        self.write_frontend_implementation()
+        legacy = self.repo / "docs" / "03_DESIGN" / "design-tokens.md"
+        legacy.parent.mkdir(parents=True, exist_ok=True)
+        template = SCRIPT_DIR.parent / "templates" / "design-tokens.md"
+        content = self.backfill_design_tokens(template.read_text(encoding="utf-8"))
+        legacy.write_text(content, encoding="utf-8")
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+        original_content = legacy.read_text(encoding="utf-8")
+        result = protocol_package.scaffold_package(self.repo, self.manifest, "project", True)
+
+        artifact = next(item for item in plan["files"] if item["kind"] == "conditional-artifact")
+        self.assertEqual(artifact["target"], "docs/03_DESIGN/design-tokens.md")
+        self.assertEqual(artifact["action"], "maintain-and-verify")
+        self.assertEqual(legacy.read_text(encoding="utf-8"), original_content)
+        self.assertIn(legacy.as_posix(), result["skipped"])
+
+    def test_validate_requires_backfilled_design_tokens_for_frontend(self) -> None:
+        self.write_frontend_implementation()
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        self.write_valid_entry()
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertIn(
+            "ai-agent-workspace/product/design/design-tokens.md "
+            "仍包含待回填标记：初始化状态：待回填",
+            result["content_errors"],
+        )
+
+    def test_validate_accepts_backfilled_design_tokens_for_frontend(self) -> None:
+        self.write_frontend_implementation()
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        self.write_valid_entry()
+        design_tokens = (
+            self.repo
+            / "ai-agent-workspace"
+            / "product"
+            / "design"
+            / "design-tokens.md"
+        )
+        content = self.backfill_design_tokens(design_tokens.read_text(encoding="utf-8"))
+        design_tokens.write_text(content, encoding="utf-8")
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["content_errors"], [])
+
+    def test_validate_rejects_design_tokens_with_pending_document_status(self) -> None:
+        self.write_frontend_implementation()
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        self.write_valid_entry()
+        design_tokens = (
+            self.repo
+            / "ai-agent-workspace"
+            / "product"
+            / "design"
+            / "design-tokens.md"
+        )
+        content = design_tokens.read_text(encoding="utf-8").replace(
+            "初始化状态：待回填",
+            "初始化状态：已建立",
+        )
+        design_tokens.write_text(content, encoding="utf-8")
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertIn(
+            "ai-agent-workspace/product/design/design-tokens.md "
+            "仍包含待回填标记：| 状态 | 待回填 |",
+            result["content_errors"],
+        )
+
+    def test_validate_rejects_parallel_design_tokens_sources(self) -> None:
+        self.write_frontend_implementation()
+        canonical = self.repo / "ai-agent-workspace" / "product" / "design" / "design-tokens.md"
+        legacy = self.repo / "docs" / "03_DESIGN" / "design-tokens.md"
+        canonical.parent.mkdir(parents=True, exist_ok=True)
+        legacy.parent.mkdir(parents=True, exist_ok=True)
+        canonical.write_text("# Design Tokens\n", encoding="utf-8")
+        legacy.write_text("# Design Tokens\n", encoding="utf-8")
+        scaffold = protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        self.write_valid_entry()
+
+        self.assertTrue(scaffold["errors"])
+        self.assertEqual(scaffold["written"], [])
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertIn(
+            "frontend-design-tokens 存在多个可编辑真值源："
+            "ai-agent-workspace/product/design/design-tokens.md, "
+            "docs/03_DESIGN/design-tokens.md",
+            result["content_errors"],
+        )
 
     def test_validate_rejects_broken_entry_reference(self) -> None:
         self.scaffold()

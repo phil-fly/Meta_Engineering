@@ -13,6 +13,7 @@
 - 生成模板目录。
 - 生成或维护 `playbooks/`、`routes/`、`checks/`、`templates/`。
 - 把当前协议入口引用的文件补齐。
+- 在已确认存在前端实现的目标仓创建、补齐或维护设计基线。
 
 `CON-PACKAGE-TRIGGER-EXPLAIN-ONLY`：如果用户只是在询问规则、设计或差异，应先解释，不落盘。
 
@@ -24,8 +25,8 @@
 
 - `scripts/protocol-package.py detect <target-repo>`：把目标仓入口、协议目录和技术栈证据输出为 JSON。
 - `scripts/protocol-package.py plan <target-repo> --mode minimal|project|full`：按 `scripts/protocol-package-manifest.json` 生成拟落盘文件、路由裁剪和检查清单计划。
-- `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖。
-- `scripts/protocol-package.py validate <target-repo>`：检查根级生效入口及其本地 Markdown 引用、协议包目录、模板资产、`WF-*`/`CHK-*` 核心内容、路由索引状态标注和占位符泄漏。
+- `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖协议包资产；既有 `design-tokens.md` 永不被通用模板覆盖。
+- `scripts/protocol-package.py validate <target-repo>`：检查根级生效入口及其本地 Markdown 引用、协议包目录、模板资产、`WF-*`/`CHK-*` 核心内容、路由索引状态标注和占位符泄漏；存在前端实现时还检查唯一 `design-tokens.md`、必备明细和回填状态。
 
 脚本输出用于生成方案预览和生成报告，不替代用户确认。`scaffold` 不自动维护根级生效入口，因此执行者完成入口维护前，`validate` 应返回失败；这表示协议包尚未生效，不是可忽略 warning。
 
@@ -67,7 +68,7 @@
 
 `CON-PACKAGE-CONTENT-SOURCE`：目标仓文件应从技能内 `references/` 派生，不要凭空编写，也不要复制外部仓库路径。
 
-技能内 `templates/` 目录提供可直接复制到目标仓协议模板目录的模板资产；新项目默认 `ai-agent-workspace/protocols/templates/`，旧项目兼容 `ai-agent-protocols/templates/`。`references/protocol/user-protocol-template.md`、`references/protocol/project-protocol-template.md` 和 `references/protocol/route-card-template.md` 是模板正文的解释性来源，维护时应保持两者同步。
+技能内 `templates/` 目录提供可复制资产。协议模板默认进入目标仓 `ai-agent-workspace/protocols/templates/`，旧项目兼容 `ai-agent-protocols/templates/`；`templates/design-tokens.md` 则是目标仓设计基线的详细骨架，只在发现真实前端实现时直接实例化为 `ai-agent-workspace/product/design/design-tokens.md`，已有项目可继承 `docs/03_DESIGN/design-tokens.md`，不得把它复制成协议路由。`references/protocol/user-protocol-template.md`、`references/protocol/project-protocol-template.md` 和 `references/protocol/route-card-template.md` 是对应协议模板正文的解释性来源，维护时应保持两者同步。`templates/frontend-design-system-review-prompt.md` 是独立、自包含的审查执行模板，不在 `references/protocol/` 维护镜像正文；其过程约束真值源是 `references/engineering/frontend/design-system-maintenance.md`，审查覆盖必须与该路由及 `CHK-FE-DS-*` 保持一致。把审查项左移到设计和开发门禁时，只提炼短触发语句，不得从独立模板删除逐域问题和报告契约。
 
 落盘前先确定目标仓真值源：
 
@@ -78,6 +79,7 @@
 工程路由正文    → ai-agent-workspace/protocols/routes/，兼容 ai-agent-protocols/routes/
 检查清单正文    → ai-agent-workspace/protocols/checks/，兼容 ai-agent-protocols/checks/
 模板资产正文    → ai-agent-workspace/protocols/templates/，兼容 ai-agent-protocols/templates/
+前端设计基线    → ai-agent-workspace/product/design/design-tokens.md，兼容 docs/03_DESIGN/design-tokens.md（二选一；仅存在前端实现时）
 生成过程证据    → 生成报告 / 任务日志 / Issue / PR 描述
 ```
 
@@ -144,6 +146,12 @@ ai-agent-workspace/protocols/templates/project-protocol.md
 
 ai-agent-workspace/protocols/templates/route-card.md
   → templates/route-card.md
+
+ai-agent-workspace/protocols/templates/frontend-design-system-review-prompt.md
+  → templates/frontend-design-system-review-prompt.md；仅用于独立只读审查，日常设计与开发读取 routes/checks 门禁
+
+ai-agent-workspace/product/design/design-tokens.md
+  → templates/design-tokens.md；仅在真实前端实现证据成立时创建，创建后必须据生产实现回填参数和真值源关系
 ```
 
 目标仓已采用 `ai-agent-protocols/` 时，可把上述路径整体映射到兼容目录；映射必须写入入口说明或生成报告，且不得同时保留两套可编辑正文。
@@ -166,6 +174,10 @@ ai-agent-workspace/protocols/templates/route-card.md
 - `CON-PACKAGE-GENERATE-CHECKS-SCOPE`：`checks/*.md` 只放检查项，不放长流程或教程。
 - `CON-PACKAGE-GENERATE-DIR-DIFFERENCE`：如果目标仓已经采用不同目录名，应先说明差异并征求确认；新项目默认目录是 `ai-agent-workspace/protocols`，旧项目可兼容 `ai-agent-protocols`。
 - `CON-PACKAGE-GENERATE-PATH-BASE`：每个生成文件的路径引用必须统一口径。协议包内文件引用根级文件时，使用 `../`、`../../` 等当前文件相对路径，或明确写 `仓库根：<path>`；不要写基准不明的裸路径。
+- `CON-PACKAGE-GENERATE-FRONTEND-EVIDENCE`：只有生产页面、组件、客户端样式或真实 UI 入口才能证明存在前端实现；`package.json`、构建配置、设计稿、原型或文档单独存在时不得创建 `design-tokens.md`。
+- `CON-PACKAGE-GENERATE-DESIGN-TOKENS`：存在前端实现时，必须创建或继承唯一 `design-tokens.md`，按生产实现回填后才能通过验证；不得用协议路由、审查提示语或空模板替代实际参数明细。
+- `CON-PACKAGE-GENERATE-DESIGN-TOKENS-NO-OVERWRITE`：协议包工具即使收到 `--overwrite` 也必须跳过既有 `design-tokens.md`；更新只能由 Agent 读取现有内容和生产实现后按最小修改完成。
+- `CON-PACKAGE-GENERATE-DESIGN-TOKENS-CONFLICT`：推荐路径与兼容路径同时存在可编辑正文时，`scaffold` 必须停止，等待真值源裁决；不得选择其一继续生成或覆盖。
 
 ## 触发链路规则
 
@@ -188,7 +200,7 @@ ai-agent-workspace/protocols/templates/route-card.md
 
 项目版裁剪规则：
 
-- 发现 `package.json`、前端构建配置或前端源码时，可生成 `routes/frontend/index.md` 和 `routes/frontend/javascript-typescript.md`；只有发现列表、远程搜索、提交型表单、Design Token、紧凑布局、权限渲染、导航状态等证据时，才生成对应细分路由。
+- 发现生产页面、组件、客户端样式或真实 UI 入口时，创建或维护唯一 `design-tokens.md`，并可生成 `routes/frontend/index.md` 和必要前端路由；只有 `package.json`、前端构建配置、设计稿、原型或文档时，不视为存在前端实现。参数明细写入 `design-tokens.md`，不通过扩增路由数量承载。
 - 发现 `go.mod` 时，可生成 Go 后端路由；发现 Maven/Gradle 文件时，可生成 Java 路由；发现 `Cargo.toml` 时，可生成 Rust 路由；发现 `pyproject.toml`、`requirements.txt`、`setup.py`、`Pipfile` 或 Python 服务源码时，可生成 Python 路由；未发现的语言路由不生成。
 - 发现 API、数据库、鉴权、日志、配置或服务目录证据时，可生成对应 `routes/core/` 细分入口；只发现其中一类时，不展开其他无证据细项。
 - 通用安全、性能和质量入口可作为条件适用路由生成，但正文必须写明适用触发条件，避免把未启用架构写成项目事实。
@@ -231,6 +243,8 @@ templates/user-protocol.md          == references/protocol/user-protocol-templat
 templates/project-protocol.md       == references/protocol/project-protocol-template.md
 templates/route-card.md             == references/protocol/route-card-template.md
 ```
+
+`templates/frontend-design-system-review-prompt.md` 不维护镜像正文；脚本检查其必备调查维度、证据规则、问题格式和完成门，防止设计/开发门禁左移时误删独立审查能力。`templates/design-tokens.md` 同样不维护第二份正文，脚本检查其真值源关系和各参数域必备章节。
 
 ## 最小协议包
 

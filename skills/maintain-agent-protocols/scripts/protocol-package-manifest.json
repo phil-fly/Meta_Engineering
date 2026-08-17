@@ -14,6 +14,62 @@
     {
       "source": "templates/route-card.md",
       "target": "templates/route-card.md"
+    },
+    {
+      "source": "templates/frontend-design-system-review-prompt.md",
+      "target": "templates/frontend-design-system-review-prompt.md"
+    }
+  ],
+  "conditional_artifacts": [
+    {
+      "id": "frontend-design-tokens",
+      "source": "templates/design-tokens.md",
+      "default_target": "ai-agent-workspace/product/design/design-tokens.md",
+      "compat_targets": ["docs/03_DESIGN/design-tokens.md"],
+      "evidence_keys": ["frontend_implementation"],
+      "required_markers": [
+        "## 1. 文档状态",
+        "## 2. 真值源关系",
+        "## 3. Color",
+        "## 4. Typography",
+        "## 5. Spacing",
+        "## 6. Size And Density",
+        "## 7. Radius",
+        "## 8. Border",
+        "## 9. Shadow And Elevation",
+        "## 10. Layout And Grid",
+        "## 11. Breakpoints And Responsive Behavior",
+        "## 12. Z-index And Layering",
+        "## 13. Motion",
+        "## 14. Icons",
+        "## 15. Component Tokens",
+        "## 16. Theme And Brand Modes",
+        "## 17. Exceptions And Debt",
+        "## 18. Maintenance Contract",
+        "## 19. Change Log"
+      ],
+      "incomplete_markers": [
+        "初始化状态：待回填",
+        "| 项目 | 待回填 |",
+        "| 状态 | 待回填 |",
+        "| 适用前端 | 待回填 |",
+        "| 维护路径 | 待回填 |",
+        "| 最近核对日期 | 待回填 |",
+        "| 最近核对范围 | 待回填 |",
+        "| Color | 待回填 |",
+        "| Typography | 待回填 |",
+        "| Spacing | 待回填 |",
+        "| Radius | 待回填 |",
+        "| Border | 待回填 |",
+        "| Shadow / Elevation | 待回填 |",
+        "| Layout / Grid | 待回填 |",
+        "| Breakpoint | 待回填 |",
+        "| Size / Density | 待回填 |",
+        "| Motion | 待回填 |",
+        "| Icon | 待回填 |",
+        "| Z-index / Layer | 待回填 |",
+        "| Component Token | 待回填 |"
+      ]
     }
   ],
   "playbooks": {
@@ -35,6 +91,7 @@
     "sections": {
       "maintenance-checklist": "maintenance-checklist.md",
       "security-checklist": "security-checklist.md",
+      "frontend-design-system-checklist": "frontend-design-system-checklist.md",
       "frontend-i18n-checklist": "frontend-i18n-checklist.md",
       "frontend-accessibility-checklist": "frontend-accessibility-checklist.md",
       "frontend-testing-checklist": "frontend-testing-checklist.md",
@@ -52,7 +109,7 @@
       "status": "项目证据支持",
       "source_globs": ["references/engineering/frontend/*.md"],
       "target_prefix": "routes/frontend",
-      "evidence_keys": ["frontend"],
+      "evidence_keys": ["frontend_implementation"],
       "always_include": ["index.md", "javascript-typescript.md"]
     },
     {
@@ -126,6 +183,7 @@
   "minimal_checks": ["maintenance-checklist", "security-checklist"],
   "project_checks_by_route": {
     "frontend": [
+      "frontend-design-system-checklist",
       "frontend-i18n-checklist",
       "frontend-accessibility-checklist",
       "frontend-testing-checklist",
