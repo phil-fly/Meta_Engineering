@@ -12,7 +12,7 @@
 - `component-system.md`：共享组件、页面局部组件、第三方组件包装、组件工坊和复用边界。
 - `javascript-typescript.md`：JavaScript/TypeScript 类型边界、异步生命周期和安全输入规则。
 - `api-and-data.md`：前端请求、真实筛选、按需加载。
-- `state-and-cache.md`：组件状态、应用状态、服务端缓存、表单状态、URL 状态和缓存失效。
+- `state-and-cache.md`：组件状态、应用状态、服务端缓存、表单状态、URL 状态、缓存失效和首屏结构与数据解耦。
 - `list-query.md`：列表查询接口组合路由与查询类型分类策略。
 - `form-validation.md`：提交型表单、字段校验、错误展示和服务端业务错误保留。
 - `i18n-governance.md`：国际化、文案资源、翻译 Key、硬编码文案和错误信息本地化。
@@ -37,7 +37,7 @@
 - 页面、弹窗、表单、表格、菜单、Tooltip、Notification、Empty 状态、Error 状态或任何用户可见文案：读取 `i18n-governance.md`。
 - 前端目录、新文件落点、feature 边界、共享层、路径别名和导入方向：读取 `project-structure.md`。
 - 共享组件、页面局部组件、第三方组件包装和 Storybook：读取 `component-system.md`。
-- 状态拥有者、服务端缓存、URL 状态、缓存失效和本地持久化：读取 `state-and-cache.md`。
+- 状态拥有者、服务端缓存、URL 状态、缓存失效、本地持久化或首屏结构与数据依赖：读取 `state-and-cache.md`。
 - 全面调查或维护目标仓前端设计规范、Token 真值源、组件/页面模式、Layout/Grid、Breakpoint、主题或 Vibe Coding 视觉漂移：先读取 `design-system-maintenance.md`。
 - 颜色、主题、品牌色、状态色、中性色、间距、字号、圆角、阴影、motion 和视觉 token：读取 `styling-and-tokens.md`；若真值源、既有值或影响范围不清，先补读 `design-system-maintenance.md`；只涉及历史颜色 token 时可读取 `design-tokens.md`。
 - 首屏核心任务、紧凑布局、图表高度、重复文案和容器层级压缩：先读取 `compact-ui.md`。

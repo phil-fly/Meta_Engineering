@@ -100,6 +100,7 @@
 - CHK-FE-TEST-003 使用 mock server、fixture 或 MSW 时，是否标明数据契约假设且未伪装成真实后端能力？
 - CHK-FE-TEST-004 测试选择器是否优先使用 role、label、text、placeholder 或稳定 test id？
 - CHK-FE-TEST-005 缺陷修复是否补充失败路径测试，或说明无法补测试的原因和替代验证？
+- CHK-FE-TEST-006 是否按 `CON-FE-TEST-007` 验证冷缓存或延迟请求下页面壳层先可见，数据区域独立覆盖 loading、success、empty、error 和 retry，且普通页面数据没有阻塞整页挂载？
 
 ## frontend-performance-checklist
 

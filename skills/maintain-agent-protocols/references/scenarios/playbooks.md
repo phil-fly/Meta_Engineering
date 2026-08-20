@@ -7,9 +7,9 @@
 开发任务默认流程：
 
 1. 预检门：识别语言、工程域、风险等级和约束触发项；至少检查是否命中规范同步、最小修改、项目命令、权限/安全、数据迁移、删除、配置、性能、日志、用户可见文案、架构边界、Git 和知识沉淀相关 `CON-*`。前端任务还要确认目标仓是否存在真实前端实现；只有 `package.json`、设计稿或文档不算前端实现证据。
-2. 路由门：先读 `../engineering/index.md`，再读取对应工程路由。存在前端实现时，任何前端设计或开发任务都必须先定位并读取仓库根 `ai-agent-workspace/product/design/design-tokens.md` 或已确认的兼容 `docs/03_DESIGN/design-tokens.md`；文件缺失时读取 `../engineering/frontend/design-system-maintenance.md` 并在实施前创建或据生产实现回填。涉及配置、安全、错误日志、国际化、通用质量或性能时再按命中范围补读对应路由。
+2. 路由门：先读 `../engineering/index.md`，再读取对应工程路由。存在前端实现时，任何前端设计或开发任务都必须先定位并读取仓库根 `ai-agent-workspace/product/design/design-tokens.md` 或已确认的兼容 `docs/03_DESIGN/design-tokens.md`；文件缺失时读取 `../engineering/frontend/design-system-maintenance.md` 并在实施前创建或据生产实现回填。涉及异步页面、服务端缓存、首屏数据依赖或加载状态时必须读取 `../engineering/frontend/state-and-cache.md`；涉及配置、安全、错误日志、国际化、通用质量或性能时再按命中范围补读对应路由。
 3. 变更门：涉及 API、数据结构、配置、权限模型或系统架构时，先确认项目规范、OpenSpec、ADR 或设计文档是否需要同步；前端变更必须继承已读取的 Token、组件、状态和响应式行为，修改 Token、主题、断点、布局原语、组件默认值或生产真值源时同步 `design-tokens.md` 并完成消费者影响与迁移分析；命中高风险项时先说明影响范围、回滚方式和验证方式；按最小修改实施。
-4. 验证门：运行与变更范围和风险等级匹配的验证；存在前端实现时还应按 `../checks/checklists.md` 的 `CHK-FE-DS-*` 验证 `design-tokens.md` 的唯一性、明细完整性、生产映射和同步状态，再按变更范围补充 UI 稳定性、组件或 a11y 检查；验证不可用时说明原因、替代证据和剩余风险。
+4. 验证门：运行与变更范围和风险等级匹配的验证；存在前端实现时还应按 `../checks/checklists.md` 的 `CHK-FE-DS-*` 验证 `design-tokens.md` 的唯一性、明细完整性、生产映射和同步状态，再按变更范围补充 UI 稳定性、组件或 a11y 检查。涉及异步页面时，必须按 `CHK-FE-TEST-*` 验证冷缓存或延迟请求下页面壳层先可见、数据区域独立显示 loading/error/empty，并确认普通页面数据没有阻塞整页挂载；验证不可用时说明原因、替代证据和剩余风险。
 5. 报告门：汇报变更、命中的关键约束、验证结果和剩余风险；前端任务说明读取、创建、回填或更新的 `design-tokens.md` 路径及 Token/组件决策，不适用时说明未发现前端实现证据；若涉及协议维护或规则变更，按 `../checks/checklists.md` 的 `CHK-MAINT-*` 闭环；若产生可复用经验、长期设计模式或架构决策，先询问用户是否沉淀到 Wiki。
 
 ## WF-ARCHITECTURE architecture
