@@ -17,32 +17,12 @@
 - `WF-MODE-MAINTENANCE`：维护模式。用户指定维护文档、Wiki、协议或任务清单时使用；只维护指定载体，不新增其他长期产物，除非用户确认。
 - `WF-MODE-REVIEW`：审查模式。用户说“审查、巡检、全面检查”时先声明范围、基准和结论口径，再给发现和闭环。
 
-`CON-COLLAB-AUTO-EXECUTION-GATE`：自动切换到执行模式前，应满足目标明确、范围明确、验收方式可描述、风险不高、未违反用户刚给出的边界。
+`CON-COLLAB-AUTO-EXECUTION-GATE`：模式切换与动作授权统一使用 `../scenarios/playbooks.md` 的 `WF-TASK-GOVERNANCE`；讨论或审查请求保持只读，明确实施请求再进入执行。
 
 ## 确认门槛
 
-默认需要明确确认：
-
-- `CON-COLLAB-CONFIRM-ARTIFACT`：创建新协作载体、长期文档或沉淀位置。
-- `CON-COLLAB-CONFIRM-HIGH-RISK`：修改 OpenSpec、项目级协议、权限模型、安全控制逻辑、数据迁移或删除操作。
-- `CON-COLLAB-CONFIRM-EXTERNAL-STATE`：提交、推送、创建 PR、发布、归档或影响外部状态。
-- `CON-COLLAB-CONFIRM-LONG-TERM-RULE`：把临时偏好升级为长期规则。
-- `CON-COLLAB-CONFIRM-REPO-WIDE`：在未指定范围时输出 repo-wide 结论。
-
-问询通道规则：
-
-- `CON-COLLAB-ASK-NATIVE-FIRST`：需要用户确认或补充关键信息时，若当前 Agent App 支持原生确认、结构化问询、选择器或弹出式问题，应优先使用原生机制。
-- `CON-COLLAB-ASK-FALLBACK`：若当前环境没有原生问询机制，或原生机制不可用，应退化为普通对话问询，并明确说明需要用户确认的事项。
-- `CON-COLLAB-ASK-LIMIT`：一次问询默认不超过 3 个关键问题；能给推荐默认值时，应把推荐项放在第一位并说明影响。
-- `CON-COLLAB-ASK-GENERATION-GATE`：协议生成、协议调整、入口迁移、真值源选择、目录双写和高风险治理变更，优先进入原生确认/问询流程。
-
-通常不需要额外确认：
-
-- `CON-COLLAB-NO-CONFIRM-READ`：读取当前任务相关文件。
-- `CON-COLLAB-NO-CONFIRM-SCOPED-EDIT`：对用户已指定文件做最小编辑。
-- `CON-COLLAB-NO-CONFIRM-READONLY-CHECK`：运行只读检查命令。
-- `CON-COLLAB-NO-CONFIRM-ORGANIZE-GIVEN`：在当前指定文档中整理用户已给出的内容。
-- `CON-COLLAB-NO-CONFIRM-DIRTY-REPORT`：报告无关脏文件但不触碰它们。
+- `CON-COLLAB-CONFIRMATION-GATE`：所有确认判断统一使用 `WF-TASK-GOVERNANCE` 的 Confirmation Gate，不因文件名或“协议”类别自动确认。用户已明确授权的局部、可逆、低风险编辑直接执行；高风险、不可逆、外部状态变更或实质扩大范围时才确认或停止。
+- `CON-COLLAB-ASK-CHANNEL`：确需确认时优先使用环境原生问询；不可用时使用普通对话。只询问会实质改变范围、风险或结果的最少问题。
 
 ## 证据与范围
 
@@ -59,12 +39,7 @@
 
 ## 完成定义
 
-- `CHK-COLLAB-DONE-DISCUSSION`：讨论，回答核心问题，列出取舍和待确认点。
-- `CHK-COLLAB-DONE-ARCHITECTURE`：架构设计，给出推荐方案、备选方案、风险和演进路径。
-- `CHK-COLLAB-DONE-CODING`：开发修复，完成相关修改、验证和审查说明。
-- `CHK-COLLAB-DONE-REVIEW`：审查巡检，声明范围，列出发现并给出每项去向。
-- `CHK-COLLAB-DONE-KNOWLEDGE`：知识维护，更新指定载体，并说明吸收内容和未覆盖内容。
-- `CHK-COLLAB-DONE-PROTOCOL`：协议维护，把确认过的规则写入指定协议，并保留待讨论项。
+- `CHK-COLLAB-DONE`：所有任务统一使用 `WF-TASK-GOVERNANCE` 的 Completion Gate 与 Stop Gate；场景产物只定义可观察目标，不另建完成流程。
 
 ## 来源边界
 

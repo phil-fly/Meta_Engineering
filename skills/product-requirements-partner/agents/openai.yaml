@@ -1,4 +1,4 @@
 interface:
   display_name: "产品需求伙伴"
   short_description: "梳理产品想法、PRD、用户流程、实体和设计交付"
-  default_prompt: "使用 $product-requirements-partner 陪我讨论产品需求，从价值发现、MVP 范围、PRD、用户流程、实体状态机到设计交付，帮助我把模糊想法沉淀成可追溯、可实现的产品文档。"
+  default_prompt: "使用 $product-requirements-partner 陪我讨论产品需求，从价值发现、MVP 范围、PRD、用户流程、实体状态机到设计交付；定稿时先锁定 Scope/Version，当前明确指令优先，项目记忆模式再校验确认快照或 legacy-current 基线，并分开报告需求就绪与实现验证状态。"

@@ -136,11 +136,7 @@ class ValidatePackageTests(unittest.TestCase):
         self.assertTrue(checklist.is_file())
         self.assertIn("CHK-FE-DS-001", checklist.read_text(encoding="utf-8"))
         self.assertTrue(prompt.is_file())
-        self.assertTrue(design_tokens.is_file())
-        design_tokens_content = design_tokens.read_text(encoding="utf-8")
-        self.assertIn("## 2. 真值源关系", design_tokens_content)
-        self.assertIn("## 10. Layout And Grid", design_tokens_content)
-        self.assertIn("## 15. Component Tokens", design_tokens_content)
+        self.assertFalse(design_tokens.exists())
 
     def test_package_json_alone_does_not_trigger_frontend_assets(self) -> None:
         (self.repo / "package.json").write_text(
@@ -158,7 +154,7 @@ class ValidatePackageTests(unittest.TestCase):
         )
         self.assertFalse(any(route["id"] == "frontend" for route in plan["selected_routes"]))
 
-    def test_typescript_ui_entry_triggers_frontend_assets(self) -> None:
+    def test_typescript_ui_entry_selects_frontend_routes_without_design_tokens(self) -> None:
         source = self.repo / "src" / "main.ts"
         source.parent.mkdir(parents=True, exist_ok=True)
         source.write_text(
@@ -170,10 +166,16 @@ class ValidatePackageTests(unittest.TestCase):
 
         targets = {item["target"] for item in plan["files"]}
         self.assertIn("frontend_implementation", plan["evidence"]["evidence_keys"])
-        self.assertIn(
+        self.assertNotIn(
             "ai-agent-workspace/product/design/design-tokens.md",
             targets,
         )
+        self.assertTrue(any(route["id"] == "frontend" for route in plan["selected_routes"]))
+
+    def test_explicit_design_system_option_includes_design_tokens(self) -> None:
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project", True)
+        targets = {item["target"] for item in plan["files"]}
+        self.assertIn("ai-agent-workspace/product/design/design-tokens.md", targets)
 
     def test_frontend_plan_reuses_existing_legacy_design_tokens(self) -> None:
         self.write_frontend_implementation()
@@ -183,9 +185,9 @@ class ValidatePackageTests(unittest.TestCase):
         content = self.backfill_design_tokens(template.read_text(encoding="utf-8"))
         legacy.write_text(content, encoding="utf-8")
 
-        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project", True)
         original_content = legacy.read_text(encoding="utf-8")
-        result = protocol_package.scaffold_package(self.repo, self.manifest, "project", True)
+        result = protocol_package.scaffold_package(self.repo, self.manifest, "project", True, True)
 
         artifact = next(item for item in plan["files"] if item["kind"] == "conditional-artifact")
         self.assertEqual(artifact["target"], "docs/03_DESIGN/design-tokens.md")
@@ -195,10 +197,10 @@ class ValidatePackageTests(unittest.TestCase):
 
     def test_validate_requires_backfilled_design_tokens_for_frontend(self) -> None:
         self.write_frontend_implementation()
-        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False, True)
         self.write_valid_entry()
 
-        result = protocol_package.validate_package(self.repo, self.manifest)
+        result = protocol_package.validate_package(self.repo, self.manifest, design_system=True)
 
         self.assertFalse(result["ok"])
         self.assertIn(
@@ -209,7 +211,7 @@ class ValidatePackageTests(unittest.TestCase):
 
     def test_validate_accepts_backfilled_design_tokens_for_frontend(self) -> None:
         self.write_frontend_implementation()
-        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False, True)
         self.write_valid_entry()
         design_tokens = (
             self.repo
@@ -221,14 +223,14 @@ class ValidatePackageTests(unittest.TestCase):
         content = self.backfill_design_tokens(design_tokens.read_text(encoding="utf-8"))
         design_tokens.write_text(content, encoding="utf-8")
 
-        result = protocol_package.validate_package(self.repo, self.manifest)
+        result = protocol_package.validate_package(self.repo, self.manifest, design_system=True)
 
         self.assertTrue(result["ok"], result)
         self.assertEqual(result["content_errors"], [])
 
     def test_validate_rejects_design_tokens_with_pending_document_status(self) -> None:
         self.write_frontend_implementation()
-        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False, True)
         self.write_valid_entry()
         design_tokens = (
             self.repo
@@ -243,7 +245,7 @@ class ValidatePackageTests(unittest.TestCase):
         )
         design_tokens.write_text(content, encoding="utf-8")
 
-        result = protocol_package.validate_package(self.repo, self.manifest)
+        result = protocol_package.validate_package(self.repo, self.manifest, design_system=True)
 
         self.assertFalse(result["ok"])
         self.assertIn(
@@ -260,13 +262,13 @@ class ValidatePackageTests(unittest.TestCase):
         legacy.parent.mkdir(parents=True, exist_ok=True)
         canonical.write_text("# Design Tokens\n", encoding="utf-8")
         legacy.write_text("# Design Tokens\n", encoding="utf-8")
-        scaffold = protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        scaffold = protocol_package.scaffold_package(self.repo, self.manifest, "project", False, True)
         self.write_valid_entry()
 
         self.assertTrue(scaffold["errors"])
         self.assertEqual(scaffold["written"], [])
 
-        result = protocol_package.validate_package(self.repo, self.manifest)
+        result = protocol_package.validate_package(self.repo, self.manifest, design_system=True)
 
         self.assertFalse(result["ok"])
         self.assertIn(
@@ -390,6 +392,31 @@ class ValidatePackageTests(unittest.TestCase):
         )
         self.assertEqual(after_entry.returncode, 0, after_entry.stderr)
         self.assertTrue(json.loads(after_entry.stdout)["ok"])
+
+
+class TaskGovernanceBehaviorTests(unittest.TestCase):
+    def test_ten_required_scenarios_have_enforceable_contracts(self) -> None:
+        read = lambda path: (SCRIPT_DIR.parent / path).read_text(encoding="utf-8")
+        playbooks = read("references/scenarios/playbooks.md")
+        collaboration = read("references/protocol/collaboration-boundaries.md")
+        frontend = read("references/engineering/frontend/design-system-maintenance.md")
+        scenarios = [
+            ("01 rename", playbooks, ("A | 低复杂度 + 低风险", "最小修改 → 局部验证 → Completion → Stop")),
+            ("02 blue button", frontend, ("普通页面、按钮、文案或局部样式修改不触发", "`design-tokens.md` 缺失也不触发")),
+            ("03 delete data", playbooks, ("B | 低复杂度 + 高风险", "不可逆或授权不清时确认")),
+            ("04 Go refactor", playbooks, ("C | 高复杂度 + 低风险", "影响分析 → 分阶段实施 → 回归验证")),
+            ("05 auth redesign", playbooks, ("D | 高复杂度 + 高风险", "方案与证据 → Confirmation → 分阶段实施 → 高强度验证")),
+            ("06 API 500", playbooks, ("静态检查完成不能替代结果验证", "必须验证用户可观察结果")),
+            ("07 inspect", collaboration, ("讨论或审查请求保持只读",)),
+            ("08 protocol sentence", collaboration, ("局部、可逆、低风险编辑直接执行", "不因文件名或“协议”类别自动确认")),
+            ("09 related optimization", playbooks, ("相关但不阻塞的优化只记录或提示，不自动修改",)),
+            ("10 simplify", playbooks, ("用户明确目标、范围、非目标与授权", "不加载未命中的治理流程")),
+        ]
+        self.assertEqual(len(scenarios), 10)
+        for name, contract, clauses in scenarios:
+            with self.subTest(name=name):
+                for clause in clauses:
+                    self.assertIn(clause, contract)
 
 
 if __name__ == "__main__":

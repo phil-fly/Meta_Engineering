@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | 轻量讨论 | brainstorm、快速判断、局部问题、暂不落盘 | 直接讨论，不初始化 `docs/` |
 | 产物沉淀 | 用户要求写文件、生成 PRD、立项、设计说明、mockup、调研报告 | 先确认目标文件或建议目录 |
-| 项目记忆模式 | 长期项目、多轮协作、用户要求记住决策，或已存在 `ai-agent-workspace/product/memory/` / `docs/00_MEMORY/` | 读取项目记忆并按阈值写入 |
+| 项目记忆模式 | 长期项目、多轮协作、用户要求记住决策，或已存在 `ai-agent-workspace/product/memory/` / `docs/00_MEMORY/` | 读取项目记忆、`CONFIRMATIONS.md`（存在时），并在交付前运行确认记录校验 |
 
 ## Scene Contract
 
@@ -18,6 +18,7 @@
 | 实体定义 | 页面结构和关键操作 | 实体清单、状态机、操作矩阵、字段行为 | Framework PRD 或 Feature PRD | 页面结构尚未成形 |
 | 设计与交付 | 交互结构、实体状态、设计方向 | 设计指导、mockup、handoff note | `ai-agent-workspace/product/design/`，兼容 `docs/03_DESIGN/` | 待定项影响页面结构或实体逻辑 |
 | PRD 评审 | PRD 文本或文件路径 | blocker、clarification、suggestion、可执行性判断 | 原 PRD 或新版本 PRD | 未读目标文档或用户只要求口头反馈 |
+| 定稿与最终交付 | 用户明确要求定稿/交付，且唯一目标 `Scope/Version` 可确定 | 干净的当前状态 PRD、handoff 或交付摘要；需求状态与实现状态分开报告 | 当前权威 PRD、设计、handoff；用户要求时可生成 PR 文案 | 目标范围不明、确认源 split-brain、状态链校验失败、当前状态有未解决冲突，或无法读取实际变更却要求最终实现摘要 |
 | 竞品调研 | 目标问题、市场/用户范围 | 替代方案矩阵、证据、启发与不采纳项 | `ai-agent-workspace/product/resources/`，兼容 `docs/04_RESOURCES/` | 无联网能力且用户未提供资料 |
 
 ## Scene Steps
@@ -79,6 +80,21 @@
 
 退出条件：设计稿、待定项、交付说明和后续开发入口清楚。
 
+### 定稿与最终交付门
+
+做法：
+
+1. 读取 `references/final-state-delivery.md`，锁定唯一目标 `Scope/Version` 并区分需求交付与实现交付。
+2. 当前对话中对象、范围和结论明确的用户指令优先；项目记忆模式下，已有记录先校验基线再追加本轮完整快照并复验，空注册表先写首条 `add` 再校验，然后运行 `scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json` 投影当前状态。两份确认注册表同时存在时停止并处理 split-brain；无注册表且必须依赖旧产物时才运行 legacy 校验。
+3. 在写入需求、验收标准、任务或代码前，对 Agent 提出的新增能力执行需求准入；未获明确接受的能力保持 `proposed`。
+4. 删除或隔离被拒绝、已替代、已解决批注、划线旧文和 Agent 执行过程；通过准入的版本边界与长期边界除外。
+5. 仅在用户要求实现交付时读取 `references/implementation-delivery.md`、diff 与验证结果。产品范围变更必须映射到当前需求；行为保持的实现支撑变更必须映射到被支撑需求、diff 和验证结果。
+6. 分开输出需求状态和实现状态；没有实现证据时，需求可以 Ready，但实现保持 `Not assessed`。
+
+退出条件：未映射需求声明、未验证实现声明和未经准入的过程残留均为 0；需求标记 Ready 时 blocking pending 为 0 且无当前状态冲突；实现标记 Verified 时所有产品能力与支撑变更都有实现及验证证据。
+
+失败路径：目标范围不明、确认源 split-brain、状态链校验失败或 legacy-current 标记不合规时停止对应范围定稿并标记 `unresolved`；无法读取实际变更或验证结果时可以完成需求 handoff，但实现保持 `Not assessed`。
+
 ## `[Meta]` 层级示例
 
 | 用户输入 | 默认层级 | 目标 |
@@ -100,3 +116,5 @@
 - 转入后续任务
 
 不要让发现项在后续编辑或总结中消失。
+
+这里的“不消失”是指每个发现都要有闭环状态并留在评审记录、TODO、决策记录或版本历史中，不是要求把已拒绝方案和纠正过程保留在最终 PRD 或交付摘要中。

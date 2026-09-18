@@ -25,6 +25,7 @@
 | MVP 范围 | `把这个想法拆成首版 MVP 用户旅程` | `references/prd-protocols.md` |
 | PRD 编写 | `写这个功能的 PRD` | `references/prd-protocols.md` |
 | PRD 评审 | `评审这个 PRD，找出 blocker 和待确认项` | `references/prd-protocols.md` |
+| 需求定稿与交付 | `按最新确认状态定稿 PRD，并生成开发交付摘要` | `references/final-state-delivery.md`、`references/implementation-delivery.md`、状态校验脚本 |
 | 竞品调研 | `查一下类似产品，看看我们为什么还值得做` | `references/research-and-competition.md` |
 | 页面结构 | `设计这个功能的用户流程和页面结构` | `SKILL.md` Scene 3 |
 | 实体模型 | `定义这个模块的实体、状态机和字段行为` | `SKILL.md` Scene 4 |
@@ -36,7 +37,12 @@
 - `SKILL.md`：技能触发、主流程、行为边界和参考导航。
 - `references/strategy-foundation.md`：立项、价值、范围和决策依据。
 - `references/prd-protocols.md`：PRD 层级、命名、UI 相关页面设计需求、线稿、写作原则和评审协议。
-- `references/memory-system.md`：项目记忆、初始化、TODO、决策记录和写入阈值。
+- `references/final-state-delivery.md`：目标范围、当前需求状态投影、历史隔离和需求交付门禁。
+- `references/implementation-delivery.md`：实现变更分类、证据映射、实现状态和 PR/handoff 门禁。
+- `references/memory-system.md`：项目记忆、初始化、确认记录、TODO、决策记录和写入阈值。
+- `scripts/validate-confirmations.py`：解析唯一确认源，校验线性快照链，并按目标 `Scope/Version` 输出当前状态 JSON。
+- `scripts/validate-legacy-current.py`：校验旧项目 current 基线的唯一 frontmatter 标记。
+- `tests/test_confirmation_state.py`：覆盖空注册表、唯一 active、断链、split-brain、范围过滤和 legacy 标记。
 - `references/workflow-contracts.md`：协作强度、Scene 契约、`[Meta]` 层级示例和闭环状态。
 - `references/research-and-competition.md`：竞品调研、替代方案矩阵和证据要求。
 - `references/design-artifacts.md`：设计指导文档、待定项、线稿和组件 demo。
@@ -65,6 +71,11 @@
 ## 常用验证
 
 ```bash
-python3 /Users/phil-fly/Documents/GitHub/skill-craft/scripts/validate-metadata.py --path skills/product-requirements-partner
-python3 /Users/phil-fly/Documents/GitHub/skill-craft/scripts/validate-structure.py --path skills/product-requirements-partner
+python3 <skill-craft-root>/scripts/validate-metadata.py --path skills/product-requirements-partner
+python3 <skill-craft-root>/scripts/validate-structure.py --path skills/product-requirements-partner
+python3 -m unittest discover -s skills/product-requirements-partner/tests -v
+# 项目记忆模式下运行；同时检查规范路径与兼容路径冲突
+python3 skills/product-requirements-partner/scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json
+# 没有 CONFIRMATIONS.md 且使用 legacy current 时运行
+python3 skills/product-requirements-partner/scripts/validate-legacy-current.py --path <legacy-authoritative-document>
 ```

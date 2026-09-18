@@ -23,8 +23,8 @@
 
 ## 输出要求
 
-- 目标仓存在前端实现时，先读取仓库根 `ai-agent-workspace/product/design/design-tokens.md` 或已确认的兼容 `docs/03_DESIGN/design-tokens.md`；缺失时先按 `design-system-maintenance.md` 创建或回填。
+- 局部视觉修改先读取实际生产样式来源，局部修改并验证，不因缺少 `design-tokens.md` 创建治理文档。
 - 说明本次样式来自哪个 token、主题变量、组件变量或项目语义变量。
-- 说明真值源是否已确认；未确认时先完成 `design-system-maintenance.md` 的范围门、证据门和基线门，不得直接补值。
+- 修改共享 Token、Theme、全局组件默认样式或建立共享视觉体系时，说明真值源是否已确认，并按 `design-system-maintenance.md` 完成范围门、证据门和基线门。
 - 说明是否新增或修改 token；若是，说明语义、适用场景、影响范围和回归验证。
 - 说明状态色、焦点、禁用、错误和对比度是否保持一致与可访问。

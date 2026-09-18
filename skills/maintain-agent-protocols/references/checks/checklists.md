@@ -58,12 +58,12 @@
 - CHK-FE-DS-008 全局 Token、主题、断点、布局原语或组件默认值变更是否完成消费者影响、兼容/迁移、废弃和回归分析？
 - CHK-FE-DS-009 是否验证实际页面或组件状态、目标视口、浏览器缩放、长文本、数据规模和可访问性，而不是只检查静态源码？
 - CHK-FE-DS-010 未读取生产实现时是否避免把设计模板当实际值，未运行页面时是否避免断言响应式或交互已通过？
-- CHK-FE-DS-011 存在前端实现但缺少规范时，是否先创建并据生产实现回填唯一 `design-tokens.md`，并把没有依据的新值保持为待回填、未发现或不适用？
+- CHK-FE-DS-011 进入 Design System Governance 且确需新载体时，是否据生产实现创建并回填唯一 `design-tokens.md`，并把没有依据的新值保持为待回填、未发现或不适用？
 - CHK-FE-DS-012 最终报告是否说明继承或修改的真值源、Token/组件决策、验证证据、未确认项、例外、迁移状态和剩余风险？
-- CHK-FE-DS-013 是否只有真实前端实现或当前任务将首次引入前端实现时才要求 `design-tokens.md`，并排除仅有 `package.json`、设计稿、文档或未来规划的仓库？
+- CHK-FE-DS-013 是否仅在修改共享 Token、Theme、全局组件默认样式、建立共享视觉体系或用户明确要求时进入治理，并排除普通局部 UI 修改？
 - CHK-FE-DS-014 是否只存在一份可编辑 `design-tokens.md`，且新路径与兼容旧路径没有双写？
 - CHK-FE-DS-015 `design-tokens.md` 是否直接包含真值源关系及 Color、Typography、Spacing、Size/Density、Radius、Border、Shadow/Elevation、Layout/Grid、Breakpoint/Responsive、z-index、Motion、Icon、Component Token、Theme、例外和维护契约明细，而不是只列路由链接？
-- CHK-FE-DS-016 Agent 是否在前端设计或开发开始前读取 `design-tokens.md`，缺失时是否在实施前完成创建或生产回填？
+- CHK-FE-DS-016 命中治理条件时，Agent 是否读取现有 `design-tokens.md`；缺失时是否只在确需共享载体的情况下创建并生产回填？
 - CHK-FE-DS-017 修改 Token、Theme、Breakpoint、Layout/Grid、组件默认值或生产真值源时，是否在同一变更中同步 `design-tokens.md` 并验证消费者？
 
 ## frontend-i18n-checklist

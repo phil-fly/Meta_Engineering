@@ -2,7 +2,7 @@
 
 前端、UI、页面、组件、交互、表单、Design Token、紧凑布局、UI 稳定性、国际化、文案治理、JavaScript、TypeScript、导航、权限渲染、前端请求、项目结构、状态缓存、测试、可访问性、工具链和前端性能任务先读本文件。
 
-目标仓存在真实前端实现时，任何前端设计或开发任务先读取仓库根 `ai-agent-workspace/product/design/design-tokens.md` 或已确认的兼容 `docs/03_DESIGN/design-tokens.md`。缺失、未回填或出现双真值源时，只补读 `design-system-maintenance.md` 处理；不要用加载大量其他路由代替 `design-tokens.md` 的参数明细。
+局部前端设计或开发默认读取受影响组件和生产样式来源，局部修改并局部验证。仅当任务修改共享 Token、Theme、全局组件默认样式、建立共享视觉体系，或用户明确要求维护 Design System 时，才读取 `design-system-maintenance.md` 并定位现有 `design-tokens.md`；文件缺失本身不触发创建。
 
 ## 文件
 

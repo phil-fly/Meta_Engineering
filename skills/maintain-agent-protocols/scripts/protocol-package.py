@@ -273,8 +273,8 @@ def evidence_supports(rule: dict[str, Any], evidence: dict[str, list[str]], mode
     return any(evidence.get(key) for key in rule.get("evidence_keys", []))
 
 
-def artifact_evidence_supports(artifact: dict[str, Any], evidence: dict[str, list[str]]) -> bool:
-    return any(evidence.get(key) for key in artifact.get("evidence_keys", []))
+def artifact_is_active(artifact: dict[str, Any], design_system: bool) -> bool:
+    return artifact.get("activation") == "design_system" and design_system
 
 
 def resolve_artifact_target(root: Path, artifact: dict[str, Any]) -> tuple[str | None, list[str]]:
@@ -285,7 +285,12 @@ def resolve_artifact_target(root: Path, artifact: dict[str, Any]) -> tuple[str |
     return (existing[0] if existing else artifact["default_target"]), existing
 
 
-def plan_package(root: Path, manifest: dict[str, Any], mode: str = "project") -> dict[str, Any]:
+def plan_package(
+    root: Path,
+    manifest: dict[str, Any],
+    mode: str = "project",
+    design_system: bool = False,
+) -> dict[str, Any]:
     detection = detect_repo(root)
     evidence = detection["evidence"]
     package_dir = manifest["compat_package_dir"] if (root / manifest["compat_package_dir"]).exists() else manifest["default_package_dir"]
@@ -304,7 +309,7 @@ def plan_package(root: Path, manifest: dict[str, Any], mode: str = "project") ->
         })
 
     for artifact in manifest.get("conditional_artifacts", []):
-        if not artifact_evidence_supports(artifact, evidence):
+        if not artifact_is_active(artifact, design_system):
             continue
         target, existing = resolve_artifact_target(root, artifact)
         if target is None:
@@ -315,7 +320,7 @@ def plan_package(root: Path, manifest: dict[str, Any], mode: str = "project") ->
             "source": artifact["source"],
             "kind": "conditional-artifact",
             "action": "maintain-and-verify" if existing else "create-and-backfill",
-            "evidence_keys": [key for key in artifact.get("evidence_keys", []) if evidence.get(key)],
+            "activation": artifact.get("activation"),
         })
 
     playbook_keys = list(manifest["playbooks"]["sections"].keys()) if mode == "full" else manifest["minimal_playbooks"]
@@ -372,7 +377,7 @@ def plan_package(root: Path, manifest: dict[str, Any], mode: str = "project") ->
         "files": files,
         "notes": [
             "scaffold 默认跳过既有文件；使用 --overwrite 才会覆盖。",
-            "仅在发现真实前端实现时创建或维护 design-tokens.md；package.json 单独存在不构成前端实现证据。",
+            "普通前端证据不创建 design-tokens.md；仅显式 --design-system 时创建或维护。",
             "新建 design-tokens.md 后必须按生产实现回填；模板的待回填状态不能作为完成结果。",
             "项目事实证据只输出到计划，不写入生成的协议正文。",
             "生效入口文件仍需由执行者按预览确认后维护。",
@@ -422,8 +427,14 @@ def make_route_index(selected_routes: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-def scaffold_package(root: Path, manifest: dict[str, Any], mode: str, overwrite: bool) -> dict[str, Any]:
-    plan = plan_package(root, manifest, mode)
+def scaffold_package(
+    root: Path,
+    manifest: dict[str, Any],
+    mode: str,
+    overwrite: bool,
+    design_system: bool = False,
+) -> dict[str, Any]:
+    plan = plan_package(root, manifest, mode, design_system)
     if plan["artifact_conflicts"]:
         return {
             "plan": plan,
@@ -516,7 +527,12 @@ def directory_contains_rule_id(directory: Path, pattern: re.Pattern[str]) -> boo
     return False
 
 
-def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | None = None) -> dict[str, Any]:
+def validate_package(
+    root: Path,
+    manifest: dict[str, Any],
+    package_dir: str | None = None,
+    design_system: bool = False,
+) -> dict[str, Any]:
     root = root.resolve()
     package_dir = package_dir or (manifest["compat_package_dir"] if (root / manifest["compat_package_dir"]).exists() else manifest["default_package_dir"])
     base = root / package_dir
@@ -524,7 +540,6 @@ def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | No
     warnings: list[str] = []
     entry_files, entry_errors = validate_entries(root)
     content_errors: list[str] = []
-    evidence = detect_repo(root)["evidence"]
     required_dirs = ["templates", "playbooks", "checks", "routes"]
     for directory in required_dirs:
         if not (base / directory).exists():
@@ -535,7 +550,7 @@ def validate_package(root: Path, manifest: dict[str, Any], package_dir: str | No
             missing.append(f"{package_dir}/{template['target']}")
 
     for artifact in manifest.get("conditional_artifacts", []):
-        if not artifact_evidence_supports(artifact, evidence):
+        if not artifact_is_active(artifact, design_system):
             continue
         target, existing = resolve_artifact_target(root, artifact)
         if target is None:
@@ -599,20 +614,20 @@ def cmd_detect(args: argparse.Namespace) -> int:
 
 def cmd_plan(args: argparse.Namespace) -> int:
     manifest = load_json(Path(args.manifest))
-    dump_json(plan_package(Path(args.repo), manifest, args.mode))
+    dump_json(plan_package(Path(args.repo), manifest, args.mode, args.design_system))
     return 0
 
 
 def cmd_scaffold(args: argparse.Namespace) -> int:
     manifest = load_json(Path(args.manifest))
-    result = scaffold_package(Path(args.repo), manifest, args.mode, args.overwrite)
+    result = scaffold_package(Path(args.repo), manifest, args.mode, args.overwrite, args.design_system)
     dump_json(result)
     return 1 if result["errors"] else 0
 
 
 def cmd_validate(args: argparse.Namespace) -> int:
     manifest = load_json(Path(args.manifest))
-    result = validate_package(Path(args.repo), manifest, args.package_dir)
+    result = validate_package(Path(args.repo), manifest, args.package_dir, args.design_system)
     dump_json(result)
     return 0 if result["ok"] else 1
 
@@ -629,17 +644,20 @@ def build_parser() -> argparse.ArgumentParser:
     plan = subparsers.add_parser("plan", help="Create a protocol package generation plan.")
     plan.add_argument("repo", help="Target repository root.")
     plan.add_argument("--mode", choices=["minimal", "project", "full"], default="project")
+    plan.add_argument("--design-system", action="store_true", help="Include Design System governance artifacts.")
     plan.set_defaults(func=cmd_plan)
 
     scaffold = subparsers.add_parser("scaffold", help="Write protocol package files from a plan.")
     scaffold.add_argument("repo", help="Target repository root.")
     scaffold.add_argument("--mode", choices=["minimal", "project", "full"], default="project")
     scaffold.add_argument("--overwrite", action="store_true", help="Overwrite existing files. Default skips them.")
+    scaffold.add_argument("--design-system", action="store_true", help="Include Design System governance artifacts.")
     scaffold.set_defaults(func=cmd_scaffold)
 
     validate = subparsers.add_parser("validate", help="Validate an existing protocol package.")
     validate.add_argument("repo", help="Target repository root.")
     validate.add_argument("--package-dir", help="Protocol package directory relative to repo root.")
+    validate.add_argument("--design-system", action="store_true", help="Validate Design System governance artifacts.")
     validate.set_defaults(func=cmd_validate)
 
     return parser

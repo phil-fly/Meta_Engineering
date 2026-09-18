@@ -63,6 +63,8 @@ Only write Layer 1 when the content is reusable across projects and the user con
 **Compatible legacy location:** `{project_root}/docs/00_MEMORY/`
 **Visibility:** Visible to user, committed to git. This is the explicit memory of the project.
 
+Project memory preserves evidence and history; it is not automatically the source of truth for final delivery. When memory is used to update a PRD, design artifact, handoff, title, or PR summary, apply `final-state-delivery.md`: current confirmed state wins, while rejected, superseded, and process-only entries stay in the history layer.
+
 ---
 
 ### ai-agent-workspace/product/memory/CONTEXT_SNAPSHOT.md
@@ -96,6 +98,51 @@ Do not write:
 - Casual brainstorming that the user has not endorsed.
 - Temporary assumptions used only to explore an option.
 - A rejected idea unless the rejection itself becomes an important constraint.
+
+---
+
+### ai-agent-workspace/product/memory/CONFIRMATIONS.md
+
+Compatible legacy path: `docs/00_MEMORY/CONFIRMATIONS.md`.
+
+**Role:** The append-only registry of explicit user confirmations. Each record is a complete post-change snapshot for one `Requirement ID + Scope/Version`; `CONTEXT_SNAPSHOT.md` preserves evidence, while `DECISIONS.md` records the resulting business judgment.
+
+Source resolution is exclusive. New projects use `ai-agent-workspace/product/memory/CONFIRMATIONS.md`; an existing project may keep `docs/00_MEMORY/CONFIRMATIONS.md`. If both files exist, the state is split-brain and final delivery stops until one source is migrated or removed. Resolve and validate the source from the project root with `scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json`.
+
+```markdown
+# User Confirmations — {project_id}
+
+## CONF-001 · {Short object title}
+- **Confirmed at:** 2026-03-06T10:30:00+08:00
+- **Source:** Session 2026-03-06, message/turn {stable reference}
+- **Object:** {human-readable requirement, decision, screen, flow, or scope title}
+- **Requirement ID:** REQ-XXX {stable ID; Object is display text only}
+- **Scope/Version:** {stable scope_id@version token, or scope_id@N/A}
+- **Decision state:** confirmed | deferred | rejected
+- **Change type:** add | patch | replace | remove
+- **Affected fields:** {field.path, field.path} | N/A (required for patch; descriptive only)
+- **Accepted conclusion:** {complete current conclusion after this event}
+- **User quote:** "{exact confirmation wording}"
+- **Status:** active | superseded | withdrawn (record lifecycle)
+- **Supersedes:** CONF-XXX | N/A (required for replace/remove or a patch of an existing active record)
+- **Related decision:** DEC-XXX | N/A
+
+---
+```
+
+Every new or changed user-confirmed conclusion persisted for later delivery uses one `CONF-*` record. `proposed` and `pending` stay in the working layer or TODO until the user decides. All displayed fields except `Related decision` are required; `Affected fields` may be `N/A` except for `patch`, and `Supersedes` may be `N/A` only for the initial `add`. A missing field, duplicate ID, invalid timestamp, broken chain, non-latest active record, or active count other than one makes that reconstruction key `unresolved`.
+
+`Status` describes record lifecycle; `Decision state` describes the accepted requirement outcome. Records for one exact `Requirement ID + Scope/Version` form a linear snapshot chain:
+
+1. The first record is `add` and has `Supersedes: N/A`.
+2. Every later `patch`, `replace`, or `remove` points to the immediately previous record.
+3. Every record carries the complete current `Accepted conclusion`. A `patch` lists changed fields for review, but no consumer is expected to merge free-form fragments.
+4. Earlier records are `superseded` or `withdrawn`; the latest record is the only `active` record.
+5. `remove` records an explicit `rejected` or `deferred` current outcome.
+
+Append corrections as new snapshots; do not rewrite history. The validator projects the unique active snapshot and can filter it by target `Scope/Version`.
+
+**Update trigger:** An explicit user confirmation, version deferral, withdrawal, or supersession that must persist beyond the current conversation. A current explicit instruction is already authoritative for the current response; persistence is required only when project memory mode is active and a durable product artifact is being updated. If the user forbids memory writes, do not update this registry and report that persistence was not recorded. Short acknowledgements such as “好” or “提 PR” are recorded only when they answer one uniquely identified conclusion under `final-state-delivery.md`.
 
 ---
 
@@ -177,6 +224,9 @@ Compatible legacy path: `docs/01_STRATEGY/DECISIONS.md`.
 
 ## DEC-001 · {Short decision title}
 - **Date:** 2026-03-01
+- **Status:** active | superseded
+- **Supersedes:** DEC-XXX | N/A
+- **Confirmation:** CONF-XXX
 - **Context:** Based on [CNT-001]
 - **Decision:** One sentence summary of what was decided
 - **Rationale:** Why this direction, not alternatives
@@ -188,7 +238,20 @@ Compatible legacy path: `docs/01_STRATEGY/DECISIONS.md`.
 
 **Written when:** Consensus Detection fires — user signals agreement on a business judgment.
 
-**Critical rule:** DECISIONS are **never written without explicit user confirmation**. The AI may draft a decision, but it must present the draft and wait for the user to approve before writing to `DECISIONS.md`. If the decision overrides or conflicts with an existing Context entry, the decision must explicitly reference the affected `[CNT-XXX]` and state the override reason.
+**Critical rule:** DECISIONS are **never written without explicit user confirmation**. The AI may draft a decision, but it must present the draft and wait for the user to approve before writing to `DECISIONS.md`. Each new decision must reference a `CONF-*` record; the confirmation registry carries the object, scope/version, accepted conclusion, exact quote, timestamp, and source. If a later confirmation replaces an older decision in the same scope, write the new decision as `active`, mark the older decision `superseded`, and link both records. If the decision overrides or conflicts with an existing Context entry, it must explicitly reference the affected `[CNT-XXX]` and state the override reason.
+
+**Legacy compatibility:** Existing decision entries without a `Status` field are treated as `active` only when they are covered by an explicit legacy-current marker and no later explicit confirmation, explicit supersession, or same-scope contradiction exists. The marker must be present in the authoritative document frontmatter and include exactly one entry for the scope:
+
+```yaml
+product_state: legacy-current
+legacy_scope: {stable scope ID}
+legacy_version: {version ID}
+effective_at: {ISO-8601 timestamp with timezone}
+```
+
+The marker is evidence of an unchanged baseline, not a user confirmation, and cannot establish a new “latest” confirmation. Entries without the marker, with multiple markers for one scope, or with a marker that conflicts with another authoritative artifact are `unresolved`; ask the user or migrate the state into `CONFIRMATIONS.md`. New or edited entries must use `Status` and `Confirmation`.
+
+Before relying on legacy compatibility, run `scripts/validate-legacy-current.py --path <authoritative-document> [<other-document> ...]`; duplicate scopes or malformed markers fail closed.
 
 Decision threshold:
 
@@ -211,6 +274,7 @@ When a new `project_id` is mentioned for the first time, create this skeleton in
 │   └── product/
 │       ├── memory/
 │       │   ├── CONTEXT_SNAPSHOT.md  ← Header + "事实快照库..."
+│       │   ├── CONFIRMATIONS.md     ← Header + "User Confirmations"
 │       │   ├── SESSION_MEMORY.md    ← Header + "Project Session Log"
 │       │   └── TODO.md              ← initialized with empty sections
 │       ├── strategy/
@@ -231,7 +295,7 @@ When a new `project_id` is mentioned for the first time, create this skeleton in
 
 **No .gitignore changes needed** (docs are meant to be committed).
 
-Confirm to user: `"Project '{project_id}' initialized. Product workspace ready in ai-agent-workspace/product/. PRD docs initialized in product/prd/ (README + framework-prd.md)."`
+Confirm to user: `"Project '{project_id}' initialized. Product workspace ready in ai-agent-workspace/product/. Memory includes CONTEXT_SNAPSHOT.md, CONFIRMATIONS.md, SESSION_MEMORY.md, and TODO.md; PRD docs initialized in product/prd/ (README + framework-prd.md)."`
 
 ---
 
@@ -240,12 +304,13 @@ Confirm to user: `"Project '{project_id}' initialized. Product workspace ready i
 | Sub-layer | Records | Files |
 |-----------|---------|-------|
 | **Objective facts** | What happened & User's raw input | `ai-agent-workspace/product/memory/SESSION_MEMORY.md`, `ai-agent-workspace/product/memory/CONTEXT_SNAPSHOT.md` |
+| **Confirmation authority** | Explicit accepted state and ordering | `ai-agent-workspace/product/memory/CONFIRMATIONS.md` |
 | **Logic assets** | Conclusions — decisions, flows, specs | `ai-agent-workspace/product/strategy/DECISIONS.md`, other product workspace docs |
 
-Facts layer = history. Logic layer = conclusions.
+Facts layer = history. Logic layer = conclusions. Final delivery is a current-state projection from the active conclusions, not a summary of both layers.
 
-**When they conflict — stop and flag, do not auto-resolve.** The AI must:
-1. Surface the conflict to the user: *"I noticed [DEC-XXX] may conflict with the earlier constraint [CNT-XXX] — here's what I see: [brief description]. How would you like to handle this?"*
-2. Wait for the user's judgment.
-3. If the user decides to override: record a new decision in `DECISIONS.md` that explicitly references `[CNT-XXX]` and explains why the override is justified.
-4. The original Context entry is never deleted or modified — it remains as historical evidence.
+**When they conflict:**
+1. If the confirmation registry contains a later `active` confirmation for the same object and scope, treat it as the current state and record the supersession without asking for the same decision again.
+2. If the object, scope, condition, or replacement relationship is ambiguous, surface the conflict and wait for the user's judgment.
+3. If the user decides to override, record a new active decision in `DECISIONS.md`, mark the older decision superseded when applicable, and explicitly reference the affected `[CNT-XXX]`.
+4. The original Context and Session entries are never deleted or modified; they remain historical evidence and are not copied into final delivery unless `final-state-delivery.md` explicitly admits them.

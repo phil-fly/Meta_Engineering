@@ -46,7 +46,7 @@ Minimum coverage:
 - **Information hierarchy:** content blocks, fields, primary/secondary actions, navigation, and visibility/permission rules.
 - **UI states:** default, loading, empty, error, success, disabled, and permission-limited states when relevant.
 - **Wireframes:** ASCII, Mermaid, Figma link, exported image link, or referenced prototype file. Use the lowest-fidelity format that makes layout and flow reviewable.
-- **Open design gaps:** if a page cannot be drawn yet, add a stable `[待定项-XXX]` with reason, impact, and the decision needed.
+- **Open design gaps:** if a page cannot be drawn yet, add a stable `[待定项-XXX]` with `blocking` or `non-blocking`, reason, impact, and the decision needed.
 
 Acceptance rule for UI-related PRDs: `key pages with design requirements == key pages in user journeys`, and `key pages with wireframes + explicitly deferred wireframes == key pages in user journeys`. Acceptance rule for non-UI PRDs: page design and wireframes are explicitly marked `N/A` with reason.
 
@@ -139,6 +139,8 @@ A list of all functional modules, linking to their Level 2 PRDs.
 
 A feature PRD is only "ready" when it passes the **Three-Layer Design Gate**:
 
+When finalizing for development, use the pending rubric in `final-state-delivery.md`: any `blocking` pending item or unresolved current-state conflict keeps the PRD out of `Ready for development`; only `non-blocking` pending items may remain on a ready PRD, with an owner or follow-up timing. Unknown impact defaults to `blocking`.
+
 ### 1. User Flow (The Path)
 - Entry point (referenced from Framework Screen Tree).
 - Step-by-step interaction flow.
@@ -148,7 +150,7 @@ A feature PRD is only "ready" when it passes the **Three-Layer Design Gate**:
 - **UI Structure:** Information hierarchy, component breakdown.
 - **UI Scope Check:** if this feature has no user-facing UI change, mark Frontend Specs as `N/A` with reason.
 - **Page Design Requirements:** for UI-related features, affected pages/views, page purpose, content blocks, visible fields, primary/secondary actions, navigation, permissions, and responsive constraints if relevant.
-- **Wireframes:** for UI-related features, low-fidelity wireframe for every key affected page or flow state; use `[待定项-XXX]` only when the page cannot be drawn yet and explain impact.
+- **Wireframes:** for UI-related features, low-fidelity wireframe for every key affected page or flow state; use `[待定项-XXX]` only when the page cannot be drawn yet, mark its blocking level, and explain impact.
 - **Interactions:** Input validation, loading states, error states.
 - **Display Logic:** "If status is X, show Y."
 
@@ -161,14 +163,18 @@ A feature PRD is only "ready" when it passes the **Three-Layer Design Gate**:
 
 ## Annotation Handling
 
-(Applies to all docs. See `SKILL.md` for full protocol.)
+(Applies to draft and review states. Finalization follows `final-state-delivery.md`.)
 
 1.  **Identify:** Read `[批注]` or `[comment]`.
 2.  **Discuss:** Propose solution in chat.
 3.  **Confirm:** Wait for user approval.
 4.  **Execute:** Update doc.
-    - **Method A (In-place):** Convert to blockquote: `> [批注] ...`.
-    - **Method B (New Version):** `v1_0` -> `v1_1`. Add header: `> Based on [批注] from v1_0`.
+    - **Draft mode:** The annotation and answer may remain temporarily while discussion continues.
+    - **In-place finalization:** Merge the confirmed conclusion into the relevant requirement and remove the resolved annotation and answer.
+    - **New-version finalization:** `v1_0` -> `v1_1`; the new version is a clean current-state document. Git or the archived old version carries history, so do not add a `Based on [批注]` header.
+    - **Still unresolved:** Keep only a stable `[待定项-XXX]` that states the decision needed and implementation impact.
+
+Do not use strikethrough, negative titles, or commentary about the Agent's earlier proposal as a substitute for updating the current requirement.
 
 ---
 
@@ -234,6 +240,8 @@ Every finding must end in one of:
 
 Do not let findings disappear between review and edit.
 
+Closure status belongs in the review record, TODO, decision log, or version history. It does not require rejected findings, resolved comments, or correction narratives to remain in the finalized PRD.
+
 ### Step 5: Editing Mode
 
 Before editing, ask or infer the safest mode:
@@ -252,3 +260,4 @@ If the user only asks for review, do not modify files.
 2.  **User First, Data Last:** Always design the experience (Screen Tree) before constraining it with storage (Entities).
 3.  **Pain-Point Closure:** Every feature must trace back to a pain point in the Strategy doc.
 4.  **Wireframes In UI PRDs:** Page design requirements and low-fidelity wireframes are part of readiness for UI-related PRDs, not optional post-PRD decoration; non-UI PRDs should mark them `N/A`.
+5.  **Current State At Delivery:** Drafts may expose exploration, but a finalized PRD is rebuilt from the latest confirmed state under `final-state-delivery.md`; discussion history is not product behavior.

@@ -168,6 +168,10 @@ The goal: a stakeholder looking at the mockup should immediately understand what
 
 Never jump from step 3 to step 5 without a handoff note.
 
+Before a handoff is marked ready, apply `final-state-delivery.md`. The current handoff and mockup must describe the latest confirmed design state; resolved comments, rejected variants, superseded layouts, and Agent execution history stay in working artifacts or version history. Any unresolved `blocking` pending item or current-state conflict means `Needs revision`; `non-blocking` pending items must include an owner or follow-up timing. Use the pending rubric in `final-state-delivery.md`; unknown impact defaults to `blocking`.
+
+If the user asks for a PR title or description, generate it from the current accepted requirements, actual implementation diff, and available verification results. Only behavior-preserving internal changes may be treated as implementation support when linked to a `CONF-*` record. Migrations, dependency changes, observability, generated API/contracts, permissions, data, security/compliance, rollback, or other externally observable semantics are product-scope changes; unknown impact defaults to `blocking`. Do not name the PR after a removed suggestion or narrate the correction process. If the implementation diff or verification evidence is unavailable, label the text as a draft rather than presenting it as the final implementation summary.
+
 ---
 
 ## Handoff Note Format
@@ -178,7 +182,7 @@ File: `ai-agent-workspace/product/design/handoff/{screen-name}.md` or compatible
 # Handoff: {Screen Name}
 
 **Mockup:** `ai-agent-workspace/product/design/screens/{screen-name}.html`
-**Status:** Ready for development / Needs revision
+**Status:** Ready for development / Needs revision (Ready requires no `blocking` pending items and no unresolved current-state conflict.)
 
 ## Components
 - [ ] {Component name}: {brief description}
@@ -198,7 +202,7 @@ File: `ai-agent-workspace/product/design/handoff/{screen-name}.md` or compatible
 - {Condition}: {how to handle}
 
 ## Open Questions
-- [ ] {Question that needs resolution before or during development}
+- [ ] [`blocking` | `non-blocking`] {Question that needs resolution before or during development}; {impact and follow-up timing}
 ```
 
 ---

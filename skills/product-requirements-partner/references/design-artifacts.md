@@ -59,13 +59,13 @@ ai-agent-workspace/product/design/
 
 - 人对每个待定项可：在文档内直接回复（如 `[Answer to 待定项-001]` + 结论），或通过对话与 AI 讨论后再把结论写回文档。
 
-**3. 待定项确认后的整理（与批注整理策略类似）**
+**3. 待定项确认后的整理（草案保留过程，定稿只保留当前状态）**
 
-- **结论明确化：** 在文档相关位置保留结论，用引用/Answer 格式（如 `[Answer to 待定项-001]`），不删除原待定项标记，便于追溯。
+- **结论明确化：** 讨论中可暂时使用 `[Answer to 待定项-001]`；定稿时必须把已确认结论合并到相关正文，并删除已解决的待定项与 Answer。追溯由 memory、旧版本或 Git 承担。
 - **关键业务判断留存：** 重要判断除写在文档内外，如确有必要，同步写入项目的 DECISIONS（如 `ai-agent-workspace/product/strategy/DECISIONS.md`，或兼容 `docs/01_STRATEGY/DECISIONS.md`）。
 - **与 PRD 的一致性：** 若结论与原有 PRD 设计冲突，讨论时就应指出；若最终决定与当初 PRD 不一致，**必须对 PRD 进行修改**。修改前需与用户确认。修改方式二选一：
   - **方式 A：** 原文直接覆盖。
-  - **方式 B：** 原文用划线格式删除旧版，再在文档中补充新设计。
+  - **方式 B：** 生成一份干净的新版本；旧版作为历史保留，不在当前正文中用划线展示旧设计。
 - **衍生 TODO：** 待定项可能衍生出后续任务，这些 TODO 需记录到项目 TODO（`ai-agent-workspace/product/memory/TODO.md`，或兼容 `docs/TODO.md`），并在待定项汇总中注明对应 TODO 编号。
 
 整理完成后，即得到一份可指导线稿与细节设计的**文字版设计指导方案**。
@@ -97,4 +97,4 @@ ai-agent-workspace/product/design/
 ## 使用习惯建议
 
 - **命名：** 文件命名与 PRD 功能/模块或版本对应（如 `ui_ux/design_handoff_v1_0_20260227.md`、`ai_prompts/order_chat.md`）。
-- **与记忆系统同步：** 重要设计决策（含待定项结论、技术选型等）确认后，除在产品设计目录中更新外，按产品记忆目录同步更新：记录讨论过程到 `SESSION_MEMORY.md`，关键事实或约束追加到 `CONTEXT_SNAPSHOT.md`；如涉及业务判断或业务决策，经用户确认后更新 `DECISIONS.md`。
+- **与记忆系统同步：** 重要设计决策（含待定项结论、技术选型等）确认后，先按 `memory-system.md` 登记 `CONFIRMATIONS.md`，再在产品设计目录中更新；`SESSION_MEMORY.md` 只记录有长期追溯价值的简短讨论结论，不记录 Agent 工具调用、执行步骤、日常往返或被否定草案的展开过程；关键事实或约束追加到 `CONTEXT_SNAPSHOT.md`；如涉及业务判断或业务决策，经用户确认后更新 `DECISIONS.md` 并关联 `CONF-*`。最终设计交付按 `final-state-delivery.md` 清理过程残留。

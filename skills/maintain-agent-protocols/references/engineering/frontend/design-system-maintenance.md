@@ -10,18 +10,18 @@
 - CON-FE-DS-004 设计阶段继承：已有产品或目标仓的设计任务必须先继承已确认的 Token、组件、页面模式和响应式约束；只有新项目或确认缺失的参数才能进入补齐决策，且不得静默采用通用兜底值。
 - CON-FE-DS-005 开发阶段复用：实现前必须确认受影响参数、现有组件、Variant、Size、State、Responsive 行为和 Token 映射；已有语义 Token 或组件能力可满足时，不得新增同义值、平行组件或第二套 UI Framework。
 - CON-FE-DS-006 变更可追溯：新增或修改 Token、主题、组件默认值、断点或页面布局时，必须说明语义、使用范围、受影响消费者、兼容或迁移策略、例外和回归验证；不得只修改一个视觉值而不检查下游组件和页面。
-- CON-FE-DS-007 缺失体系门禁：目标仓存在前端实现但没有相关规范时，必须先创建并据生产实现回填 `design-tokens.md`；没有生产依据的参数标为待回填、未发现或不适用，新增候选值仍需用户或项目负责人确认。企业 SaaS 默认基线只能作为候选，不自动升级为项目标准。
+- CON-FE-DS-007 缺失体系门禁：只有当前任务已经进入 Design System Governance，且共享视觉体系需要持久化而无现有载体时，才创建并据生产实现回填 `design-tokens.md`；缺少文档本身不是创建理由。没有生产依据的参数标为待回填、未发现或不适用。
 - CON-FE-DS-008 审查独立性：完整基线审查、变更审查和实现验收必须区分；日常设计与开发执行前移门禁，独立审查使用同一 Skill 或协议包 `templates/` 目录中的 `frontend-design-system-review-prompt.md` 和 `CHK-FE-DS-*`，不得用一次终局审查替代过程控制。左移只提炼高频门禁，不得删除独立提示语对逐域参数、组件、页面模式、真实响应式、Agent 发现链路、协议继承和报告契约的自包含调查能力。
-- CON-FE-DS-009 条件强制：仅当目标仓存在真实前端实现，或当前任务将首次引入前端实现时，才要求创建和维护 `design-tokens.md`；单独存在 `package.json`、设计稿、需求文档或未来规划不构成前端实现证据。
-- CON-FE-DS-010 统一设计入口：命中 CON-FE-DS-009 时，目标仓必须维护且只能维护一份 `design-tokens.md`。新路径默认是仓库根 `ai-agent-workspace/product/design/design-tokens.md`；已有项目可继承仓库根 `docs/03_DESIGN/design-tokens.md`，但禁止两处同时保留可编辑正文。
+- CON-FE-DS-009 条件强制：仅当修改共享 Token、Theme、全局组件默认样式、建立共享视觉体系，或用户明确要求建立/维护 Design System 时进入本治理流程。普通页面、按钮、文案或局部样式修改不触发；`design-tokens.md` 缺失也不触发。
+- CON-FE-DS-010 统一设计入口：命中 CON-FE-DS-009 且需要文档载体时，目标仓只维护一份 `design-tokens.md`。新路径默认是仓库根 `ai-agent-workspace/product/design/design-tokens.md`；已有项目可继承仓库根 `docs/03_DESIGN/design-tokens.md`，但禁止两处同时保留可编辑正文。
 - CON-FE-DS-011 明细完整：`design-tokens.md` 必须直接记录文档状态、生产真值源关系、Color、Typography、Spacing、Size/Density、Radius、Border、Shadow/Elevation、Layout/Grid、Breakpoint/Responsive、z-index、Motion、Icon、Component Token、Theme、例外、维护契约和长期变更记录；不得用一组路由链接代替参数明细。
-- CON-FE-DS-012 强制读取与同步：存在前端实现时，Agent 开始前端设计或开发前必须先定位并读取 `design-tokens.md`；文件缺失时先创建或回填。修改其记录的 Token、Theme、Breakpoint、Layout/Grid、组件默认值或生产真值源时，必须在同一变更中同步文件并验证消费者。
+- CON-FE-DS-012 条件读取与同步：命中 CON-FE-DS-009 时定位并读取现有 `design-tokens.md`；修改其记录的 Token、Theme、Breakpoint、Layout/Grid、组件默认值或生产真值源时，在同一变更中同步文件并验证消费者。现有文档不是生产真值源时，报告差异，不自动迁移整个体系。
 
 ## 维护流程
 
 ### 1. 范围门
 
-先确认是否存在真实前端实现，并声明审查或变更模式：
+先确认是否命中 CON-FE-DS-009，并声明审查或变更模式：
 
 ```text
 仓库级基线调查  → 回答目标仓整体如何维护前端规范
@@ -29,7 +29,7 @@
 独立变更审查    → 审查既有改动是否破坏设计系统
 ```
 
-真实前端实现证据包括生产页面、组件、客户端样式或真实 UI 入口。只有包管理配置、设计稿、原型或文档时，本路由不要求创建 `design-tokens.md`；当前任务将首次引入前端实现时，在首个 UI 实现落盘前创建。
+未命中时返回局部流程：读取受影响组件与生产样式来源，完成局部修改和验证后停止。不得因为发现前端实现或缺少治理文档而升级为仓库级基线调查。
 
 仓库级结论必须覆盖目标仓前端实现范围；只读到单个页面或组件时，结论必须限制在该范围。
 
@@ -46,7 +46,7 @@
 
 ### 3. 基线门
 
-命中 CON-FE-DS-009 时，先定位唯一 `design-tokens.md`。文件不存在则从 `templates/design-tokens.md` 对应的详细结构创建，再基于生产实现回填；旧项目不得用空模板宣告完成。
+命中 CON-FE-DS-009 时，先定位现有 `design-tokens.md` 与生产真值源。任务明确需要建立共享视觉体系且文件不存在时，才从 `templates/design-tokens.md` 创建并基于生产实现回填；旧项目不得用空模板宣告完成。
 
 在 `design-tokens.md` 中维护两张核心表：
 
@@ -57,7 +57,7 @@
 
 ### 4. 设计门
 
-进入线框图、视觉稿、mockup 或组件 demo 前：
+进入共享视觉体系的线框图、视觉稿、mockup 或组件 demo 前：
 
 - 先读取唯一 `design-tokens.md`，再按其中记录的生产路径读取受影响的 Token、组件和页面模式真值源。
 - 标出本次复用、扩展、缺失和待确认项。
@@ -66,7 +66,7 @@
 
 ### 5. 开发预检门与变更门
 
-编码前必须读取唯一 `design-tokens.md`，并确认真实挂载入口、受影响组件、Token 来源、组件库边界和验证命令。实施中：
+实施共享体系变更前读取现有 `design-tokens.md`（如有），并确认真实挂载入口、受影响组件、Token 来源、组件库边界和验证命令。实施中：
 
 - 优先复用现有 Token、组件、布局原语和状态模式。
 - 新增视觉值前搜索同义值和近似值；新增共享组件前检查组合、扩展和第三方包装层。
@@ -79,7 +79,7 @@
 按目标仓现有工具运行静态检查、类型检查、测试、构建、组件工坊、视觉回归、E2E 或等价验证；用户可见页面同时执行 `ui-stability.md` 的运行态检查。最后按 `../../checks/checklists.md` 的 `frontend-design-system-checklist` 自检，并说明：
 
 - 继承或修改了哪些真值源。
-- 读取、创建、回填或更新了哪一份 `design-tokens.md`；不适用时说明不存在前端实现证据。
+- 读取、创建、回填或更新了哪一份 `design-tokens.md`；局部任务未进入治理流程时无需报告文档缺失。
 - 新增、复用、废弃或保留了哪些 Token 和组件能力。
 - 验证过的状态、视口、缩放、长文本和数据规模。
 - 未确认项、项目例外、迁移状态和剩余风险。

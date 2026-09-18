@@ -19,7 +19,7 @@
 - `protocol/route-card-template.md`：工程路由卡片模板，可落盘到 `ai-agent-protocols/templates/route-card.md`。
 - `../templates/user-protocol.md`、`project-protocol.md`、`route-card.md`：复制到目标仓 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`。
 - `../templates/frontend-design-system-review-prompt.md`：复制到目标仓协议模板目录，作为前端设计系统基线调查与变更审查的独立只读提示语；它不在 `references/protocol/` 维护镜像正文。
-- `../templates/design-tokens.md`：仅在目标仓存在或将首次引入真实前端实现时，实例化为 `ai-agent-workspace/product/design/design-tokens.md` 或继承兼容 `docs/03_DESIGN/design-tokens.md`；不得复制到协议模板或路由目录。
+- `../templates/design-tokens.md`：仅在显式进入 Design System Governance 且需要共享文档载体时，实例化为 `ai-agent-workspace/product/design/design-tokens.md` 或继承兼容 `docs/03_DESIGN/design-tokens.md`；不得因普通前端存在而创建。
 
 ## 工程规则路由
 
