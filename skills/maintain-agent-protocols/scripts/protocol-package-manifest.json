@@ -18,6 +18,10 @@
     {
       "source": "templates/frontend-design-system-review-prompt.md",
       "target": "templates/frontend-design-system-review-prompt.md"
+    },
+    {
+      "source": "templates/design-tokens.md",
+      "target": "templates/design-tokens.md"
     }
   ],
   "conditional_artifacts": [
@@ -111,42 +115,49 @@
       "source_globs": ["references/engineering/frontend/*.md"],
       "target_prefix": "routes/frontend",
       "evidence_keys": ["frontend_implementation"],
-      "always_include": ["index.md", "javascript-typescript.md"]
+      "always_include": ["index.md", "javascript-typescript.md", "design-system-maintenance.md"],
+      "requires": ["core", "security", "performance"],
+      "min_confidence": 0.5
     },
     {
       "id": "backend-go",
       "status": "项目证据支持",
       "source_globs": ["references/engineering/backend/go.md", "references/engineering/backend/go/*.md"],
       "target_prefix": "routes/backend/go",
-      "evidence_keys": ["go"]
+      "evidence_keys": ["go"],
+      "min_confidence": 0.5
     },
     {
       "id": "backend-java",
       "status": "项目证据支持",
       "source_globs": ["references/engineering/backend/java.md", "references/engineering/backend/java/*.md"],
       "target_prefix": "routes/backend/java",
-      "evidence_keys": ["java"]
+      "evidence_keys": ["java"],
+      "min_confidence": 0.5
     },
     {
       "id": "backend-rust",
       "status": "项目证据支持",
       "source_globs": ["references/engineering/backend/rust.md", "references/engineering/backend/rust/*.md"],
       "target_prefix": "routes/backend/rust",
-      "evidence_keys": ["rust"]
+      "evidence_keys": ["rust"],
+      "min_confidence": 0.5
     },
     {
       "id": "backend-python",
       "status": "项目证据支持",
       "source_globs": ["references/engineering/backend/python.md"],
       "target_prefix": "routes/backend/python",
-      "evidence_keys": ["python"]
+      "evidence_keys": ["python"],
+      "min_confidence": 0.5
     },
     {
       "id": "core",
       "status": "项目证据支持",
       "source_globs": ["references/engineering/core/*.md"],
       "target_prefix": "routes/core",
-      "evidence_keys": ["api", "database", "auth", "logging", "config"]
+      "evidence_keys": ["api", "database", "auth", "logging", "config"],
+      "min_confidence": 0.5
     },
     {
       "id": "security",
@@ -154,7 +165,9 @@
       "source_globs": ["references/engineering/security/*.md"],
       "target_prefix": "routes/security",
       "evidence_keys": ["security"],
-      "conditional": true
+      "conditional": true,
+      "requires": ["core"],
+      "min_confidence": 0.5
     },
     {
       "id": "performance",
@@ -162,7 +175,9 @@
       "source_globs": ["references/engineering/performance/*.md"],
       "target_prefix": "routes/performance",
       "evidence_keys": ["performance"],
-      "conditional": true
+      "conditional": true,
+      "requires": ["core", "platform"],
+      "min_confidence": 0.5
     },
     {
       "id": "platform",
@@ -177,7 +192,8 @@
       "source_globs": ["references/engineering/governance/index.md", "references/engineering/governance/evidence-and-scope.md", "references/engineering/governance/agent-governance.md"],
       "target_prefix": "routes/governance",
       "evidence_keys": ["governance"],
-      "conditional": true
+      "conditional": true,
+      "min_confidence": 0.5
     }
   ],
   "minimal_playbooks": ["task-governance", "coding", "architecture", "security-review", "troubleshooting", "research"],

@@ -7,6 +7,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -34,7 +35,8 @@ class ValidatePackageTests(unittest.TestCase):
 
     def write_valid_entry(self) -> None:
         (self.repo / "AGENTS.md").write_text(
-            "# Agent Protocol\n\n开发任务读取 [编码手册](ai-agent-workspace/protocols/playbooks/coding.md)。\n",
+            "# Agent Protocol\n\n"
+            + protocol_package.make_entry_body("ai-agent-workspace/protocols", []),
             encoding="utf-8",
         )
 
@@ -173,9 +175,112 @@ class ValidatePackageTests(unittest.TestCase):
         self.assertTrue(any(route["id"] == "frontend" for route in plan["selected_routes"]))
 
     def test_explicit_design_system_option_includes_design_tokens(self) -> None:
+        self.write_frontend_implementation()
         plan = protocol_package.plan_package(self.repo, self.manifest, "project", True)
         targets = {item["target"] for item in plan["files"]}
         self.assertIn("ai-agent-workspace/product/design/design-tokens.md", targets)
+
+    def test_explicit_design_system_without_frontend_evidence_does_not_plan_tokens(self) -> None:
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project", True)
+        targets = {item["target"] for item in plan["files"]}
+        self.assertNotIn("ai-agent-workspace/product/design/design-tokens.md", targets)
+
+    def test_validate_rejects_default_when_both_protocol_directories_have_assets(self) -> None:
+        self.scaffold()
+        compat = self.repo / "ai-agent-protocols"
+        compat.mkdir(parents=True)
+        (compat / "README.md").write_text("# Compatibility package\n", encoding="utf-8")
+        self.write_valid_entry()
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("双" in error for error in result["content_errors"]))
+
+    def test_validate_allows_explicit_protocol_directory_selection(self) -> None:
+        self.scaffold()
+        compat = self.repo / "ai-agent-protocols"
+        compat.mkdir(parents=True)
+        (compat / "README.md").write_text("# Compatibility package\n", encoding="utf-8")
+        self.write_valid_entry()
+
+        result = protocol_package.validate_package(self.repo, self.manifest, "ai-agent-workspace/protocols")
+
+        self.assertTrue(result["ok"], result)
+        self.assertTrue(any("已显式选择协议真值源" in warning for warning in result["warnings"]))
+
+    def test_validate_rejects_package_directory_outside_manifest_without_mutation(self) -> None:
+        outside = self.repo.parent / f"outside-protocols-{self.repo.name}"
+        outside.mkdir()
+        state_path = outside / "protocol-package-state.json"
+        original = '{"sentinel": "unchanged"}\n'
+        state_path.write_text(original, encoding="utf-8")
+
+        result = protocol_package.validate_package(
+            self.repo, self.manifest, "../outside-protocols"
+        )
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any(
+            "manifest" in error and "package_dir" in error
+            for error in result["content_errors"]
+        ))
+        self.assertEqual(state_path.read_text(encoding="utf-8"), original)
+
+    def test_validate_rejects_unknown_and_duplicate_route_rows(self) -> None:
+        self.write_frontend_implementation()
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        self.write_valid_entry()
+        route_index = self.repo / "ai-agent-workspace" / "protocols" / "routes" / "index.md"
+        content = route_index.read_text(encoding="utf-8")
+        row = next(line for line in content.splitlines() if line.startswith("| 项目证据支持 |"))
+        route_index.write_text(content + row + "\n| 项目证据支持 | `routes/mystery/` | 当前仓库证据支持 | 0.85 | 无 |\n", encoding="utf-8")
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("重复路由" in error for error in result["content_errors"]))
+        self.assertTrue(any("未知路由" in error for error in result["content_errors"]))
+
+    def test_validate_rejects_project_route_forged_as_full_coverage(self) -> None:
+        self.write_frontend_implementation()
+        protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        self.write_valid_entry()
+        route_index = self.repo / "ai-agent-workspace" / "protocols" / "routes" / "index.md"
+        route_index.write_text(route_index.read_text(encoding="utf-8").replace("| 项目证据支持 |", "| 完整覆盖 |", 1), encoding="utf-8")
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("只有 full 模式" in error for error in result["content_errors"]))
+
+    def test_validate_does_not_create_missing_state_file(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        state_path = self.repo / "ai-agent-workspace" / "protocols" / "protocol-package-state.json"
+        state_path.unlink()
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertFalse(state_path.exists())
+
+    def test_validate_rejects_planned_state_without_generate(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        state_path = self.repo / "ai-agent-workspace" / "protocols" / "protocol-package-state.json"
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state["status"] = "planned"
+        state["completed"] = ["classify", "collect", "decide"]
+        state_path.write_text(json.dumps(state), encoding="utf-8")
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("完成 generate 阶段" in error for error in result["content_errors"]))
+        persisted = json.loads(state_path.read_text(encoding="utf-8"))
+        self.assertEqual(persisted["status"], "invalid")
+        self.assertEqual(persisted["completed"], protocol_package.CHECKPOINT_PHASES)
 
     def test_frontend_plan_reuses_existing_legacy_design_tokens(self) -> None:
         self.write_frontend_implementation()
@@ -392,6 +497,448 @@ class ValidatePackageTests(unittest.TestCase):
         )
         self.assertEqual(after_entry.returncode, 0, after_entry.stderr)
         self.assertTrue(json.loads(after_entry.stdout)["ok"])
+
+    def test_detect_excludes_skill_material_from_project_evidence(self) -> None:
+        skill_doc = self.repo / "skills" / "maintain-agent-protocols" / "references" / "security.md"
+        skill_doc.parent.mkdir(parents=True, exist_ok=True)
+        skill_doc.write_text("auth router database security performance gateway\n", encoding="utf-8")
+        business_source = self.repo / "skills" / "app" / "main.py"
+        business_source.parent.mkdir(parents=True, exist_ok=True)
+        business_source.write_text("print('business app')\n", encoding="utf-8")
+
+        detection = protocol_package.detect_repo(self.repo)
+
+        self.assertNotIn("skills", detection["summary"]["excluded_prefixes"])
+        self.assertIn("skills/app/main.py", detection["evidence_quality"]["python"]["glob_hits"])
+        self.assertLess(detection["evidence_quality"]["auth"]["confidence"], 0.5)
+
+    def test_documentation_keyword_is_counter_evidence_not_route_support(self) -> None:
+        (self.repo / "README.md").write_text(
+            "This document discusses auth, router, performance and security patterns.\n",
+            encoding="utf-8",
+        )
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        self.assertFalse(plan["selected_routes"])
+        self.assertLess(plan["evidence_quality"]["auth"]["confidence"], 0.5)
+        self.assertTrue(plan["evidence_quality"]["auth"]["counter_evidence"])
+
+    def test_single_implementation_keyword_is_signal_not_route_support(self) -> None:
+        source = self.repo / "scripts" / "validate.py"
+        source.parent.mkdir(parents=True, exist_ok=True)
+        source.write_text("label = 'stable version token'\n", encoding="utf-8")
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        route_ids = {route["id"] for route in plan["selected_routes"]}
+        security = plan["evidence_quality"]["security"]
+        self.assertNotIn("security", route_ids)
+        self.assertEqual(security["implementation_samples"], ["scripts/validate.py"])
+        self.assertEqual(security["confidence"], 0.4)
+        self.assertEqual(security["min_content_samples"], 2)
+        self.assertTrue(any("内容命中数不足" in item for item in security["counter_evidence"]))
+
+    def test_independent_implementation_keyword_samples_support_route(self) -> None:
+        first = self.repo / "src" / "auth.py"
+        second = self.repo / "src" / "secrets.py"
+        first.parent.mkdir(parents=True, exist_ok=True)
+        first.write_text("credential = request.headers.get('token')\n", encoding="utf-8")
+        second.write_text("secret = load_value()\n", encoding="utf-8")
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        route_ids = {route["id"] for route in plan["selected_routes"]}
+        security = plan["evidence_quality"]["security"]
+        self.assertIn("security", route_ids)
+        self.assertEqual(security["confidence"], 0.65)
+        self.assertEqual(security["min_content_samples"], 2)
+        self.assertEqual(len(security["implementation_samples"]), 2)
+
+    def test_detects_root_level_implementation_and_skills_business_source(self) -> None:
+        (self.repo / "main.py").write_text("print('app')\n", encoding="utf-8")
+        (self.repo / "App.tsx").write_text("export function App() { return null; }\n", encoding="utf-8")
+        business = self.repo / "skills" / "app" / "main.py"
+        business.parent.mkdir(parents=True, exist_ok=True)
+        business.write_text("print('business')\n", encoding="utf-8")
+
+        detection = protocol_package.detect_repo(self.repo)
+
+        self.assertIn("main.py", detection["evidence_quality"]["python"]["glob_hits"])
+        self.assertIn("skills/app/main.py", detection["evidence_quality"]["python"]["glob_hits"])
+        self.assertIn("App.tsx", detection["evidence_quality"]["frontend_implementation"]["glob_hits"])
+
+    def test_test_hit_limit_does_not_hide_production_implementation(self) -> None:
+        tests = self.repo / "tests"
+        tests.mkdir()
+        for index in range(12):
+            (tests / f"test_{index:02d}.py").write_text(
+                "print('test')\n", encoding="utf-8"
+            )
+        source = self.repo / "src" / "main.py"
+        source.parent.mkdir()
+        source.write_text("print('production')\n", encoding="utf-8")
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        python = plan["evidence_quality"]["python"]
+        self.assertIn("src/main.py", python["implementation_samples"])
+        self.assertIn("backend-python", {route["id"] for route in plan["selected_routes"]})
+
+    def test_project_frontend_keeps_support_assets_out_of_route_selection(self) -> None:
+        self.write_frontend_implementation()
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        route_ids = {route["id"] for route in plan["selected_routes"]}
+        self.assertEqual(route_ids, {"frontend"})
+        self.assertTrue(any(item["kind"] == "support_asset" for item in plan["files"]))
+        self.assertTrue(all(
+            max((q.get("confidence", 0.0) for q in route["evidence_quality"].values()), default=0.0) < 1.0
+            for route in plan["selected_routes"]
+        ))
+
+    def test_frontend_bare_markdown_references_are_copied_and_rewritten(self) -> None:
+        self.write_frontend_implementation()
+
+        result = protocol_package.scaffold_package(
+            self.repo, self.manifest, "project", False
+        )
+
+        self.assertEqual(result["errors"], [], result)
+        package = self.repo / "ai-agent-workspace" / "protocols"
+        route = package / "routes" / "frontend" / "javascript-typescript.md"
+        content = route.read_text(encoding="utf-8")
+        for name in (
+            "api-and-data.md",
+            "interaction-and-permission.md",
+            "state-and-cache.md",
+            "tooling-and-verification.md",
+        ):
+            support = package / "support" / "engineering" / "frontend" / name
+            self.assertTrue(support.is_file(), name)
+            self.assertIn(f"../../support/engineering/frontend/{name}", content)
+
+    def test_validate_rejects_missing_rewritten_bare_reference_target(self) -> None:
+        self.write_frontend_implementation()
+        scaffold = protocol_package.scaffold_package(
+            self.repo, self.manifest, "project", False, False, True
+        )
+        self.assertEqual(scaffold["errors"], [], scaffold)
+        missing = (
+            self.repo
+            / "ai-agent-workspace"
+            / "protocols"
+            / "support"
+            / "engineering"
+            / "frontend"
+            / "api-and-data.md"
+        )
+        missing.unlink()
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("api-and-data.md" in error for error in result["content_errors"]))
+
+    def test_backend_cross_domain_bare_references_are_copied_and_rewritten(self) -> None:
+        (self.repo / "go.mod").write_text("module example.com/app\n", encoding="utf-8")
+
+        result = protocol_package.scaffold_package(
+            self.repo, self.manifest, "project", False, False, True
+        )
+
+        self.assertEqual(result["errors"], [], result)
+        package = self.repo / "ai-agent-workspace" / "protocols"
+        architecture = package / "routes" / "backend" / "go" / "architecture.md"
+        content = architecture.read_text(encoding="utf-8")
+        self.assertIn("../../../support/engineering/core/api-design.md", content)
+        self.assertTrue(
+            (package / "support" / "engineering" / "core" / "api-design.md").is_file()
+        )
+        self.assertTrue(result["validation"]["ok"], result)
+
+    def test_frontend_always_include_is_a_real_pruning_contract(self) -> None:
+        self.write_frontend_implementation()
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+        route_files = {
+            item["source"] for item in plan["files"] if item["kind"] == "route"
+        }
+        self.assertEqual(
+            route_files,
+            {
+                "references/engineering/frontend/index.md",
+                "references/engineering/frontend/javascript-typescript.md",
+                "references/engineering/frontend/design-system-maintenance.md",
+            },
+        )
+
+    def test_validate_persists_validate_checkpoint(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        result = protocol_package.validate_package(self.repo, self.manifest)
+        state = json.loads(
+            (self.repo / "ai-agent-workspace" / "protocols" / "protocol-package-state.json").read_text()
+        )
+        self.assertTrue(result["ok"])
+        self.assertIn("validate", state["completed"])
+        self.assertEqual(state["status"], "validated")
+
+    def test_validate_rejects_invalid_checkpoint_status(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        state_path = self.repo / "ai-agent-workspace" / "protocols" / "protocol-package-state.json"
+        state = json.loads(state_path.read_text())
+        state["status"] = "pretend"
+        state_path.write_text(json.dumps(state), encoding="utf-8")
+        result = protocol_package.validate_package(self.repo, self.manifest)
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("status 无效" in error for error in result["content_errors"]))
+
+    def test_validate_rejects_hollow_checkpoint_contract(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        state_path = self.repo / "ai-agent-workspace" / "protocols" / "protocol-package-state.json"
+        original = json.loads(state_path.read_text())
+
+        for field in ("mode", "package_dir", "entry"):
+            with self.subTest(field=field):
+                state = dict(original)
+                state.pop(field)
+                state_path.write_text(json.dumps(state), encoding="utf-8")
+                result = protocol_package.validate_package(self.repo, self.manifest)
+                self.assertFalse(result["ok"])
+                self.assertTrue(any(field in error for error in result["content_errors"]))
+
+    def test_validate_rejects_invalid_checkpoint_mode_and_patch_status(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        state_path = self.repo / "ai-agent-workspace" / "protocols" / "protocol-package-state.json"
+        original = json.loads(state_path.read_text())
+
+        for field, value in (("mode", "pretend"), ("entry_patch_status", "magic")):
+            with self.subTest(field=field):
+                state = dict(original)
+                state[field] = value
+                state_path.write_text(json.dumps(state), encoding="utf-8")
+                result = protocol_package.validate_package(self.repo, self.manifest)
+                self.assertFalse(result["ok"])
+                self.assertTrue(any(field in error for error in result["content_errors"]))
+
+    def test_validate_rejects_undeclared_design_tokens_reference(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        route = self.repo / "ai-agent-workspace" / "protocols" / "playbooks" / "coding.md"
+        route.write_text("# WF-CODING\n\n[ghost](ghost/design-tokens.md)\n", encoding="utf-8")
+        result = protocol_package.validate_package(self.repo, self.manifest)
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("ghost/design-tokens.md" in error for error in result["content_errors"]))
+
+    def test_scaffold_apply_entry_runs_validation(self) -> None:
+        result = protocol_package.scaffold_package(self.repo, self.manifest, "minimal", False, False, True)
+        self.assertTrue(result["entry_applied"])
+        self.assertTrue(result["entry_apply_attempted"])
+        self.assertFalse(result["entry_rolled_back"])
+        self.assertIsNotNone(result["validation"])
+        self.assertTrue(result["validation"]["ok"], result)
+
+    def test_apply_entry_failure_restores_existing_entry(self) -> None:
+        entry = self.repo / "AGENTS.md"
+        original = "# Existing protocol\n"
+        entry.write_text(original, encoding="utf-8")
+        with mock.patch.object(
+            protocol_package, "validate_package", return_value={"ok": False}
+        ):
+            result = protocol_package.scaffold_package(
+                self.repo, self.manifest, "minimal", False, False, True
+            )
+
+        self.assertEqual(entry.read_text(encoding="utf-8"), original)
+        self.assertTrue(result["entry_apply_attempted"])
+        self.assertFalse(result["entry_applied"])
+        self.assertTrue(result["entry_rolled_back"])
+
+    def test_apply_entry_failure_removes_new_entry(self) -> None:
+        entry = self.repo / "AGENTS.md"
+        with mock.patch.object(
+            protocol_package, "validate_package", return_value={"ok": False}
+        ):
+            result = protocol_package.scaffold_package(
+                self.repo, self.manifest, "minimal", False, False, True
+            )
+
+        self.assertFalse(entry.exists())
+        self.assertTrue(result["entry_apply_attempted"])
+        self.assertFalse(result["entry_applied"])
+        self.assertTrue(result["entry_rolled_back"])
+
+    def test_entry_patch_rejects_header_empty_marker_and_old_package_path(self) -> None:
+        entry = self.repo / "AGENTS.md"
+        cases = {
+            "header-only": "## AI Agent Protocol Package\n",
+            "empty-marker": (
+                f"{protocol_package.ENTRY_MARKER_START}\n"
+                f"{protocol_package.ENTRY_MARKER_END}\n"
+            ),
+            "old-path": protocol_package.make_entry_body("old/protocols", []),
+        }
+        for name, content in cases.items():
+            with self.subTest(name=name):
+                entry.write_text(content, encoding="utf-8")
+                plan = protocol_package.plan_package(self.repo, self.manifest, "minimal")
+                self.assertNotEqual(plan["entry_patch"]["status"], "already-wired")
+                self.assertTrue(plan["entry_patch"]["apply"])
+
+    def test_validate_rejects_noncanonical_entry_marker(self) -> None:
+        self.scaffold()
+        (self.repo / "AGENTS.md").write_text(
+            "## AI Agent Protocol Package\n\nThis is unrelated.\n",
+            encoding="utf-8",
+        )
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("marker block" in error for error in result["entry_errors"]))
+
+    def test_support_asset_budget_warning_blocks_scaffold(self) -> None:
+        self.write_frontend_implementation()
+        with mock.patch.object(protocol_package, "SUPPORT_ASSET_MAX_FILES", 0):
+            plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+            result = protocol_package.scaffold_package(
+                self.repo, self.manifest, "project", False
+            )
+
+        self.assertTrue(plan["warnings"])
+        self.assertTrue(any("file budget exceeded" in warning for warning in plan["warnings"]))
+        self.assertTrue(result["errors"])
+        self.assertEqual(result["written"], [])
+
+    def test_support_asset_closure_runs_once_for_the_whole_package(self) -> None:
+        with mock.patch.object(
+            protocol_package,
+            "support_assets_for_routes",
+            wraps=protocol_package.support_assets_for_routes,
+        ) as closure:
+            plan = protocol_package.plan_package(self.repo, self.manifest, "full")
+
+        self.assertEqual(closure.call_count, 1)
+        route_sources = {
+            item["source"] for item in plan["files"] if item["kind"] == "route"
+        }
+        support_sources = [
+            item["source"] for item in plan["files"] if item["kind"] == "support_asset"
+        ]
+        self.assertTrue(route_sources.isdisjoint(support_sources))
+        self.assertEqual(len(support_sources), len(set(support_sources)))
+
+    def test_full_mode_selection_does_not_claim_direct_project_evidence(self) -> None:
+        plan = protocol_package.plan_package(self.repo, self.manifest, "full")
+
+        self.assertTrue(plan["selected_routes"])
+        for route in plan["selected_routes"]:
+            with self.subTest(route=route["id"]):
+                self.assertEqual(route["status"], "完整覆盖")
+                self.assertEqual(route["decision"], "full-coverage")
+                self.assertFalse(route["evidence_complete"])
+                self.assertEqual(route["evidence_quality"], {})
+
+        result = protocol_package.scaffold_package(
+            self.repo, self.manifest, "full", False, False, True
+        )
+        self.assertEqual(result["errors"], [], result)
+        route_index = (
+            self.repo / "ai-agent-workspace" / "protocols" / "routes" / "index.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("| 完整覆盖 |", route_index)
+        self.assertIn("当前仓库无直接证据 | 0.00 |", route_index)
+
+    def test_route_index_persists_generated_and_ungenerated_read_dependencies(self) -> None:
+        self.write_frontend_implementation()
+        backend = self.repo / "server.py"
+        worker = self.repo / "worker.py"
+        backend.write_text(
+            "router = 'api'; permission = 'token'; cache = 'performance'\n",
+            encoding="utf-8",
+        )
+        worker.write_text(
+            "endpoint = 'rest'; credential = 'secret'; latency = 'performance'\n",
+            encoding="utf-8",
+        )
+        result = protocol_package.scaffold_package(
+            self.repo, self.manifest, "project", False
+        )
+        self.assertEqual(result["errors"], [], result)
+        route_index = (
+            self.repo / "ai-agent-workspace" / "protocols" / "routes" / "index.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("[core](core/index.md)", route_index)
+        self.assertIn("[security](security/index.md)", route_index)
+        self.assertIn("[performance](performance/index.md)", route_index)
+        self.assertIn("platform（源规则依赖未落盘）", route_index)
+
+    def test_route_index_validator_rejects_dependency_mismatch(self) -> None:
+        self.write_frontend_implementation()
+        scaffold = protocol_package.scaffold_package(
+            self.repo, self.manifest, "project", False, False, True
+        )
+        self.assertEqual(scaffold["errors"], [], scaffold)
+        route_index = self.repo / "ai-agent-workspace" / "protocols" / "routes" / "index.md"
+        content = route_index.read_text(encoding="utf-8").replace(
+            "core（源规则依赖未落盘）", "[core](core/index.md)"
+        )
+        route_index.write_text(content, encoding="utf-8")
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any(
+            "阅读依赖" in error and "core" in error
+            for error in result["content_errors"]
+        ))
+
+    def test_plan_exposes_reviewable_entry_patch_and_checkpoints(self) -> None:
+        plan = protocol_package.plan_package(self.repo, self.manifest, "minimal")
+
+        self.assertEqual(plan["entry_patch"]["status"], "patch-required")
+        self.assertIn("AI Agent Protocol Package", plan["entry_patch"]["diff"])
+        self.assertIn(protocol_package.ENTRY_MARKER_START, plan["entry_patch"]["diff"])
+        self.assertEqual(plan["checkpoint_state"]["status"], "planned")
+        self.assertEqual(plan["checkpoint_state"]["completed"], ["classify", "collect", "decide"])
+
+    def test_validate_checks_generated_package_markdown_references(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        broken = self.repo / "ai-agent-workspace" / "protocols" / "playbooks" / "coding.md"
+        broken.write_text(
+            "# WF-CODING\n\n读取 `../routes/missing.md`。\n",
+            encoding="utf-8",
+        )
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertIn(
+            "playbooks/coding.md 引用不存在：../routes/missing.md",
+            result["content_errors"],
+        )
+
+    def test_validate_rejects_explicit_bare_markdown_link(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        broken = self.repo / "ai-agent-workspace" / "protocols" / "playbooks" / "coding.md"
+        broken.write_text(
+            "# WF-CODING\n\n[missing](missing.md)\n",
+            encoding="utf-8",
+        )
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertIn(
+            "playbooks/coding.md 引用不存在：missing.md",
+            result["content_errors"],
+        )
 
 
 class TaskGovernanceBehaviorTests(unittest.TestCase):

@@ -23,12 +23,18 @@
 
 可执行工具链：
 
-- `scripts/protocol-package.py detect <target-repo>`：把目标仓入口、协议目录和技术栈证据输出为 JSON。
+- `scripts/protocol-package.py detect <target-repo>`：把目标仓入口、协议目录和技术栈证据输出为 JSON；证据包含来源类型、样本数、置信度和反证，技能自身源码、参考文档、模板和既有生成协议目录默认排除。
 - `scripts/protocol-package.py plan <target-repo> --mode minimal|project|full [--design-system]`：按 manifest 生成拟落盘文件、路由裁剪和检查清单计划；显式选项才加入设计系统产物。
-- `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full [--design-system]`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖协议包资产；既有 `design-tokens.md` 永不被通用模板覆盖。
-- `scripts/protocol-package.py validate <target-repo> [--design-system]`：检查入口、引用、协议包、`WF-*`/`CHK-*`、路由状态和占位符；显式选项才强校验唯一 `design-tokens.md`、必备明细和回填状态。
+- `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full [--design-system] [--apply-entry]`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖协议包资产；既有 `design-tokens.md` 永不被通用模板覆盖；support asset 闭包超出预算时停止生成；默认只输出根入口 unified diff，显式 `--apply-entry` 才应用接线并立即验证，失败时恢复原入口或删除本轮新建入口。
+- `scripts/protocol-package.py validate <target-repo> [--design-system]`：递归检查规范化入口 marker、生成包内 Markdown 引用、完整 checkpoint 契约、`WF-*`/`CHK-*`、路由与阅读依赖状态和占位符；显式选项才强校验唯一 `design-tokens.md`、必备明细和回填状态。
 
-脚本输出用于生成方案预览和生成报告，不替代用户确认。`scaffold` 不自动维护根级生效入口，因此执行者完成入口维护前，`validate` 应返回失败；这表示协议包尚未生效，不是可忽略 warning。
+脚本输出用于生成方案预览和生成报告，不替代用户确认。默认 `scaffold` 不维护根级生效入口，因此执行者完成入口维护前，`validate` 应返回失败。规范化入口块必须同时包含唯一 BEGIN/END marker、`## AI Agent Protocol Package` 标题和当前 `{package_dir}/README.md` 路径；只有标题、空 marker 或旧包路径都不算已接线。显式 `--apply-entry` 是受控接线选项，应用后自动运行同一验证，失败时入口必须回滚。
+
+`protocol-package-state.json` 必须包含 `schema`、`mode`、`package_dir`、`entry`、`entry_patch_status`、有序 `required`、有序前缀 `completed` 和 `status`。`planned`、`generated`、`validated`、`invalid` 必须分别与阶段进度一致；验证成功写入 `validated`，失败写入 `invalid`，支持跨进程审计而不是只拼装返回值或补齐空壳状态。
+
+项目版路由按目标仓直接实现证据裁剪：文件类型、目录结构或配置命中可作为强结构证据；泛化语义内容规则只命中一个实现文件时仍是待调查信号，置信度必须低于路由阈值，默认至少两个独立实现文件命中后才可支持项目路由。受源码类型约束的框架入口签名可显式使用单样本门槛；每条证据输出必须公开 `min_content_samples`，不得在决策函数中隐藏特例。manifest 的 `requires` 仅描述阅读关系，不会递归把依赖路由列为 `selected_routes` 或标成项目证据支持。每条 `requires` 必须进入 `routes/index.md` 的“阅读依赖”列：已生成依赖写可达链接，未生成依赖明确标记“源规则依赖未落盘”。若直接路由正文引用其他工程文档，生成器先按源文件目录解析裸文件名，再仅对工程规则中的唯一 basename 做跨目录解析；解析成功的引用进入同一个全包级 `support/engineering/` reference-only 闭包并重写为生成路径。正式 route 文件不重复复制为 support，这些支持资产也不进入路由选择或提升项目证据置信度。闭包预算按整个生成包累计，默认受最大深度、文件数和总字节数约束；超限必须在计划中报告并阻止 scaffold，不能对每条路由重置预算或静默截断成悬空包。`always_include` 是实际文件裁剪清单，未列文件不会因为同属 source glob 而复制。
+
+脚本验证属于静态生成包与入口一致性检查，不证明真实 Codex/Claude 等宿主已经发现 Skill、选择了该入口或在生产任务中稳定触发；宿主触发率必须通过独立运行时实验验证。
 
 预览只包含会改变生成结果的事实：生效入口与真值源、生成模式、拟写路径、实际路径映射、项目证据与待确认项，以及触发断链和风险。编号沿用现有体系；模板来源和不适用路由不重复展开。
 
@@ -132,7 +138,7 @@ ai-agent-workspace/product/design/design-tokens.md
 - `CON-PACKAGE-GENERATE-ROUTE-LAYERING`：`routes/**` 应保留领域分层，避免把所有工程规则压成单个大文件。
 - `CON-PACKAGE-GENERATE-CHECKS-SCOPE`：`checks/*.md` 只放检查项，不放长流程或教程。
 - `CON-PACKAGE-GENERATE-PATH-BASE`：每个生成文件的路径引用必须统一口径。协议包内文件引用根级文件时，使用 `../`、`../../` 等当前文件相对路径，或明确写 `仓库根：<path>`；不要写基准不明的裸路径。
-- `CON-PACKAGE-GENERATE-DESIGN-TOKENS`：前端证据可选择前端路由，但不自动触发治理文档；仅显式 `--design-system` 时创建或继承唯一 `design-tokens.md`，按生产实现回填后才能通过对应验证。
+- `CON-PACKAGE-GENERATE-DESIGN-TOKENS`：前端证据可选择前端路由，但不自动触发治理文档；仅显式 `--design-system` 且检测到真实前端实现时创建或继承唯一 `design-tokens.md`，按生产实现回填后才能通过对应验证；空仓、仅文档或仅测试证据不得创建或强校验该文件。
 - `CON-PACKAGE-GENERATE-DESIGN-TOKENS-NO-OVERWRITE`：协议包工具即使收到 `--overwrite` 也必须跳过既有 `design-tokens.md`；更新只能由 Agent 读取现有内容和生产实现后按最小修改完成。
 - `CON-PACKAGE-GENERATE-DESIGN-TOKENS-CONFLICT`：推荐路径与兼容路径同时存在可编辑正文时，`scaffold` 必须停止，等待真值源裁决；不得选择其一继续生成或覆盖。
 
@@ -169,6 +175,7 @@ ai-agent-workspace/product/design/design-tokens.md
 - `项目证据支持`：目标仓文件、配置、源码或用户明确说明证明该路由当前适用。
 - `条件适用`：当前未证明常驻适用，但任务触发时应读取，例如安全、性能、风险控制。
 - `通用治理`：协议维护、证据范围、Agent 边界、生成报告等治理类路由。
+- `完整覆盖`：仅用于用户显式选择完整版但目标仓没有直接证据的路由；选择原因是覆盖模式，证据置信度保持 `0.00`，不得标成项目证据支持。
 
 项目版 `routes/index.md` 和各子目录索引必须标注以上三类之一；不允许只列路径而不说明适用状态。
 
@@ -184,6 +191,7 @@ ai-agent-workspace/product/design/design-tokens.md
 
 - 保留完整覆盖能力，但必须在预览中说明会生成与当前仓库无直接证据的通用路由。
 - 完整版中的未验证技术栈规则不得写入项目级协议正文；只作为通用路由或模板资产存在。
+- 完整版选择和直接证据判断必须分离；`selected by full mode` 不等于 `directly supported`，无直接证据时使用 `完整覆盖`/`full-coverage` 并保持证据置信度为 `0.00`。
 
 ## 同步验证
 

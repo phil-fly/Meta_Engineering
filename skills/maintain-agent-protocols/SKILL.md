@@ -1,6 +1,6 @@
 ---
 name: maintain-agent-protocols
-description: "创建、审查、升级和维护 AI Agent 协作协议与规则路由。Use for Protocol Engineer reviews, trigger-stability reviews, constraint-to-workflow gate design, rule ingestion, protocol-package creation/upgrade sync, Spec-first workflow routing, trigger-entry decisions, maintenance-location decisions, AGENTS.md/CLAUDE.md and legacy CODEX.md migration, ai-agent-workspace/protocols or compatible ai-agent-protocols layout, user/project protocol templates, target-repository frontend design-system maintenance rules, conditional design-tokens.md creation/backfill/read/update gates, review prompts, route-based engineering rules, execution-rate/token-cost/conflict analysis, UI/frontend/backend/API/security/performance/platform route design, and AI coding workflow agreements. Do not use for ordinary feature implementation, product design, normal code review, generic architecture discussion, external spec governance, service onboarding, or project debugging unless the user is maintaining agent collaboration protocols or rule routing."
+description: "创建或维护 AI Agent 协作协议与规则路由。当用户明确要求从零创建、把零散约定转换为协议、生成协议包或设计协作规则时，即使尚无 Skill、入口或协议目录也应触发；当用户要求升级、审查、迁移、修复触发链路或决定规则维护位置时，仅在提供目标 Skill、协议目录、AGENTS.md/CLAUDE.md/CODEX.md、routes/playbooks/checks/templates 或其他可检查协议资产时触发。支持 Protocol Engineer、trigger-stability、rule ingestion、协议包 detect/plan/scaffold/validate、Spec-first 路由和前端设计系统协议维护。普通功能开发、产品设计、普通代码审查、安全/性能领域审查、通用架构讨论、服务接入或故障排查不触发，除非用户明确要求维护协作协议或规则路由；仅讨论概念而不要求创建、检查或修改协议资产时也不触发。"
 ---
 
 # Maintain Agent Protocols
@@ -20,12 +20,17 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
 - `references/scenarios/`：任务流程场景，覆盖开发、架构、安全审查、性能审查、排障和调研。
 - `references/checks/`：审查检查场景，覆盖维护、安全与性能检查清单。
 - `references/shared/`：随 Skill 安装的跨技能规则运行时资产；源码仓根级 `references/` 是跨技能编辑真值源，发布前必须验证精确副本或当前 Skill 专用投影同步。
-- `templates/`：可复制到目标仓统一产物目录的协议模板资产；协议模板默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；`design-tokens.md` 仅在显式进入 Design System Governance 时实例化到产品设计目录；维护镜像模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
-- `scripts/`：技能维护验证脚本与协议包工具链；`protocol-package.py` 用于目标仓探测、生成计划、协议包 scaffold 和结果验证，其他检查脚本用于模板同步、编号、占位符和引用校验。
+- `templates/`：可复制到目标仓统一产物目录的协议模板资产；协议模板默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；`design-tokens.md` 仅在显式进入 Design System Governance 且目标仓存在真实前端实现时实例化到产品设计目录；维护镜像模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
+- `scripts/`：技能维护验证脚本与协议包工具链；`protocol-package.py` 用于目标仓探测、结构化证据与反证、生成计划、入口 patch 预览、协议包 scaffold 和结果验证，其他检查脚本用于模板同步、编号、占位符和引用校验。
 
 ## 工作流
 
-1. 识别请求类型。
+1. 先按 `WF-TASK-GOVERNANCE` 判断是否需要完整协议门禁。
+   - 低风险、边界明确、可逆、已获授权且不改变真值源或写入范围的任务，直接走最小路径：读取一个已存在且明显适用的入口，执行必要动作并按影响范围验证；不要求完整 Checkpoint、方案预览、新增编号或协议级闭环。
+   - 涉及不可逆操作、外部状态、身份/权限、安全、删除/迁移、真值源变更、写入范围不确定，或风险/范围在处理中实质变化时，启用下述完整流程。
+   - 低风险路径出现新证据时，只有在证据改变风险、范围、授权或完成定义时才升级；否则记录假设并继续。
+
+   识别请求类型。
    - `创建`：起草新的用户级协议、项目级协议或目标仓协议包。
    - `维护`：更新、合并、拆分或重构已有规则。
    - `升级同步`：对照最新技能规则，审查并升级已落盘的项目协议包，保持现有真值源并按最小修改同步新增或变更约束。
@@ -39,23 +44,23 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - 主流程与辅助流程用于内部路由；仅在长任务、用户明确要求、发生阻塞或范围/风险实质变化时对外说明。只有候选主流程会改变写入范围、覆盖策略或真值源且证据无法裁决时才询问用户，否则按保守范围继续。
    - 仅当用户明确要求创建、落盘、补齐或维护目标仓协议包时，才进入生成流程；读取或触发技能本身不会自动生成任何文件。
 
-2. 判断目标层级。
+2. 完整路径：判断目标层级。低风险路径不建立额外层级分类。
    - `用户级`：长期有效的个人协作偏好、默认任务路由、全局安全边界、回复风格、跨项目原则。
    - `项目级`：仓库专属架构、命令、测试要求、编码约定、发布流程、业务领域约束。
    - `工程路由`：UI、目标仓前端设计系统维护、JavaScript/TypeScript、Go、Java、Rust、Python、API、安全、性能等功能类型的执行细节入口。
    - `场景手册`：开发、架构、安全审查、性能审查、排障、调研等任务方法。
    - `临时规则`：短期本地约定，除非变成可复用规则，否则不要沉淀为长期协议。
 
-3. 编辑前先收集上下文。
+3. 完整路径：编辑前先收集上下文。低风险路径只读取完成当前任务所需的直接相关入口。
    - 优先检查 `AGENTS.md`、`CODEX.md`、`CLAUDE.md`、`.cursor/rules`、`.github/copilot-instructions.md`、`ai-agent-protocols/**/*.md`、历史 `playbooks/*.md`、项目文档和用户当前指令。
    - 保留历史决策和项目术语，除非它们已经明确过期或冲突。
    - 仓库扫描得到的来源证据、文件清单和生成过程记录只用于本轮判断，默认不写入生效协议正文。
-   - 创建、升级同步或补齐协议包时读取 `references/protocol/package-blueprint.md`，用 `scripts/protocol-package.py` 完成探测、计划、经 Confirmation Gate 后生成及验证；升级时先识别生效真值源并做差异审查。
-   - 只有进入 Design System Governance 时才传入 `--design-system`；普通前端证据不自动创建治理文档。
+   - 创建、升级同步或补齐协议包时读取 `references/protocol/package-blueprint.md`，用 `scripts/protocol-package.py` 完成探测、计划、经 Confirmation Gate 后生成及验证；探测证据必须区分实现/配置、文档/样例、样本数、置信度和反证，技能自身源码、参考文档、模板和既有生成协议目录默认排除，但不得按通用目录名误杀目标仓业务源码；`plan`/`scaffold` 输出可审阅的根入口 unified diff，只有显式 `--apply-entry` 才接线并立即验证。
+   - 只有进入 Design System Governance 且已确认真实前端实现时才传入 `--design-system`；空仓或仅有文档/测试证据时不创建治理文档。
    - 关键决策按 `references/shared/interactive-decision-protocol.md` 使用原生问询，不可用时退化为文本问询。
    - 审查类任务必须说明检查范围、未检查范围和结论适用范围。
 
-4. 应用协议设计规则。
+4. 完整路径：应用协议设计规则。低风险路径不加载未命中的协议工程、路由或检查细节。
    - 读取 `references/protocol/index.md`，再按场景读取 `references/protocol/guide.md`。
    - 涉及协议工程审查、执行率、Token 成本、协议膨胀或冲突分析时，读取 `references/protocol/protocol-engineer.md`。
    - 涉及触发稳定性审查、条件适用路由触发、项目约束嵌入流程、工作流节点门禁或检查项映射时，读取 `references/protocol/trigger-stability-guide.md`。
@@ -66,10 +71,10 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
    - 涉及本技能自身目录结构、`templates/` 目录或结构校验 warning 处理时，读取 `references/protocol/skill-structure.md`。
    - 需要工程规则细节时先读取 `references/engineering/index.md`，再进入对应领域目录读取路由文件；维护目标仓前端规范时读取 `references/engineering/frontend/design-system-maintenance.md`，参数明细直接落入目标仓 `design-tokens.md`，不得用增加大量路由替代。
    - 用户协议只定义入口和长期原则；工程路由与场景手册承载执行细节。保持目标仓既有单一真值源，除非用户明确迁移，不双写、不重建整包。
-   - 入口、目录、模式、路径映射、路由裁剪、编号和规范词强度按 `references/protocol/package-blueprint.md`；生效入口只引用实际存在的资产。
+   - 入口、目录、模式、路径映射、路由裁剪、编号和规范词强度按 `references/protocol/package-blueprint.md`；项目版只选择直接证据支持的路由，`requires` 不递归伪装成项目支持；full 模式只扩大选择范围，无直接证据的路由标为 `完整覆盖` 且置信度保持 `0.00`；为保持包内引用可达而复制的跨域文档必须标为 reference-only/support asset，不进入路由索引。
    - 高风险或易漏约束用短引用绑定到相关 `WF-*` 节点，不复制正文；默认最小修改。
 
-5. 闭环。
+5. 完整路径：闭环。低风险路径只报告任务结果、必要验证和未解决风险。
    - 创建类任务：先给生成方案预览；落盘后给出生成报告、验收清单和使用者下一步。
    - 维护类任务：把每个发现归类为已解决、延后处理、明确排除或转入后续任务。
    - 升级同步类任务：输出升级前后差异、编号变更、适用性结论和触发稳定性变化；把每个发现归类为已解决、延后处理、明确排除或转入后续任务。
@@ -80,14 +85,14 @@ description: "创建、审查、升级和维护 AI Agent 协作协议与规则�
 
 ## 工作流 Checkpoints
 
-Checkpoint 是内部控制机制，以下等式不可跳过，但默认不逐步向用户输出。仅在长任务、用户明确要求、执行时间较长、发生阻塞或范围/风险实质变化时展示必要状态：
+Checkpoint 是高风险或范围不确定任务的内部控制机制，不是所有任务的默认前置税。只有上一阶段风险门命中时，以下完整门禁才不可跳过；低风险路径不要求逐项分类、全量读取、过程回退、编号分配或协议级发现闭环。默认不逐步向用户输出，仅在长任务、用户明确要求、发生阻塞或范围/风险实质变化时展示必要状态：
 
 - Step 1：`主流程数 == 1`；记录主流程及辅助流程，无法唯一仲裁且会改变写入范围时停在写入前询问。
 - Step 2：`已分类目标层级数 == 已识别目标层级总数`；归属不明项标为待确认，不静默丢弃。
 - Step 3：`已读取必要来源数 == 上下文清单中的必要来源总数`；文件缺失或不可读时记录证据缺口并限制结论。
 - Step 4：`已读取参考数 == 已选择参考数`；未读参考不得作为强结论依据。
 - Step 5：`已解决数 + 延后数 + 排除数 + 后续任务数 == 发现总数`；等式不成立时不得宣告闭环。
-- 任一 Checkpoint 失败时回到对应步骤；若用户改变最终交付物，必须从 Step 1 重新仲裁，禁止沿用旧写入范围。
+- 完整路径中任一 Checkpoint 失败时回到对应步骤；若用户改变最终交付物，或风险/范围实质变化，重新仲裁并确认写入范围。低风险路径不因可逆的局部歧义自动回退或升级。
 
 ## 行为准则
 
@@ -111,10 +116,10 @@ Checkpoint 是内部控制机制，以下等式不可跳过，但默认不逐步
 
 ## 依赖链
 
-- Step 2 的目标层级判断必须继承 Step 1 的请求类型，不能重新猜测任务。
-- Step 1 必须只有一个主流程；审查维度不得与写入动作并列为主流程。
-- Step 4 的输入 = Step 2 的完整层级分类 + Step 3 的完整证据清单；不得脱离前序产出重新猜测，出现新证据时先回到 Step 3 更新清单。
-- Step 5 的输入 = Step 4 的全部决定与发现；不得重新生成问题清单，闭环分类数量之和必须等于发现总数。
+- 完整路径中，Step 2 的目标层级判断必须继承 Step 1 的请求类型，不能重新猜测任务；低风险路径不强制建立完整层级分类。
+- 完整路径中，Step 1 必须只有一个主流程；审查维度不得与写入动作并列为主流程。低风险路径可直接沿用最明显的现有入口。
+- 完整路径中，Step 4 的输入 = Step 2 的完整层级分类 + Step 3 的完整证据清单；不得脱离前序产出重新猜测，出现会改变风险或范围的新证据时先回到 Step 3 更新清单。
+- 完整路径中，Step 5 的输入 = Step 4 的全部决定与发现；不得重新生成问题清单，闭环分类数量之和必须等于发现总数。低风险路径只需报告任务结果、验证和未解决风险。
 - 写入或修改协议前，先核对规则类型、维护位置、触发入口和反证检查是否一致。
 - 新增、移动或重命名工作流、约束和检查项前，先核对编号前缀、唯一性和引用是否同步。
 - 修改模板正文后，必须验证 `templates/` 与 `references/protocol/` 下对应模板参考文件同步；自动脚本不可用时执行手动 `cmp` 检查。

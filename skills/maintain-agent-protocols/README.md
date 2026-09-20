@@ -266,7 +266,9 @@ python3 skills/maintain-agent-protocols/scripts/protocol-package.py scaffold <ta
 python3 skills/maintain-agent-protocols/scripts/protocol-package.py validate <target-repo>
 ```
 
-`detect` 输出项目证据，`plan` 输出拟生成文件、条件设计产物和路由裁剪结果，`scaffold` 默认跳过既有文件。只有显式传入 `--design-system` 时才计划、生成或强校验 `design-tokens.md`，且即使使用 `--overwrite` 也不会覆盖既有文件。`validate` 还会检查根级生效入口、本地 Markdown 引用、`WF-*`、`CHK-*`、协议包目录、模板资产、路由索引状态和占位符泄漏。
+`detect` 输出排除自有技能/生成目录后的项目证据，并为每类证据提供来源类型、样本数、内容样本门槛、置信度和反证；排除按已知真实路径执行，不把目标仓任意 `skills/` 目录当成工具源码。泛化语义内容规则只命中一个实现文件时保留为待调查信号，不能越过项目路由阈值；结构证据或达到规则公开样本门槛的独立实现样本才可支持路由。`plan` 输出拟生成文件、直接证据路由、reference-only 支持资产、闭包预算告警、可审阅的根入口 unified diff、完整 `checkpoint_state` 和条件设计产物；`requires` 只进入路由索引的“阅读依赖”列，不选择依赖路由或抬高证据置信度。full 模式只扩大选择范围，不制造项目证据；没有直接证据的路由标为 `完整覆盖`，置信度保持 `0.00`。`scaffold` 默认跳过既有文件，并写入机器可读的 `protocol-package-state.json`；support asset 按整个生成包计算一次引用闭包和深度、文件数、字节预算，正式 route 不重复复制为 support，超限时停止生成。只有显式传入 `--design-system` 且检测到真实前端实现时才计划、生成或强校验 `design-tokens.md`；空仓、仅文档或仅测试证据不会创建该文件，且即使使用 `--overwrite` 也不会覆盖既有文件。
+
+默认不会接线根入口。显式 `--apply-entry` 只接受带 BEGIN/END marker、标题和当前协议包 `README.md` 路径的规范化入口块；应用后立即验证，失败则恢复原入口或删除本轮新建入口。`validate` 检查规范化生效入口、生成包内递归 Markdown 引用、状态字段与有序阶段、`WF-*`、`CHK-*`、协议包目录、模板资产、路由索引内容、阅读依赖和占位符泄漏；显式 Markdown 链接即使使用裸文件名也必须可达，裸行内代码文件名只有被生成映射消费时才视为导航。该验证证明静态包与接线一致，不等价于真实 Codex 宿主已经发现或按预期触发 Skill。
 
 ## 输出闭环
 
