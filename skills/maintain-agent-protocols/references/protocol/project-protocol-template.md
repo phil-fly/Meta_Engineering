@@ -73,6 +73,8 @@ P5 默认 AI 行为
 
 本节只写仓库专属约束。通用工程约束应维护在已确认的工程路由真值源，默认 `ai-agent-workspace/protocols/routes/`；业务能力、接口、数据结构、配置、权限模型或系统架构约束应优先维护在项目 Spec、OpenSpec、ADR 或设计文档。OpenSpec 工作流应由目标仓已选 Spec 或场景手册入口承载，不在本协议重复展开。
 
+问题台账：默认使用 `ai-agent-workspace/issues.md` 作为唯一可编辑真值源；若仓库已有根级 `issues.md` 或项目已声明其他路径，应在此明确映射，不得并行维护两份问题正文。排障、审查或开发产生的可执行发现应登记问题 ID；修复前状态达到 `planned` 并记录方案，关闭前补齐验证证据。字段与状态细则见 `issue-tracking.md`，检查项见 `CHK-ISSUE-*`。
+
 约束摄入规则：
 
 ```text

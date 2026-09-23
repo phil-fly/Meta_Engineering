@@ -113,6 +113,9 @@ ai-agent-workspace/protocols/templates/project-protocol.md
 ai-agent-workspace/protocols/templates/route-card.md
   → templates/route-card.md
 
+ai-agent-workspace/protocols/templates/issues.md
+  → templates/issues.md；实例化后默认落盘为目标仓 `ai-agent-workspace/issues.md`，已有根级 `issues.md` 时按问题台账真值源规则兼容使用
+
 ai-agent-workspace/protocols/templates/frontend-design-system-review-prompt.md
   → templates/frontend-design-system-review-prompt.md；仅用于独立只读审查，日常设计与开发读取 routes/checks 门禁
 
@@ -132,6 +135,7 @@ ai-agent-workspace/product/design/design-tokens.md
 - `CON-PACKAGE-GENERATE-PLAYBOOK-SPLIT`：若协议包 `playbooks/` 被选为场景手册真值源，`playbooks/*.md` 应拆分为独立文件，每个文件只包含一个任务流程。
 - `CON-PACKAGE-GENERATE-ROOT-PLAYBOOK`：若根级 `playbooks/` 被选为场景手册真值源，协议包内不要复制同名正文；可创建协议包内 `playbooks/README.md` 或单文件别名说明，指向根级手册。
 - `CON-PACKAGE-GENERATE-TEMPLATE-SCOPE`：`templates/*.md` 只放可复用格式骨架、填写规则和可实例化的通用协议条款，不承载目标仓专属决策或一次性任务约定。
+- `CON-PACKAGE-GENERATE-ISSUE-LEDGER-SINGLE-SOURCE`：问题台账模板只提供可实例化骨架；实例化后的 `issues.md` 必须按 `issue-tracking.md` 选择唯一可编辑真值源，不得把协议包模板和目标仓台账同时当作问题正文维护。
 - `CON-PACKAGE-GENERATE-EVIDENCE-REPORT-ONLY`：从目标仓扫描得到的读取文件清单、事实来源、置信度标注和生成过程记录只在生成报告中说明，不写入落盘协议正文、协议包 `README.md` 或入口说明。
 - `CON-PACKAGE-GENERATE-NO-PLACEHOLDER`：生效协议、协议包 `README.md` 和入口说明不得保留 `<project>`、`<install-command>`、`<path>` 等模板占位符；证据不足时删除该项或写为待确认，不把占位符交给后续 Agent 猜测。
 - `CON-PACKAGE-GENERATE-TEMPLATE-SYNC`：修改技能内模板正文时，应同步更新 `templates/` 与 `references/protocol/` 下对应模板参考文件。

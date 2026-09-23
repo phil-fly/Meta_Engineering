@@ -25,10 +25,12 @@ scripts/
 
 这些提示对本技能不直接构成缺陷，原因是：
 
-- `templates/` 是目标仓协议模板目录的可复制资产，新项目默认落到 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；它不是执行流程引用目录。
+- `templates/` 是目标仓协议模板目录的可复制资产，新项目默认落到 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；问题台账模板实例化后默认落盘为 `ai-agent-workspace/issues.md`，已有根级 `issues.md` 时按唯一真值源规则兼容；它不是执行流程引用目录。
 - 多层 `references/` 是本技能按需加载的核心设计，用于避免一次性读取全部工程规则。
 - `references/shared/` 保存随 Skill 安装的精确副本或当前 Skill 专用投影，避免独立安装后依赖源码仓根目录或其他 Skill。
 - `SKILL.md` 已明确要求先读 `references/index.md`，再按任务场景进入对应目录。
+
+问题台账规则由 `references/protocol/issue-tracking.md` 维护，`templates/issues.md` 只提供可实例化骨架，场景手册和检查清单只保留短引用与检查项。
 
 处理规则：
 

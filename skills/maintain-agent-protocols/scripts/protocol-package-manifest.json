@@ -16,6 +16,15 @@
       "target": "templates/route-card.md"
     },
     {
+      "source": "templates/issues.md",
+      "target": "templates/issues.md",
+      "required_markers": [
+        "# 问题清单",
+        "修复前必须达到 `planned`",
+        "### ISSUE-0001 标题"
+      ]
+    },
+    {
       "source": "templates/frontend-design-system-review-prompt.md",
       "target": "templates/frontend-design-system-review-prompt.md"
     },
@@ -24,6 +33,16 @@
       "target": "templates/design-tokens.md"
     }
   ],
+  "issue_ledger": {
+    "source": "templates/issues.md",
+    "default_target": "ai-agent-workspace/issues.md",
+    "compat_targets": ["issues.md"],
+    "required_markers": [
+      "# 问题清单",
+      "修复前必须达到 `planned`",
+      "### ISSUE-0001 标题"
+    ]
+  },
   "conditional_artifacts": [
     {
       "id": "frontend-design-tokens",

@@ -113,6 +113,93 @@ class ValidatePackageTests(unittest.TestCase):
         self.assertIn("## 10. AI / Vibe Coding 机制", prompt_content)
         self.assertIn("## 14. 完成门", prompt_content)
 
+    def test_minimal_scaffold_copies_issue_tracking_template(self) -> None:
+        self.scaffold()
+
+        issues = (
+            self.repo
+            / "ai-agent-workspace"
+            / "protocols"
+            / "templates"
+            / "issues.md"
+        )
+
+        self.assertTrue(issues.is_file())
+        issues_content = issues.read_text(encoding="utf-8")
+        self.assertIn("# 问题清单", issues_content)
+        self.assertIn("修复前必须达到 `planned`", issues_content)
+        self.assertIn("### ISSUE-0001 标题", issues_content)
+
+    def test_validate_rejects_missing_issue_tracking_template(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        issues = (
+            self.repo
+            / "ai-agent-workspace"
+            / "protocols"
+            / "templates"
+            / "issues.md"
+        )
+        issues.unlink()
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertIn(
+            "ai-agent-workspace/protocols/templates/issues.md",
+            result["missing"],
+        )
+
+    def test_validate_rejects_incomplete_issue_tracking_template(self) -> None:
+        self.scaffold()
+        self.write_valid_entry()
+        issues = (
+            self.repo
+            / "ai-agent-workspace"
+            / "protocols"
+            / "templates"
+            / "issues.md"
+        )
+        issues.write_text("# 问题清单\n", encoding="utf-8")
+
+        result = protocol_package.validate_package(self.repo, self.manifest)
+
+        self.assertFalse(result["ok"])
+        self.assertTrue(any("issues.md 缺少必备内容" in error for error in result["content_errors"]))
+
+    def test_root_issue_ledger_is_reused_and_references_are_rewritten(self) -> None:
+        source = SCRIPT_DIR.parent / "templates" / "issues.md"
+        (self.repo / "issues.md").write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+
+        result = protocol_package.scaffold_package(
+            self.repo, self.manifest, "minimal", False, False, True
+        )
+
+        self.assertEqual(result["errors"], [], result)
+        self.assertFalse((self.repo / "ai-agent-workspace" / "issues.md").exists())
+        troubleshooting = (
+            self.repo
+            / "ai-agent-workspace"
+            / "protocols"
+            / "playbooks"
+            / "troubleshooting.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn("`issues.md`", troubleshooting)
+        self.assertTrue(result["validation"]["ok"], result)
+
+    def test_parallel_issue_ledgers_stop_scaffold(self) -> None:
+        source = SCRIPT_DIR.parent / "templates" / "issues.md"
+        (self.repo / "issues.md").write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+        default = self.repo / "ai-agent-workspace" / "issues.md"
+        default.parent.mkdir(parents=True, exist_ok=True)
+        default.write_text(source.read_text(encoding="utf-8"), encoding="utf-8")
+
+        result = protocol_package.scaffold_package(self.repo, self.manifest, "minimal", False)
+
+        self.assertTrue(result["errors"])
+        self.assertTrue(any("真值源冲突" in error for error in result["errors"]))
+        self.assertEqual(result["written"], [])
+
     def test_project_frontend_scaffold_copies_design_system_route_and_checklist(self) -> None:
         self.write_frontend_implementation()
 

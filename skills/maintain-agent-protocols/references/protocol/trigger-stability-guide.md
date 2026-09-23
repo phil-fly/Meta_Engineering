@@ -23,6 +23,16 @@
 → 最终报告闭环
 ```
 
+排障或修复任务若产生可执行发现，还应能沿短路径触达 `issue-tracking.md`：
+
+```text
+WF-TROUBLESHOOTING
+→ CON-ISSUE-001..004
+→ 唯一问题台账 `ai-agent-workspace/issues.md`（兼容根级 `issues.md`）
+→ CHK-ISSUE-*
+→ 最终报告逐条对账
+```
+
 审查时分别记录：
 
 - 工作流是否能从任务分类或入口表稳定触发。
@@ -31,6 +41,7 @@
 - 条件适用路由是否有触发条件，而不是只写“条件适用”。
 - 项目级约束是否有生效条件、流程节点、门禁动作、验证方式和短路径引用。
 - 闭环步骤是否能定位到相关检查清单或检查项编号族。
+- 排障发现是否能从 `WF-TROUBLESHOOTING` 触达问题台账、修复方案门禁和 `CHK-ISSUE-*`，且最终报告能逐条对账。
 
 ## 稳定性分级
 
@@ -76,6 +87,8 @@ rg -n "条件适用|项目证据支持|通用治理" ai-agent-workspace/protocol
 `CON-TRIGGER-PROJECT-CONSTRAINT`：项目级约束若会影响开发、审查、排障或发布流程，应在相关 playbook 的门禁节点中引用约束编号或触发路由；若只是项目事实或低频说明，可保持在项目协议中，不强制进入 playbook。
 
 `CON-TRIGGER-CHECK-MAPPING`：playbook 闭环步骤应映射到相关检查清单或编号族，例如安全审查映射 `CHK-SEC-*`，性能审查映射 `CHK-PERF-*`，协议维护映射 `CHK-MAINT-*`。不需要在 playbook 中列出完整清单。
+
+`CON-TRIGGER-ISSUE-LEDGER`：排障或修复流程中产生的可执行发现必须从 `WF-TROUBLESHOOTING` 的台账门、方案门和验证/报告门触达 `CON-ISSUE-*` 与 `CHK-ISSUE-*`；问题台账路径和兼容映射由 `issue-tracking.md` 维护，不在 playbook 中复制完整字段契约。
 
 `CON-TRIGGER-OPTIONAL-STRENGTHENING`：协议升级同步时，触发稳定性审查默认只读执行；强化 playbooks、routes 或 checks 属于可选变更，必须在升级预览中列出拟修改文件并获得用户确认。新建协议包时，可把通用触发规则直接写入新生成的 playbooks，但仍需在预览中声明。
 

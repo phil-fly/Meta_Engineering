@@ -23,6 +23,7 @@ ai-agent-workspace/
 │   ├── playbooks/
 │   ├── checks/
 │   └── templates/
+├── issues.md
 ├── product/
 │   ├── memory/
 │   ├── strategy/
@@ -48,6 +49,7 @@ ai-agent-workspace/
 | 场景手册 | `ai-agent-workspace/protocols/playbooks/` | `ai-agent-protocols/playbooks/`、根级 `playbooks/` | 若根级 `playbooks/` 已存在且明确选为真值源，可保留；否则不得把协议入口自动猜到根级 `playbooks/`。 |
 | 检查清单 | `ai-agent-workspace/protocols/checks/` | `ai-agent-protocols/checks/` | 承载审查和验收项。 |
 | 协议模板 | `ai-agent-workspace/protocols/templates/` | `ai-agent-protocols/templates/` | 只放可复用模板，不放项目事实。 |
+| 问题台账 | `ai-agent-workspace/issues.md` | 根级 `issues.md` | 排障、审查和开发中的可执行问题唯一可编辑真值源；外部 Issue 默认只作关联记录。 |
 | 产品记忆 | `ai-agent-workspace/product/memory/` | `docs/00_MEMORY/` | 记录事实快照、会话记忆和 TODO。 |
 | 立项与策略 | `ai-agent-workspace/product/strategy/` | `docs/01_STRATEGY/` | 记录价值、范围和业务决策依据。 |
 | PRD | `ai-agent-workspace/product/prd/` | `docs/02_PRD/` | Framework PRD 与 Feature PRD。 |

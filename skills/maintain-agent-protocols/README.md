@@ -42,6 +42,7 @@
 | 维护协议 | `把这些规则合并进现有 AGENTS.md` | `references/protocol/index.md`、`references/protocol/guide.md` |
 | 协议升级同步 | `对照最新协议技能，升级当前项目协议包` | `references/protocol/index.md`、`references/protocol/guide.md`、`references/protocol/package-blueprint.md` |
 | 多类型请求仲裁 | `先审查触发问题，再修复当前协议` | `references/protocol/workflow-routing.md` |
+| 问题台账与修复方案 | `排障结果如何落盘并在修复前形成方案` | `references/protocol/issue-tracking.md`、`templates/issues.md`、`references/checks/checklists.md` |
 | 审查协议 | `审查这套协议有没有冲突和遗漏` | `references/protocol/protocol-engineer.md`、`references/checks/index.md` |
 | 规则摄入 | `这条规则应该放在哪里` | `references/protocol/rule-ingestion.md` |
 | 工作流整理 | `把这些任务流程整理成 playbook` | `references/scenarios/index.md`、`references/scenarios/playbooks.md` |
@@ -75,6 +76,7 @@
 - 工作流编号使用 `WF-*`，例如 `WF-CODING`。
 - 约束编号使用 `CON-*`，例如 `CON-PROJECT-001`。
 - 检查项编号使用 `CHK-*`，例如 `CHK-MAINT-001`。
+- 问题台账模板默认实例化为目标仓 `ai-agent-workspace/issues.md`；已有根级 `issues.md` 时继续使用其作为兼容真值源，不能并行维护两份问题正文。
 - 生成或维护协议时，新增、移动或重命名以上项目必须同步编号引用。
 
 ## 不同场景怎么快用

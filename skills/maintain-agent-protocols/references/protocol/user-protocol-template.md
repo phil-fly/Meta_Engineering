@@ -143,6 +143,7 @@ WF-ARCHITECTURE        → ai-agent-workspace/protocols/playbooks/architecture.m
 
 ```text
 CHK-MAINT-*  规则维护       → ai-agent-workspace/protocols/checks/maintenance-checklist.md
+CHK-ISSUE-*   问题台账检查   → ai-agent-workspace/protocols/checks/maintenance-checklist.md；排障时按 `WF-TROUBLESHOOTING` 触发
 CHK-SEC-*    安全检查       → ai-agent-workspace/protocols/checks/security-checklist.md
 CHK-PERF-*   性能检查       → ai-agent-workspace/protocols/checks/performance-checklist.md
 ```
@@ -161,5 +162,6 @@ CHK-PERF-*   性能检查       → ai-agent-workspace/protocols/checks/performa
 | CON-NATIVE-ASK | 协议生成、调整、入口迁移、真值源选择或高风险治理变更需要用户确认时，若当前 Agent App 支持原生确认/问询机制，应优先使用。 | 不支持原生机制时退化为普通文本问询；一次默认不超过 3 个关键问题。 |
 | 经验优先 | 优先继承项目规范、历史决策、Wiki、设计文档和既有代码模式。 | 不在缺少背景时推翻既有设计。 |
 | CON-REVIEW-CLOSURE | 发现的问题必须归类为已解决、延后处理、明确排除或转入后续任务。 | 禁止问题无故消失。 |
+| CON-ISSUE-LEDGER | 可执行发现应写入项目声明的唯一问题台账；修复前先形成可审阅方案，关闭前补齐验证证据。 | 详细字段、状态流转和检查项见 `issue-tracking.md` 与 `CHK-ISSUE-*`。 |
 | CON-KNOWLEDGE-CAPTURE | 只沉淀可复用经验、通用设计模式、架构决策和长期有效规则。 | 一次性问题、临时方案、环境异常和偶发故障不沉淀为长期规则。 |
 | CON-GIT-SCOPE | 默认不自动提交；仅用户或项目协议明确要求时提交。 | 提交范围仅包含当前任务相关内容。 |

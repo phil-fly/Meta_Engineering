@@ -18,9 +18,9 @@ description: "创建或维护 AI Agent 协作协议与规则路由。当用户�
 - `references/protocol/`：协议生成与维护场景，包含层级、目标仓目录结构、入口模板和冲突处理。
 - `references/engineering/`：工程规则路由场景；企业级 SaaS 设计、前端、后端、安全、性能、平台、治理必须用目录隔离。
 - `references/scenarios/`：任务流程场景，覆盖开发、架构、安全审查、性能审查、排障和调研。
-- `references/checks/`：审查检查场景，覆盖维护、安全与性能检查清单。
+- `references/checks/`：审查检查场景，覆盖维护、问题台账、安全与性能检查清单。
 - `references/shared/`：随 Skill 安装的跨技能规则运行时资产；源码仓根级 `references/` 是跨技能编辑真值源，发布前必须验证精确副本或当前 Skill 专用投影同步。
-- `templates/`：可复制到目标仓统一产物目录的协议模板资产；协议模板默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；`design-tokens.md` 仅在显式进入 Design System Governance 且目标仓存在真实前端实现时实例化到产品设计目录；维护镜像模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
+- `templates/`：可复制到目标仓统一产物目录的协议模板资产；协议模板默认使用 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`；`issues.md` 是问题台账可实例化骨架，实例化后默认落盘为目标仓 `ai-agent-workspace/issues.md`；`design-tokens.md` 仅在显式进入 Design System Governance 且目标仓存在真实前端实现时实例化到产品设计目录；维护镜像模板正文时必须同步 `user-protocol-template.md`、`project-protocol-template.md` 和 `route-card-template.md`。
 - `scripts/`：技能维护验证脚本与协议包工具链；`protocol-package.py` 用于目标仓探测、结构化证据与反证、生成计划、入口 patch 预览、协议包 scaffold 和结果验证，其他检查脚本用于模板同步、编号、占位符和引用校验。
 
 ## 工作流
@@ -65,6 +65,7 @@ description: "创建或维护 AI Agent 协作协议与规则路由。当用户�
    - 涉及协议工程审查、执行率、Token 成本、协议膨胀或冲突分析时，读取 `references/protocol/protocol-engineer.md`。
    - 涉及触发稳定性审查、条件适用路由触发、项目约束嵌入流程、工作流节点门禁或检查项映射时，读取 `references/protocol/trigger-stability-guide.md`。
    - 涉及原则摄入、约束摄入、执行流程摄入、约束触发项绑定或触发入口判断时，读取 `references/protocol/rule-ingestion.md`。
+   - 涉及排障结果落盘、修复前方案或问题状态闭环时，读取 `references/protocol/issue-tracking.md`。
    - 涉及 OpenSpec、Spec-first、规范驱动开发、审查修复闭环或 Epic/Subtask 拆分时，读取 `references/protocol/openspec-workflow.md`。
    - 涉及目标仓统一产物入口、跨技能产物目录或新旧路径兼容时，读取 `references/shared/target-workspace-layout.md`。
    - 涉及协议包落盘、三档生成模式、模板目录、playbooks 内容来源或目标仓文件生成时，读取 `references/protocol/package-blueprint.md`。

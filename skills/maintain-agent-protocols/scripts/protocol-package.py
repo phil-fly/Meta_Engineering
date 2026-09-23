@@ -705,6 +705,20 @@ def plan_package(
             "action": "copy",
         })
 
+    issue_ledger_target = None
+    issue_ledger = manifest.get("issue_ledger")
+    if issue_ledger:
+        issue_ledger_target, existing = resolve_artifact_target(root, issue_ledger)
+        if issue_ledger_target is None:
+            artifact_conflicts.append({"id": "issue-ledger", "existing_targets": existing})
+        else:
+            files.append({
+                "target": issue_ledger_target,
+                "source": issue_ledger["source"],
+                "kind": "issue-ledger",
+                "action": "maintain-and-verify" if existing else "create-and-backfill",
+            })
+
     for artifact in manifest.get("conditional_artifacts", []):
         if not artifact_is_active(artifact, design_system, evidence_quality):
             continue
@@ -837,6 +851,7 @@ def plan_package(
         "support_assets": [path.relative_to(SKILL_ROOT).as_posix() for path in support_files],
         "artifact_conflicts": artifact_conflicts,
         "protocol_directory": directory_status,
+        "issue_ledger_target": issue_ledger_target,
         "files": files,
         "entry_patch": entry_patch,
         "warnings": support_warnings,
@@ -958,6 +973,7 @@ def make_state_file(plan: dict[str, Any]) -> str:
         "status": "generated",
         "entry": plan["entry_patch"]["entry"],
         "entry_patch_status": plan["entry_patch"]["status"],
+        "issue_ledger": plan.get("issue_ledger_target"),
     }
     return json.dumps(state, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
@@ -1017,7 +1033,7 @@ def scaffold_package(
             content = make_check_index(check_keys, manifest)
         elif item["kind"] == "route-index":
             content = make_route_index(plan["selected_routes"])
-        elif item["kind"] in {"template", "route", "support_asset", "conditional-artifact"}:
+        elif item["kind"] in {"template", "route", "support_asset", "conditional-artifact", "issue-ledger"}:
             content = (SKILL_ROOT / item["source"]).read_text(encoding="utf-8")
         elif item["kind"] == "playbook":
             key = item["source"].split("#", 1)[1]
@@ -1034,8 +1050,9 @@ def scaffold_package(
             item.get("source"),
             item.get("target"),
             asset_map,
+            plan.get("issue_ledger_target"),
         )
-        item_overwrite = overwrite and item["kind"] != "conditional-artifact"
+        item_overwrite = overwrite and item["kind"] not in {"conditional-artifact", "issue-ledger"}
         write_file(target, content, item_overwrite, written, skipped)
 
     entry_apply_attempted = False
@@ -1095,7 +1112,10 @@ def rewrite_generated_references(
     source_rel: str | None = None,
     target_rel: str | None = None,
     support_map: dict[str, str] | None = None,
+    issue_ledger_target: str | None = None,
 ) -> str:
+    if issue_ledger_target:
+        content = content.replace("ai-agent-workspace/issues.md", issue_ledger_target)
     if kind == "playbook":
         content = content.replace("../engineering/", "../routes/")
         content = content.replace("../checks/checklists.md", "../checks/README.md")
@@ -1581,8 +1601,38 @@ def validate_package(
     warnings.extend(entry_warnings)
 
     for template in manifest["templates"]:
-        if not (base / template["target"]).exists():
+        source_path = SKILL_ROOT / template["source"]
+        if not source_path.is_file():
+            content_errors.append(f"模板源文件不存在：{template['source']}")
+        target_path = base / template["target"]
+        if not target_path.is_file():
             missing.append(f"{package_dir}/{template['target']}")
+            continue
+        target_content = target_path.read_text(encoding="utf-8", errors="ignore")
+        for marker in template.get("required_markers", []):
+            if marker not in target_content:
+                content_errors.append(
+                    f"{package_dir}/{template['target']} 缺少必备内容：{marker}"
+                )
+
+    issue_ledger = manifest.get("issue_ledger")
+    if issue_ledger:
+        issue_ledger_target, existing = resolve_artifact_target(root, issue_ledger)
+        if issue_ledger_target is None:
+            content_errors.append(
+                f"问题台账存在多个可编辑真值源：{', '.join(existing)}"
+            )
+        else:
+            issue_ledger_path = root / issue_ledger_target
+            if not issue_ledger_path.is_file():
+                missing.append(issue_ledger_target)
+            else:
+                issue_content = issue_ledger_path.read_text(encoding="utf-8", errors="ignore")
+                for marker in issue_ledger.get("required_markers", []):
+                    if marker not in issue_content:
+                        content_errors.append(
+                            f"{issue_ledger_target} 缺少必备内容：{marker}"
+                        )
 
     evidence_quality = detect_repo(root).get("evidence_quality", {})
     for artifact in manifest.get("conditional_artifacts", []):
@@ -1629,6 +1679,10 @@ def validate_package(
         for artifact in manifest.get("conditional_artifacts", [])
         for target in [artifact["default_target"], *artifact.get("compat_targets", [])]
     }
+    if issue_ledger:
+        issue_ledger_target, _ = resolve_artifact_target(root, issue_ledger)
+        if issue_ledger_target:
+            allowed_external_references.add(issue_ledger_target)
     content_errors.extend(validate_package_references(root, base, allowed_external_references))
 
     if not directory_contains_rule_id(base / "playbooks", RULE_ID_PATTERNS["playbook"]):

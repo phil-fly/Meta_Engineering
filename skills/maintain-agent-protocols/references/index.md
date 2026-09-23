@@ -12,12 +12,14 @@
 - `protocol/trigger-stability-guide.md`：触发稳定性审查，覆盖任务入口、场景手册、工程路由、项目约束、约束门禁和检查项之间的触发链路。
 - `protocol/rule-ingestion.md`：原则、约束、约束触发项、执行流程、模板、检查项和知识的摄入与触发判断。
 - `protocol/openspec-workflow.md`：Spec-first 工作流，覆盖规范前置、变更闭环、审查闭环和 Epic 拆分。
+- `protocol/issue-tracking.md`：问题台账唯一真值源、修复前方案门禁、验证关闭和发现对账。
 - `protocol/package-blueprint.md`：目标仓协议包落盘蓝图，说明生成方案预览、入口兼容、三档生成模式、路由状态标注、目录、内容来源和不会自动生成的边界。
 - `protocol/skill-structure.md`：技能自身目录结构说明，覆盖多层 `references/`、`templates/` 和结构校验 warning 处理。
 - `protocol/user-protocol-template.md`：用户级协议模板，可直接复用后按项目裁剪。
 - `protocol/project-protocol-template.md`：项目级协议模板，可直接复用后按仓库约束裁剪。
 - `protocol/route-card-template.md`：工程路由卡片模板，可落盘到 `ai-agent-protocols/templates/route-card.md`。
 - `../templates/user-protocol.md`、`project-protocol.md`、`route-card.md`：复制到目标仓 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`。
+- `../templates/issues.md`：问题台账模板；实例化后默认落盘到目标仓 `ai-agent-workspace/issues.md`，已有根级 `issues.md` 时按兼容真值源规则使用。
 - `../templates/frontend-design-system-review-prompt.md`：复制到目标仓协议模板目录，作为前端设计系统基线调查与变更审查的独立只读提示语；它不在 `references/protocol/` 维护镜像正文。
 - `../templates/design-tokens.md`：仅在显式进入 Design System Governance 且需要共享文档载体时，实例化为 `ai-agent-workspace/product/design/design-tokens.md` 或继承兼容 `docs/03_DESIGN/design-tokens.md`；不得因普通前端存在而创建。
 
