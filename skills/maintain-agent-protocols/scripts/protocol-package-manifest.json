@@ -115,6 +115,7 @@
     "sections": {
       "maintenance-checklist": "maintenance-checklist.md",
       "security-checklist": "security-checklist.md",
+      "time-and-timezone-checklist": "time-and-timezone-checklist.md",
       "frontend-design-system-checklist": "frontend-design-system-checklist.md",
       "frontend-i18n-checklist": "frontend-i18n-checklist.md",
       "frontend-accessibility-checklist": "frontend-accessibility-checklist.md",
@@ -218,7 +219,9 @@
   "minimal_playbooks": ["task-governance", "coding", "architecture", "security-review", "troubleshooting", "research"],
   "minimal_checks": ["maintenance-checklist", "security-checklist"],
   "project_checks_by_route": {
+    "core": ["time-and-timezone-checklist"],
     "frontend": [
+      "time-and-timezone-checklist",
       "frontend-design-system-checklist",
       "frontend-i18n-checklist",
       "frontend-accessibility-checklist",

@@ -4,7 +4,7 @@
 
 ## 读取顺序
 
-1. 读取 `checklists.md` 获取维护、问题台账、安全、前端设计系统、前端国际化、前端可访问性、前端测试、前端性能、前端 UI 稳定性、企业级 SaaS 设计、前端组件、前端结构和性能检查项；检查项使用 `CHK-*` 编号。
+1. 读取 `checklists.md` 获取维护、问题台账、安全、时间、前端设计系统、前端国际化、前端可访问性、前端测试、前端性能、前端 UI 稳定性、企业级 SaaS 设计、前端组件、前端结构和性能检查项；检查项使用 `CHK-*` 编号。
 2. 需要流程时读取 `../scenarios/playbooks.md`。
 3. 需要工程规则正文时读取 `../engineering/index.md` 和对应路由。
 4. 涉及运行配置、功能配置、外部集成配置或历史配置实现检查时，读取 `../engineering/security/dependency-and-config.md`。
@@ -27,4 +27,5 @@
 - `CHK-MAINT-*` 协议分层检查。
 - `CHK-MAINT-*` 结论范围检查。
 - `CHK-ISSUE-*` 问题台账、修复方案门禁、验证证据和发现对账检查；排障任务由 `WF-TROUBLESHOOTING` 报告门触发。
+- `CHK-TIME-*` 时间语义、存储、API、展示、导出、部署、计算和跨时区测试检查；由 `WF-CODING`、`WF-ARCHITECTURE` 或 `WF-TROUBLESHOOTING` 按命中边界触发。
 - `CHK-MAINT-033` 至 `CHK-MAINT-036` 问题台账真值源、修复前方案门禁、关闭证据和发现对账检查。

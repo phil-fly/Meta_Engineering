@@ -208,6 +208,7 @@ class ValidatePackageTests(unittest.TestCase):
         package = self.repo / "ai-agent-workspace" / "protocols"
         route = package / "routes" / "frontend" / "design-system-maintenance.md"
         checklist = package / "checks" / "frontend-design-system-checklist.md"
+        time_checklist = package / "checks" / "time-and-timezone-checklist.md"
         prompt = package / "templates" / "frontend-design-system-review-prompt.md"
         design_tokens = (
             self.repo
@@ -224,6 +225,8 @@ class ValidatePackageTests(unittest.TestCase):
         )
         self.assertTrue(checklist.is_file())
         self.assertIn("CHK-FE-DS-001", checklist.read_text(encoding="utf-8"))
+        self.assertTrue(time_checklist.is_file())
+        self.assertIn("CHK-TIME-009", time_checklist.read_text(encoding="utf-8"))
         self.assertTrue(prompt.is_file())
         self.assertFalse(design_tokens.exists())
 
@@ -677,7 +680,12 @@ class ValidatePackageTests(unittest.TestCase):
         plan = protocol_package.plan_package(self.repo, self.manifest, "project")
 
         route_ids = {route["id"] for route in plan["selected_routes"]}
+        targets = {item["target"] for item in plan["files"]}
         self.assertEqual(route_ids, {"frontend"})
+        self.assertIn(
+            "ai-agent-workspace/protocols/checks/time-and-timezone-checklist.md",
+            targets,
+        )
         self.assertTrue(any(item["kind"] == "support_asset" for item in plan["files"]))
         self.assertTrue(all(
             max((q.get("confidence", 0.0) for q in route["evidence_quality"].values()), default=0.0) < 1.0
@@ -963,6 +971,11 @@ class ValidatePackageTests(unittest.TestCase):
         self.assertIn("[security](security/index.md)", route_index)
         self.assertIn("[performance](performance/index.md)", route_index)
         self.assertIn("platform（源规则依赖未落盘）", route_index)
+        package = self.repo / "ai-agent-workspace" / "protocols"
+        self.assertTrue((package / "routes" / "core" / "time-and-timezone.md").is_file())
+        time_check = package / "checks" / "time-and-timezone-checklist.md"
+        self.assertTrue(time_check.is_file())
+        self.assertIn("CHK-TIME-009", time_check.read_text(encoding="utf-8"))
 
     def test_route_index_validator_rejects_dependency_mismatch(self) -> None:
         self.write_frontend_implementation()

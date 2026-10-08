@@ -34,6 +34,7 @@ Repository、事务、缓存、存储层查询        → core/data-access.md
 N+1、资源泄漏、复杂度、阻塞、对象创建     → performance/common-performance.md
 命名、注释规范、状态语义、悬空引用、根因修复 → core/common-quality.md
 错误码、用户错误、结构化日志、脱敏        → core/error-and-logging.md
+时间点、日期、时长、时间范围、时区、过期、定时、导出 → core/time-and-timezone.md
 路由、限流、认证前置、边界保护            → platform/gateway.md
 部署目录、runtime、生命周期、清理策略     → platform/deployment.md
 追踪、日志、指标、审计、关联标识          → platform/observability.md
@@ -50,6 +51,7 @@ Agent 边界、证据、不确定性、按需加载      → governance/agent-go
 - UI 页面、弹窗、表单、表格、菜单或提示反馈任务：先读 `frontend/i18n-governance.md`；涉及新页面、共享组件、主题、布局、响应式或视觉参数时补读 `frontend/design-system-maintenance.md`，再按任务类型补 `frontend/form-validation.md`、`frontend/interaction-and-permission.md`、`core/error-and-logging.md` 或其他相关路由。
 - 前端结构、组件、状态、测试、UI 稳定性、可访问性、工具链或性能任务：先读 `frontend/index.md`，再按任务类型补 `frontend/project-structure.md`、`frontend/component-system.md`、`frontend/state-and-cache.md`、`frontend/testing.md`、`frontend/ui-stability.md`、`frontend/accessibility.md`、`frontend/tooling-and-verification.md` 或 `frontend/frontend-performance.md`。
 - 删除接口任务：先读 `core/api-design.md`、`core/auth-and-permission.md`、`core/data-access.md`，再读 `security/index.md`。
+- 时间字段、时间参数、日期、时长、时间范围、时区、过期、定时或时间导出任务：先读 `core/time-and-timezone.md`，再按边界补 `core/api-design.md`、`core/data-access.md`、`frontend/interaction-and-permission.md`、`platform/deployment.md` 或 `frontend/testing.md`。
 - Go/Java/Rust/Python 后端任务：先读 `backend/index.md` 和对应语言文件，再按需要补充 `core/`、`security/`、`performance/`。
 - 安全审查任务：先读 `../scenarios/playbooks.md` 的安全审查流程，再读 `security/index.md` 与相关语言路由。
 - 性能审查任务：先读 `../scenarios/playbooks.md` 的性能审查流程，再读 `performance/index.md` 与相关语言路由。
