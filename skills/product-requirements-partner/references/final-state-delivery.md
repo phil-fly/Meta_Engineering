@@ -33,10 +33,10 @@
 - 每条记录的 `Accepted conclusion` 都是该事件生效后的完整当前结论。`patch` 的 `Affected fields` 只说明变化位置，不承担自然语言字段合并。
 - 每个键必须恰好有一个 `active`，且它必须是时间最新的记录。
 
-项目根目录已知时运行：
+项目根目录已知时，在技能根目录运行：
 
 ```bash
-python3 skills/product-requirements-partner/scripts/validate-confirmations.py \
+python3 scripts/validate-confirmations.py \
   --project <project-root> --scope <scope_id@version> --json
 ```
 

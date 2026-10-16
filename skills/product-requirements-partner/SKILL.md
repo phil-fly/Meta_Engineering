@@ -185,14 +185,14 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 
 ## 验证
 
-修改本技能后至少执行：
+修改本技能后至少执行（以技能根目录为工作目录）：
 
 ```bash
-python3 <skill-craft-root>/scripts/validate-metadata.py --path skills/product-requirements-partner
-python3 <skill-craft-root>/scripts/validate-structure.py --path skills/product-requirements-partner
-python3 -m unittest discover -s skills/product-requirements-partner/tests -v
-python3 skills/product-requirements-partner/scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json
-python3 skills/product-requirements-partner/scripts/validate-legacy-current.py --path <legacy-authoritative-document>
+python3 -m unittest discover -s tests -v
+python3 scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json
+python3 scripts/validate-legacy-current.py --path <legacy-authoritative-document>
 ```
 
-第四个命令在项目记忆模式下运行；第五个命令仅在没有确认注册表且必须依赖 legacy current 时运行。结构或状态校验失败时不得声称完成对应范围的最终状态投影。若改动了来源、许可、目录或公开说明，同步检查根 README 和本技能 README。
+第二条命令在项目记忆模式下运行；第三条命令仅在没有确认注册表且必须依赖 legacy current 时运行。结构或状态校验失败时不得声称完成对应范围的最终状态投影。若改动了来源、许可、目录或公开说明，同步检查根 README 和本技能 README。
+
+`validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；不可用时跳过该项并说明它未运行。

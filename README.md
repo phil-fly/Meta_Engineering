@@ -26,3 +26,13 @@
 | 项目 | 来源 | 引用位置 | 许可证 | 说明 |
 | --- | --- | --- | --- | --- |
 | `ai-pm` | `https://github.com/SmileLiuuuu/ai-pm.git`，引入时提交 `bc3ed7c725abaa7c534129f180c01a0d0234e3fc` | `skills/product-requirements-partner/` | `CC BY-NC 4.0` | 本仓库将其改名并改造为仓库内产品需求协作技能；上游许可文本保存在 `skills/product-requirements-partner/LICENSE.upstream-ai-pm`。 |
+
+## 版本与许可
+
+- 技能 frontmatter 遵循宿主技能 schema，只包含 `name` 和 `description`，不含 `version` 字段；技能版本以 git 提交历史为准。
+- 本仓库自身的许可尚未声明。`skills/product-requirements-partner/` 中改编自上游的部分继续受 `CC BY-NC 4.0` 约束，该许可证含非商业使用限制；对外分发前需要先确定仓库级许可。
+
+## 本地开发
+
+- 运行校验脚本时以**技能根目录**为工作目录，脚本从自身位置解析路径，不依赖调用时的 cwd。各技能可用命令见对应技能 README 的“常用验证”章节。
+- 生成物、缓存与工具临时目录由 `.gitignore` 排除（`__pycache__/`、`.wbtmp/`、`node_modules/` 等）。

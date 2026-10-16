@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 /**
- * 检查规则编号唯一性
+ * 检查规则编号唯一性与命名空间合法性
+ *
+ * 做两件事：
+ * 1. 唯一性：同一编号不得在多个文件中被定义为规则。
+ * 2. 命名空间：规则定义位的编号必须落在已知命名空间内。
+ *    历史缺陷是只识别 `WF-`、`CON-`、`CHK-` 三个前缀，导致 `PERF001`
+ *    这类"长得像编号但不在任何命名空间"的定义对校验完全不可见（假阴性）。
  */
 
 import { readFileSync, readdirSync, statSync } from 'fs';
@@ -13,7 +19,40 @@ const __dirname = dirname(__filename);
 const ROOT = resolve(__dirname, '../../..');
 const SKILLS_DIR = join(ROOT, 'skills');
 
-const DEFINITION_LINE = /^\s*(?:-\s+|#{1,6}\s+|\|\s*`?)(WF-[A-Z0-9_-]+|CON-[A-Z0-9_-]+|CHK-[A-Z0-9_-]+)\b/;
+/**
+ * 允许出现在规则定义位的命名空间。
+ * - WF / CON / CHK：协议包的通用规则编号族。
+ * - CONF / DEC：产品需求技能确认记录与决策记录编号族。
+ * - ISSUE：问题台账编号族。
+ * 新增命名空间必须同时更新本集合与 `references/protocol/rule-ingestion.md`。
+ */
+const KNOWN_NAMESPACES = new Set(['WF', 'CON', 'CHK', 'CONF', 'DEC', 'ISSUE']);
+
+/** 规则定义位：列表项、标题或表格首列，可带反引号包裹。 */
+const DEFINITION_LINE =
+  /^\s*(?:-\s+|#{1,6}\s+|\|\s*`?)([A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*)\b/;
+
+/** 带命名空间的编号，例如 `CON-PERF-001`、`CONF-001`、`ISSUE-0001`。 */
+const NAMESPACED_ID = /^([A-Z][A-Z0-9]*)-[A-Z0-9]/;
+
+/** 无命名空间的裸编号，例如历史遗留的 `PERF001`。 */
+const BARE_ID = /^[A-Z]{2,}[0-9]{2,}$/;
+
+interface Definition {
+  id: string;
+  namespace: string;
+}
+
+function parseDefinition(token: string): Definition | null {
+  const namespaced = token.match(NAMESPACED_ID);
+  if (namespaced) {
+    return { id: token, namespace: namespaced[1] };
+  }
+  if (BARE_ID.test(token)) {
+    return { id: token, namespace: '' };
+  }
+  return null;
+}
 
 function extractRuleIds(content: string): Record<string, string> {
   const ids: Record<string, string> = {};
@@ -23,8 +62,10 @@ function extractRuleIds(content: string): Record<string, string> {
     const match = line.match(DEFINITION_LINE);
     if (!match) continue;
 
-    const ruleId = match[1];
-    ids[ruleId] = ruleId.split('-')[0];
+    const definition = parseDefinition(match[1]);
+    if (!definition) continue;
+
+    ids[definition.id] = definition.namespace;
   }
 
   return ids;
@@ -49,34 +90,38 @@ function* walkDir(dir: string): Generator<string> {
 
 function checkUniqueness() {
   const allIds: Record<string, string[]> = {};
+  const unnamespaced: Record<string, string[]> = {};
+  const unknownNamespace: Record<string, string[]> = {};
 
-  for (const mdFile of walkDir(SKILLS_DIR)) {
-    if (!shouldCheck(mdFile)) continue;
+  const scan = (dir: string) => {
+    try {
+      for (const mdFile of walkDir(dir)) {
+        if (!shouldCheck(mdFile)) continue;
 
-    const content = readFileSync(mdFile, 'utf-8');
-    const ids = extractRuleIds(content);
+        const content = readFileSync(mdFile, 'utf-8');
+        const ids = extractRuleIds(content);
+        const relPath = relative(ROOT, mdFile);
 
-    for (const ruleId of Object.keys(ids)) {
-      if (!allIds[ruleId]) allIds[ruleId] = [];
-      allIds[ruleId].push(relative(ROOT, mdFile));
-    }
-  }
+        for (const [ruleId, namespace] of Object.entries(ids)) {
+          if (!allIds[ruleId]) allIds[ruleId] = [];
+          allIds[ruleId].push(relPath);
 
-  // 扫描 references
-  const refsDir = join(ROOT, 'references');
-  try {
-    for (const mdFile of walkDir(refsDir)) {
-      if (!shouldCheck(mdFile)) continue;
-
-      const content = readFileSync(mdFile, 'utf-8');
-      const ids = extractRuleIds(content);
-
-      for (const ruleId of Object.keys(ids)) {
-        if (!allIds[ruleId]) allIds[ruleId] = [];
-        allIds[ruleId].push(relative(ROOT, mdFile));
+          const bucket = namespace === '' ? unnamespaced
+            : KNOWN_NAMESPACES.has(namespace) ? null
+              : unknownNamespace;
+          if (bucket) {
+            if (!bucket[ruleId]) bucket[ruleId] = [];
+            bucket[ruleId].push(relPath);
+          }
+        }
       }
+    } catch {
+      /* 目录不存在时跳过 */
     }
-  } catch {}
+  };
+
+  scan(SKILLS_DIR);
+  scan(join(ROOT, 'references'));
 
   const duplicates: Record<string, string[]> = {};
   for (const [ruleId, files] of Object.entries(allIds)) {
@@ -85,18 +130,20 @@ function checkUniqueness() {
     }
   }
 
-  return { allIds, duplicates };
+  return { allIds, duplicates, unnamespaced, unknownNamespace };
 }
 
-const { allIds, duplicates } = checkUniqueness();
+const { allIds, duplicates, unnamespaced, unknownNamespace } = checkUniqueness();
 
 console.log(`检查范围: ${ROOT}\n`);
 console.log(`发现规则定义编号: ${Object.keys(allIds).length} 个`);
-console.log('扫描规则: 只统计列表项、标题或表格首列中的规则定义；忽略模板资产、正文引用和示例。');
+console.log(
+  '扫描规则: 只统计列表项、标题或表格首列中的规则定义；忽略模板资产、正文引用和示例。',
+);
 
 const byType: Record<string, number> = {};
 for (const ruleId of Object.keys(allIds)) {
-  const prefix = ruleId.split('-')[0];
+  const prefix = ruleId.includes('-') ? ruleId.split('-')[0] : '(未命名空间)';
   byType[prefix] = (byType[prefix] || 0) + 1;
 }
 
@@ -106,19 +153,57 @@ for (const [prefix, count] of Object.entries(byType).sort()) {
 
 console.log();
 
-if (Object.keys(duplicates).length === 0) {
-  console.log('✅ PASS: 所有规则编号唯一');
+const hasDuplicates = Object.keys(duplicates).length > 0;
+const hasUnnamespaced = Object.keys(unnamespaced).length > 0;
+const hasUnknown = Object.keys(unknownNamespace).length > 0;
+
+if (!hasDuplicates && !hasUnnamespaced && !hasUnknown) {
+  console.log('✅ PASS: 所有规则编号唯一且命名空间合法');
   process.exit(0);
 }
 
-console.error(`❌ FAIL: 发现 ${Object.keys(duplicates).length} 个重复编号:\n`);
+if (hasDuplicates) {
+  console.error(`❌ FAIL: 发现 ${Object.keys(duplicates).length} 个重复编号:\n`);
 
-for (const [ruleId, files] of Object.entries(duplicates).sort()) {
-  console.error(`  ${ruleId} 出现在 ${files.length} 个文件:`);
-  for (const file of files) {
-    console.error(`    - ${file}`);
+  for (const [ruleId, files] of Object.entries(duplicates).sort()) {
+    console.error(`  ${ruleId} 出现在 ${files.length} 个文件:`);
+    for (const file of files) {
+      console.error(`    - ${file}`);
+    }
+    console.error();
   }
-  console.error();
+}
+
+if (hasUnnamespaced) {
+  console.error(
+    `❌ FAIL: 发现 ${Object.keys(unnamespaced).length} 个未命名空间的规则编号:\n`,
+  );
+  console.error(
+    `  允许的命名空间: ${[...KNOWN_NAMESPACES].map((n) => `${n}-*`).join('、')}\n`,
+  );
+
+  for (const [ruleId, files] of Object.entries(unnamespaced).sort()) {
+    console.error(`  ${ruleId} 缺少命名空间前缀，出现在:`);
+    for (const file of files) {
+      console.error(`    - ${file}`);
+    }
+    console.error();
+  }
+}
+
+if (hasUnknown) {
+  console.error(
+    `❌ FAIL: 发现 ${Object.keys(unknownNamespace).length} 个未知命名空间的规则编号:\n`,
+  );
+
+  for (const [ruleId, files] of Object.entries(unknownNamespace).sort()) {
+    const prefix = ruleId.split('-')[0];
+    console.error(`  ${ruleId} 使用了未注册命名空间 ${prefix}-*，出现在:`);
+    for (const file of files) {
+      console.error(`    - ${file}`);
+    }
+    console.error();
+  }
 }
 
 process.exit(1);

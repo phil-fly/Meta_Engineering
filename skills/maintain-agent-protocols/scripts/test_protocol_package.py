@@ -977,6 +977,55 @@ class ValidatePackageTests(unittest.TestCase):
         self.assertTrue(time_check.is_file())
         self.assertIn("CHK-TIME-009", time_check.read_text(encoding="utf-8"))
 
+    def test_detect_host_signal_selects_matching_entry(self) -> None:
+        (self.repo / ".claude").mkdir(parents=True, exist_ok=True)
+        (self.repo / ".claude" / "settings.local.json").write_text("{}", encoding="utf-8")
+
+        entries = protocol_package.collect_protocol_entries(self.repo)
+
+        self.assertEqual(entries["detected_host"], "claude")
+        self.assertIn(".claude", entries["host_evidence"])
+        self.assertEqual(entries["selected_entry"], "CLAUDE.md")
+        self.assertIn("claude", entries["selection_reason"])
+
+    def test_entry_selection_reports_fallback_without_host_signal(self) -> None:
+        entries = protocol_package.collect_protocol_entries(self.repo)
+
+        self.assertIsNone(entries["detected_host"])
+        self.assertEqual(entries["selected_entry"], "AGENTS.md")
+        self.assertIn("未识别宿主信号", entries["selection_reason"])
+        self.assertIn("CON-PACKAGE-ENTRY-FALLBACK", entries["selection_reason"])
+        self.assertNotIn("Codex/OpenAI", entries["selection_reason"])
+
+    def test_nested_deployment_and_api_layouts_are_detected(self) -> None:
+        manifest = self.repo / "deploy" / "k8s"
+        manifest.mkdir(parents=True, exist_ok=True)
+        (manifest / "service.yaml").write_text("apiVersion: v1\nkind: Service\n", encoding="utf-8")
+        handler = self.repo / "internal" / "api"
+        handler.mkdir(parents=True, exist_ok=True)
+        (handler / "handler.go").write_text("package api\n\nfunc List() {}\n", encoding="utf-8")
+
+        detection = protocol_package.detect_repo(self.repo)
+
+        self.assertIn("deploy/k8s/service.yaml", detection["evidence"]["deployment"])
+        self.assertIn("internal/api/handler.go", detection["evidence"]["api"])
+
+    def test_plan_reports_support_scale_without_blocking_scaffold(self) -> None:
+        self.write_frontend_implementation()
+
+        plan = protocol_package.plan_package(self.repo, self.manifest, "project")
+
+        summary = plan["support_summary"]
+        self.assertGreater(summary["support_assets"], 0)
+        self.assertEqual(summary["route_domains"], ["frontend"])
+        self.assertIn("core", summary["support_only_domains"])
+        self.assertTrue(plan["advisories"])
+        self.assertTrue(any("未生成路由" in item for item in plan["advisories"]))
+
+        result = protocol_package.scaffold_package(self.repo, self.manifest, "project", False)
+        self.assertEqual(result["errors"], [], result)
+        self.assertEqual(result["advisories"], plan["advisories"])
+
     def test_route_index_validator_rejects_dependency_mismatch(self) -> None:
         self.write_frontend_implementation()
         scaffold = protocol_package.scaffold_package(

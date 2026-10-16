@@ -61,6 +61,24 @@ TEXT_EXTENSIONS = {
     ".cfg",
 }
 ENTRY_CANDIDATES = ("AGENTS.md", "CLAUDE.md", "CODEX.md", "codex.md")
+# Host signals are configuration/directory markers only. Entry files are handled
+# separately as "existing entries" so a detected host never invents evidence.
+HOST_SIGNAL_PATHS = {
+    "claude": (".claude", ".claude/settings.json", ".claude/settings.local.json", ".claude/commands", ".claude/agents"),
+    "codex": (".codex", ".codex/config.toml"),
+    "cursor": (".cursor", ".cursorrules", ".cursor/rules"),
+    "copilot": (".github/copilot-instructions.md",),
+    "gemini": (".gemini", "GEMINI.md"),
+    "windsurf": (".windsurf", ".windsurfrules"),
+}
+HOST_DEFAULT_ENTRY = {
+    "claude": "CLAUDE.md",
+    "codex": "AGENTS.md",
+    "cursor": "AGENTS.md",
+    "copilot": "AGENTS.md",
+    "gemini": "AGENTS.md",
+    "windsurf": "AGENTS.md",
+}
 ENTRY_MARKER_START = "<!-- BEGIN AI AGENT PROTOCOL PACKAGE -->"
 ENTRY_MARKER_END = "<!-- END AI AGENT PROTOCOL PACKAGE -->"
 CHECKPOINT_PHASES = ["classify", "collect", "decide", "generate", "validate"]
@@ -68,6 +86,10 @@ CHECKPOINT_SCHEMA = "maintain-agent-protocols.checkpoints.v1"
 SUPPORT_ASSET_MAX_DEPTH = 3
 SUPPORT_ASSET_MAX_FILES = 64
 SUPPORT_ASSET_MAX_BYTES = 256 * 1024
+# Non-blocking visibility threshold: referenced rule documents are shipped on
+# purpose, but a package far larger than its route selection must be visible in
+# the preview instead of only showing up as a long file list.
+SUPPORT_ASSET_ADVISORY_FILES = 24
 RULE_ID_PATTERNS = {
     "playbook": re.compile(r"^#{1,6}\s+WF-[A-Z0-9]+(?:-[A-Z0-9]+)*\b", re.MULTILINE),
     "check": re.compile(r"^\s*-\s+CHK-[A-Z0-9]+(?:-[A-Z0-9]+)*\b", re.MULTILINE),
@@ -132,16 +154,65 @@ EVIDENCE_RULES = [
     EvidenceRule("java", ("pom.xml", "build.gradle", "build.gradle.kts", "**/*.java")),
     EvidenceRule("rust", ("Cargo.toml", "**/*.rs")),
     EvidenceRule("python", ("pyproject.toml", "requirements.txt", "setup.py", "Pipfile", "**/*.py")),
-    EvidenceRule("api", content_patterns=(r"\b(openapi|swagger|graphql|rest|router|controller|endpoint)\b",), max_hits=8),
+    EvidenceRule(
+        "api",
+        (
+            "api/**",
+            "apis/**",
+            "**/api/**",
+            "**/apis/**",
+            "**/handlers/**",
+            "**/controllers/**",
+            "**/*.proto",
+            "openapi.*",
+            "**/openapi.*",
+            "**/swagger.*",
+        ),
+        (r"\b(openapi|swagger|graphql|rest|router|controller|endpoint)\b",),
+        8,
+    ),
     EvidenceRule("database", ("**/migrations/**",), (r"\b(sqlalchemy|prisma|typeorm|sequelize|diesel|gorm|jdbc|migration)\b",), 8),
     EvidenceRule("auth", content_patterns=(r"\b(auth|oauth|jwt|session|permission|role|acl|rbac)\b",), max_hits=8),
     EvidenceRule("logging", content_patterns=(r"\b(log|logger|logging|tracing|sentry|opentelemetry)\b",), max_hits=8),
-    EvidenceRule("config", ("**/.env.example", "**/config.*",), (r"\b(config|feature flag|environment|dotenv)\b",), 8),
+    EvidenceRule(
+        "config",
+        ("**/.env.example", "**/.env", "**/.env.*", "**/config.*", "**/config/**", "**/settings.*"),
+        (r"\b(config|feature flag|environment|dotenv)\b",),
+        8,
+    ),
     EvidenceRule("security", content_patterns=(r"\b(secret|password|token|credential|encrypt|permission|audit|csrf|xss|sql injection)\b",), max_hits=8),
     EvidenceRule("performance", content_patterns=(r"\b(cache|latency|throughput|n\+1|profil|performance|web vitals)\b",), max_hits=8),
-    EvidenceRule("deployment", ("Dockerfile", "docker-compose.yml", ".github/workflows/*.yml", "k8s/**", "helm/**")),
-    EvidenceRule("observability", content_patterns=(r"\b(metrics|prometheus|grafana|opentelemetry|trace|span|observability)\b",), max_hits=8),
-    EvidenceRule("gateway", content_patterns=(r"\b(gateway|nginx|ingress|load balancer|reverse proxy)\b",), max_hits=8),
+    EvidenceRule(
+        "deployment",
+        (
+            "Dockerfile",
+            "**/Dockerfile",
+            "docker-compose.yml",
+            "docker-compose.yaml",
+            "**/docker-compose*.yml",
+            "**/docker-compose*.yaml",
+            ".github/workflows/*.yml",
+            "**/.github/workflows/*.yml",
+            "k8s/**",
+            "**/k8s/**",
+            "helm/**",
+            "**/helm/**",
+            "**/deploy/**",
+            "**/manifests/**",
+        ),
+    ),
+    EvidenceRule(
+        "observability",
+        ("**/dashboards/**", "**/*prometheus*", "**/*grafana*", "**/otel*", "**/opentelemetry*"),
+        (r"\b(metrics|prometheus|grafana|opentelemetry|trace|span|observability)\b",),
+        8,
+    ),
+    EvidenceRule(
+        "gateway",
+        ("**/nginx/**", "**/nginx.conf", "**/ingress*", "**/gateway/**", "**/traefik/**"),
+        (r"\b(gateway|nginx|ingress|load balancer|reverse proxy)\b",),
+        8,
+    ),
     EvidenceRule("governance", ("AGENTS.md", "CLAUDE.md", "CODEX.md", "ai-agent-workspace/protocols/**", "ai-agent-protocols/**")),
 ]
 
@@ -298,6 +369,15 @@ def evidence_confidence(
     return 0.4
 
 
+def detect_host(root: Path) -> tuple[str | None, list[str]]:
+    """Detect the agent host from configuration markers, never from entry files."""
+    for host, signals in HOST_SIGNAL_PATHS.items():
+        evidence = [signal for signal in signals if (root / signal).exists()]
+        if evidence:
+            return host, evidence
+    return None, []
+
+
 def collect_protocol_entries(root: Path) -> dict[str, Any]:
     existing = [path for path in ENTRY_CANDIDATES if (root / path).is_file()]
     canonical = "ai-agent-workspace/protocols"
@@ -307,11 +387,22 @@ def collect_protocol_entries(root: Path) -> dict[str, Any]:
     compat_has_assets = bool((root / compat).is_dir() and any((root / compat).rglob("*")))
     package_dir_conflict = canonical_has_assets and compat_has_assets
     playbooks = [path for path in ["playbooks", "ai-agent-workspace/protocols/playbooks", "ai-agent-protocols/playbooks"] if (root / path).exists()]
+    host, host_evidence = detect_host(root)
     default_entry = "AGENTS.md"
-    reason = "Codex/OpenAI 场景默认入口"
-    if "AGENTS.md" not in existing and "CLAUDE.md" in existing:
+    if host:
+        default_entry = HOST_DEFAULT_ENTRY[host]
+        evidence_text = "、".join(host_evidence)
+        if default_entry in existing:
+            reason = f"检测到 {host} 宿主信号（{evidence_text}），继承既有 {default_entry}"
+        else:
+            reason = f"检测到 {host} 宿主信号（{evidence_text}），按该宿主默认入口生成 {default_entry}"
+    elif "AGENTS.md" in existing:
+        reason = "未识别宿主信号，继承既有 AGENTS.md"
+    elif "CLAUDE.md" in existing:
         default_entry = "CLAUDE.md"
-        reason = "未发现 AGENTS.md，继承既有 CLAUDE.md"
+        reason = "未识别宿主信号，继承既有 CLAUDE.md"
+    else:
+        reason = "未识别宿主信号与既有入口，按 CON-PACKAGE-ENTRY-FALLBACK 回退 AGENTS.md"
     return {
         "existing_entries": existing,
         "package_dirs": package_dirs,
@@ -322,6 +413,8 @@ def collect_protocol_entries(root: Path) -> dict[str, Any]:
             "entry_files": existing,
         },
         "playbook_dirs": playbooks,
+        "detected_host": host,
+        "host_evidence": host_evidence,
         "selected_entry": default_entry,
         "selection_reason": reason,
     }
@@ -500,8 +593,28 @@ def markdown_reference_targets(source: Path) -> list[Path]:
     return sorted(set(targets))
 
 
+def engineering_root() -> Path:
+    return SKILL_ROOT / "references" / "engineering"
+
+
+def engineering_domain(path: Path) -> str | None:
+    """Return the top-level engineering domain of a rule document, or None."""
+    try:
+        relative = path.resolve().relative_to(engineering_root().resolve())
+    except ValueError:
+        return None
+    parts = relative.parts
+    return parts[0] if len(parts) > 1 else None
+
+
 def support_assets_for_routes(route_files: list[Path]) -> tuple[list[Path], list[str]]:
-    """Collect one package-wide bounded closure without duplicating formal routes."""
+    """Collect one package-wide bounded closure without duplicating formal routes.
+
+    Referenced rule documents are shipped as reference-only support assets so that
+    every reference a selected route makes stays resolvable, including cross-domain
+    inheritance declarations such as a backend route inheriting ``core/`` rules.
+    The closure is bounded by depth, file count and byte budget.
+    """
     seen = set(route_files)
     queue = [(path, 0) for path in route_files]
     support: list[Path] = []
@@ -510,7 +623,7 @@ def support_assets_for_routes(route_files: list[Path]) -> tuple[list[Path], list
     while queue:
         source, depth = queue.pop(0)
         for target in markdown_reference_targets(source):
-            if target in seen or not target.is_relative_to(SKILL_ROOT / "references" / "engineering"):
+            if target in seen or not target.is_relative_to(engineering_root()):
                 continue
             target_depth = depth + 1
             if target_depth > SUPPORT_ASSET_MAX_DEPTH:
@@ -765,6 +878,26 @@ def plan_package(
         for source in route_files
     })
     support_files, support_warnings = support_assets_for_routes(all_route_files)
+    support_domains = sorted({
+        domain for domain in (engineering_domain(path) for path in support_files) if domain
+    })
+    route_domains = sorted({
+        domain for domain in (engineering_domain(path) for path in all_route_files) if domain
+    })
+    support_bytes_total = sum(path.stat().st_size for path in support_files)
+    advisories: list[str] = []
+    if len(support_files) > max(SUPPORT_ASSET_ADVISORY_FILES, len(all_route_files) * 2):
+        advisories.append(
+            f"support 资产 {len(support_files)} 个随包落盘（路由文件仅 {len(all_route_files)} 个）；"
+            "被选路由引用的规则文档会作为 reference-only 资产一并生成，"
+            "协议包实际体积明显大于路由裁剪结果，请在预览中确认是否接受。"
+        )
+    inherited_domains = sorted(set(support_domains) - set(route_domains))
+    if inherited_domains:
+        advisories.append(
+            f"support 资产覆盖了未生成路由的领域：{'、'.join(inherited_domains)}；"
+            "这些领域没有独立路由入口，只作为被引用规则的落盘副本存在。"
+        )
     for rule in manifest["route_rules"]:
         if rule["id"] in selected_rule_ids:
             route_files = route_files_by_id[rule["id"]]
@@ -849,12 +982,23 @@ def plan_package(
         "evidence_quality": evidence_quality,
         "selected_routes": selected_routes,
         "support_assets": [path.relative_to(SKILL_ROOT).as_posix() for path in support_files],
+        "support_domains": support_domains,
+        "support_summary": {
+            "route_files": len(all_route_files),
+            "support_assets": len(support_files),
+            "support_bytes": support_bytes_total,
+            "check_files": len(check_keys),
+            "planned_files": len(files),
+            "route_domains": route_domains,
+            "support_only_domains": inherited_domains,
+        },
         "artifact_conflicts": artifact_conflicts,
         "protocol_directory": directory_status,
         "issue_ledger_target": issue_ledger_target,
         "files": files,
         "entry_patch": entry_patch,
         "warnings": support_warnings,
+        "advisories": advisories,
         "checkpoint_state": {
             "schema": CHECKPOINT_SCHEMA,
             "mode": mode,
@@ -1097,6 +1241,7 @@ def scaffold_package(
         "written": written,
         "skipped": skipped,
         "warnings": plan["warnings"],
+        "advisories": plan.get("advisories", []),
         "entry_apply_attempted": entry_apply_attempted,
         "entry_applied": entry_applied,
         "entry_rolled_back": entry_rolled_back,
