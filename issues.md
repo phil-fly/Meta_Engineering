@@ -92,7 +92,7 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 范围与拟改动：把两处改为技能内相对路径，并保留“源码仓真值源在根级”的说明。
 - 风险：低；只改引用表述，不改场景编号与内容。
 - 回滚方式：还原该段落文本。
-- 验证方式：引用检查脚本、单测、路径可达性断言。
+- 验证方式：引用检查脚本与单测。
 - Spec/ADR 影响：无。
 
 #### 实施与验证
@@ -100,6 +100,7 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 实施结果：已把两处引用改为 `references/shared/interactive-decision-protocol.md` 与 `references/shared/target-workspace-layout.md`。
 - 验证结果：引用检查由 145 条增至 147 条且全部有效；单测 10 个通过。
 - 剩余风险：未在真实宿主安装态复跑；路径可达性由静态引用检查覆盖。
+
 ### ISSUE-0003 协议技能工作流 Step 1 层级歧义且自述与结构不符
 
 - 状态：closed
@@ -135,6 +136,7 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 实施结果：Step 1 拆为风险门与请求分类两步，类型定义下沉到 `references/protocol/workflow-routing.md`；Checkpoints 与依赖链重编号为 Step 2-6；概览自述改为“触发、主流程、门禁、跨会话约束和引用导航”。
 - 验证结果：模板同步、引用、编号、占位符脚本与 74 个单测全部通过；SKILL.md 由 18564 字节降至 18295 字节。
 - 剩余风险：编号重排后未在外部目标仓实跑一次完整生成流程。
+
 ### ISSUE-0004 产品技能协作强度缺少交付物判定规则
 
 - 状态：closed
@@ -167,9 +169,10 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 
 #### 实施与验证
 
-- 实施结果：启动流程改为固定判定顺序“交付物 -> 长期记忆 -> 是否落盘”，并同步 `workflow-contracts.md` 协作强度表。
-- 验证结果：同一 prompt 复测由误判轻量讨论转为产物沉淀，并触发 UI 线稿门禁；单测 10 个通过。
+- 实施结果：启动流程改为固定判定顺序“交付物索取 -> 长期记忆 -> 是否落盘”，并同步 `workflow-contracts.md` 协作强度表；判据由“出现交付物名词”改为“把交付物作为本轮产出物索取”，仅提及名词的咨询仍属轻量讨论。
+- 验证结果：同一 prompt 复测由误判轻量讨论转为产物沉淀，并触发 UI 线稿门禁；新增 4 条契约测试覆盖“提及但未索取”，单测 14 个通过。
 - 剩余风险：仅覆盖一个典型 prompt，未覆盖纯后台需求是否被误判为需要线稿。
+
 ### ISSUE-0005 两技能路径口径与工具降级说明漂移
 
 - 状态：closed
@@ -205,6 +208,7 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 实施结果：产品技能统一 `workflow-contracts.md` 两处旧 `docs/` 口径并补工具降级列；协议技能补 `.ts` 脚本运行时说明；产品技能 Scene 计数改为五主 Scene + 三门禁。
 - 验证结果：四个静态校验脚本与两技能单测全部通过。
 - 剩余风险：无。
+
 ### ISSUE-0006 协议技能未定义「只要方案预览」的任务分类
 
 - 状态：closed
@@ -233,9 +237,10 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 风险：低。
 - 回滚方式：`git revert` 本轮提交。
 - 验证方式：引用、占位符、编号脚本与单测。
+- Spec/ADR 影响：无。
 
 #### 实施与验证
 
-- 实施结果：已补充“只要方案预览、生成计划或 diff 预览”的分类规则，明确本轮停在写入前。
-- 验证结果：四个静态校验脚本与单测通过。
+- 实施结果：判据下沉到 `references/protocol/workflow-routing.md` 的 Checkpoint 1（写入任务，授权 pending），`SKILL.md` 只保留指向契约的短句，不再自带独立判据。
+- 验证结果：四个静态校验脚本与单测通过；两处表述一致，`SKILL.md` 无与契约相反的判据。
 - 剩余风险：未再跑一次独立复测验证该分支；静态契约已闭合。

@@ -248,6 +248,8 @@
 
 以下命令以**技能根目录**为工作目录（源码仓为 `skills/maintain-agent-protocols/`，安装态为宿主技能目录，例如 `~/.claude/skills/maintain-agent-protocols/`）。随技能分发的脚本都从自身位置解析仓库/技能根，不依赖调用时的 cwd。
 
+`.ts` 校验脚本依赖原生 TypeScript 类型剥离：Node 22.18+ 默认开启，Node 22.6–22.17 需在命令中追加 `--experimental-strip-types`。仓库不声明 `package.json` engines，版本要求只在此处说明。
+
 ```bash
 python3 scripts/check-template-sync.py
 node scripts/check-cross-references.ts
