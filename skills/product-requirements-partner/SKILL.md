@@ -30,9 +30,9 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 ## 启动流程
 
 1. 判断当前问题处在哪个产品场景：价值发现、流程结构、交互结构、实体定义、设计交付、PRD 评审、竞品调研或技能改造。
-2. 判断协作强度（首次使用时使用交互式选择，详见 `references/shared/interactive-decision-protocol.md` 场景 5）：
-   - `轻量讨论`：用户只想 brainstorm、快速判断、问一个局部问题或暂不落盘。直接讨论，不初始化目标仓产物目录。
-   - `产物沉淀`：用户要求写 PRD、立项文档、设计说明、mockup、调研报告或明确要生成文件。先确认目标文件或建议目录；生成 PRD 时先判断需求是否涉及 UI、页面、交互或前端体验，涉及时必须同步覆盖页面设计需求与线稿。用户要求定稿或最终需求交付时读取 `references/final-state-delivery.md`；要求开发 handoff、实现摘要或 PR 文案时再读取 `references/implementation-delivery.md`。
+2. 判断协作强度（首次使用时使用交互式选择，详见 `references/shared/interactive-decision-protocol.md` 场景 5）。判定顺序固定为：先看是否点名交付物，再看是否需要长期记忆，最后才看是否要求落盘。
+   - `轻量讨论`：用户只想 brainstorm、快速判断、问一个局部问题，且未点名任何交付物。直接讨论，不初始化目标仓产物目录。
+   - `产物沉淀`：用户点名 PRD、立项文档、设计说明、mockup、调研报告等交付物，或明确要求生成文件。用户说“先别写文件”时仍按本档交付完整内容，只是不落盘；落盘与否只决定是否写文件，不降低内容完整度。先确认目标文件或建议目录；生成 PRD 时先判断需求是否涉及 UI、页面、交互或前端体验，涉及时必须同步覆盖页面设计需求与线稿。用户要求定稿或最终需求交付时读取 `references/final-state-delivery.md`；要求开发 handoff、实现摘要或 PR 文案时再读取 `references/implementation-delivery.md`。
    - `项目记忆模式`：长期项目、多轮协作、用户要求记住决策，或已经存在 `ai-agent-workspace/product/memory/` 或兼容 `docs/00_MEMORY/`。读取项目记忆并按阈值写入。
 3. 只有进入 `产物沉淀` 或 `项目记忆模式` 且需要项目结构时，才检查目标仓产物入口。新项目使用交互式选择确认目标目录（场景 6）；已有 `docs/` 项目可继续作为兼容真值源。
 4. 若存在项目记忆，读取：
