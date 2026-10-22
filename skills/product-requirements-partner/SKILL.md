@@ -62,13 +62,13 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 
 ## 工具优先级
 
-| 操作 | 首选方式 |
-| --- | --- |
-| 查找项目记忆或需求资产 | `rg --files`、`rg` |
-| 修改技能文件 | `apply_patch` |
-| 修改需求文档 | 先读目标章节，再局部编辑 |
-| 验证技能结构 | `skill-craft` 的 `validate-metadata.py`、`validate-structure.py` |
-| 视觉 mockup 验证 | 浏览器打开或截图检查 |
+| 操作 | 首选方式 | 降级条件 | 降级方式 |
+| --- | --- | --- | --- |
+| 查找项目记忆或需求资产 | `rg --files`、`rg` | 命令不可用 | 逐层 `ls` 定位 |
+| 修改技能文件 | `apply_patch` | 补丁无法唯一匹配 | 缩小上下文后重试 |
+| 修改需求文档 | 先读目标章节，再局部编辑 | 文件过大或结构不明 | 只改命中章节，不动无关段落 |
+| 验证技能结构 | `skill-craft` 的 `validate-metadata.py`、`validate-structure.py` | 外部工具链未安装 | 跳过并声明未运行，改跑 `tests/` 与状态校验脚本 |
+| 视觉 mockup 验证 | 浏览器打开或截图检查 | 无法渲染 | 标注未做视觉验证，不声称已确认 |
 
 ## Scene Contract
 
@@ -76,7 +76,7 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 
 ## 流程步骤
 
-五个主 Scene 的详细步骤见 `references/workflow-contracts.md`。快速判断：价值发现处理想法和痛点；流程与范围处理 MVP；交互结构处理页面和导航；实体定义处理状态、字段和权限；设计与交付处理设计说明、mockup 和 handoff。
+各 Scene 的最小输入、标准输出、可写文件和不可写条件见 `references/workflow-contracts.md`。五个主 Scene 为价值发现、流程与范围、交互结构、实体定义、设计与交付；另有 PRD 评审、定稿与最终交付、竞品调研三道门禁。遇到轻量讨论、产物沉淀或项目记忆模式边界不清时，先读该文件再行动。
 
 ### PRD 编写
 
