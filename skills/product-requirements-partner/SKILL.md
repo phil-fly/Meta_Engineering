@@ -30,7 +30,7 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 ## 启动流程
 
 1. 判断当前问题处在哪个产品场景：价值发现、流程结构、交互结构、实体定义、设计交付、PRD 评审、竞品调研或技能改造。
-2. 判断协作强度（首次使用时使用交互式选择，详见仓库根共享参考 `interactive-decision-protocol` 场景 5）：
+2. 判断协作强度（首次使用时使用交互式选择，详见 `references/shared/interactive-decision-protocol.md` 场景 5）：
    - `轻量讨论`：用户只想 brainstorm、快速判断、问一个局部问题或暂不落盘。直接讨论，不初始化目标仓产物目录。
    - `产物沉淀`：用户要求写 PRD、立项文档、设计说明、mockup、调研报告或明确要生成文件。先确认目标文件或建议目录；生成 PRD 时先判断需求是否涉及 UI、页面、交互或前端体验，涉及时必须同步覆盖页面设计需求与线稿。用户要求定稿或最终需求交付时读取 `references/final-state-delivery.md`；要求开发 handoff、实现摘要或 PR 文案时再读取 `references/implementation-delivery.md`。
    - `项目记忆模式`：长期项目、多轮协作、用户要求记住决策，或已经存在 `ai-agent-workspace/product/memory/` 或兼容 `docs/00_MEMORY/`。读取项目记忆并按阈值写入。
@@ -54,7 +54,7 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 | 项目记忆、初始化、确认记录、决策记录、TODO | `references/memory-system.md` |
 | 确认记录校验与当前状态投影 | `scripts/validate-confirmations.py` |
 | 旧项目 current 标记校验 | `scripts/validate-legacy-current.py` |
-| 目标仓统一产物目录和兼容路径 | 共享参考 `target-workspace-layout` |
+| 目标仓统一产物目录和兼容路径 | `references/shared/target-workspace-layout.md` |
 | 协作强度、Scene 契约、Meta 示例 | `references/workflow-contracts.md` |
 | 竞品调研、市场替代方案、证据对比 | `references/research-and-competition.md` |
 | 设计指导文档、待定项、线稿、组件 demo | `references/design-artifacts.md` |
