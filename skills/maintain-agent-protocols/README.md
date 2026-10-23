@@ -67,8 +67,9 @@
 入口文件默认规则：
 
 - 用户明确指定入口文件时，按用户当前要求执行。
-- 用户未指定时，按目标仓**真实宿主信号**选择入口：命中 `.claude/` 等 Claude 信号时默认 `CLAUDE.md`；命中 `.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 时默认 `AGENTS.md`。
-- 没有任何宿主信号时按 `CON-PACKAGE-ENTRY-FALLBACK` 回退到 `AGENTS.md`，并在生成方案预览的 `selection_reason` 中说明这是回退默认值，不伪装成模型感知判断。
+- 用户未指定且目标仓**已有**入口文件时，继承既有入口，不按宿主信号另建第二个：命中 `.claude/` 但仓库已有 `AGENTS.md` 时仍用 `AGENTS.md`，并在 `selection_reason` 与 `advisories` 中说明该宿主默认入口未生成。
+- 用户未指定且目标仓没有既有入口时，按**真实宿主信号**选择默认入口：命中 `.claude/` 等 Claude 信号时用 `CLAUDE.md`；命中 `.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 时用 `AGENTS.md`。
+- 既没有既有入口也没有任何宿主信号时，按 `CON-PACKAGE-ENTRY-FALLBACK` 回退到 `AGENTS.md`，并在生成方案预览的 `selection_reason` 中说明这是回退默认值，不伪装成模型感知判断。
 - `CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
 
 编号默认规则：

@@ -987,6 +987,43 @@ class ValidatePackageTests(unittest.TestCase):
         self.assertIn(".claude", entries["host_evidence"])
         self.assertEqual(entries["selected_entry"], "CLAUDE.md")
         self.assertIn("claude", entries["selection_reason"])
+        self.assertIsNone(entries["entry_advisory"])
+
+    def test_host_signal_inherits_existing_foreign_entry(self) -> None:
+        (self.repo / "AGENTS.md").write_text("# Agent Protocol\n", encoding="utf-8")
+        (self.repo / ".claude").mkdir(parents=True, exist_ok=True)
+        (self.repo / ".claude" / "settings.local.json").write_text("{}", encoding="utf-8")
+
+        entries = protocol_package.collect_protocol_entries(self.repo)
+
+        self.assertEqual(entries["detected_host"], "claude")
+        self.assertEqual(entries["existing_entries"], ["AGENTS.md"])
+        self.assertEqual(entries["selected_entry"], "AGENTS.md")
+        self.assertIn("既有 AGENTS.md 入口存在", entries["selection_reason"])
+        self.assertIn("CLAUDE.md", entries["entry_advisory"])
+
+    def test_host_signal_reuses_existing_matching_entry(self) -> None:
+        (self.repo / "CLAUDE.md").write_text("# Agent Protocol\n", encoding="utf-8")
+        (self.repo / ".claude").mkdir(parents=True, exist_ok=True)
+        (self.repo / ".claude" / "settings.local.json").write_text("{}", encoding="utf-8")
+
+        entries = protocol_package.collect_protocol_entries(self.repo)
+
+        self.assertEqual(entries["selected_entry"], "CLAUDE.md")
+        self.assertIn("继承既有 CLAUDE.md", entries["selection_reason"])
+        self.assertIsNone(entries["entry_advisory"])
+
+    def test_plan_surfaces_dual_entry_advisory_and_patches_existing_entry(self) -> None:
+        (self.repo / "AGENTS.md").write_text("# Agent Protocol\n", encoding="utf-8")
+        (self.repo / ".claude").mkdir(parents=True, exist_ok=True)
+        (self.repo / ".claude" / "settings.local.json").write_text("{}", encoding="utf-8")
+
+        plan = protocol_package.plan_package(self.repo, self.manifest)
+
+        self.assertEqual(plan["entry"]["selected_entry"], "AGENTS.md")
+        self.assertEqual(plan["entry_patch"]["entry"], "AGENTS.md")
+        self.assertFalse((self.repo / "CLAUDE.md").exists())
+        self.assertTrue(any("CLAUDE.md" in advisory for advisory in plan["advisories"]))
 
     def test_entry_selection_reports_fallback_without_host_signal(self) -> None:
         entries = protocol_package.collect_protocol_entries(self.repo)

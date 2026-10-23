@@ -54,7 +54,7 @@
 模型入口规则：
 
 - `CON-PACKAGE-ENTRY-USER-SPECIFIED`：用户明确指定入口文件时，按用户当前要求执行。
-- `CON-PACKAGE-ENTRY-MODEL-AWARE`：用户未指定时，必须主动判断当前模型或工具环境；Codex/OpenAI 场景默认生成或维护 `AGENTS.md`，Claude/Anthropic 场景默认生成或维护 `CLAUDE.md`。判断依据必须来自目标仓真实宿主信号（`.claude/`、`.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 等配置或目录标记）；不得把默认值反向断言为模型感知结论，`selection_reason` 必须写明实际依据。
+- `CON-PACKAGE-ENTRY-MODEL-AWARE`：用户未指定时，先继承目标仓既有入口；只有没有任何既有入口时，才判断当前模型或工具环境并按宿主默认入口生成（Codex/OpenAI 场景 `AGENTS.md`，Claude/Anthropic 场景 `CLAUDE.md`）。判断依据必须来自目标仓真实宿主信号（`.claude/`、`.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 等配置或目录标记）；不得把默认值反向断言为模型感知结论，`selection_reason` 必须写明实际依据。宿主信号命中但继承了其他既有入口时，必须在 `advisories` 中说明该宿主默认入口未生成，不得静默形成双入口。
 - `CON-PACKAGE-ENTRY-FALLBACK`：无法识别模型或工具环境时，默认使用 `AGENTS.md`，并在 `selection_reason` 中说明未识别到宿主信号与既有入口，不得复用模型感知措辞。
 - `CON-PACKAGE-ENTRY-CODEX-LEGACY`：`CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
 - `CON-PACKAGE-ENTRY-MIGRATION`：若既有入口与模型默认入口不同，预览中必须说明保留、迁移或别名策略，并确保只有一个可编辑真值源。

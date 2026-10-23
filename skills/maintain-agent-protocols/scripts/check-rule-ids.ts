@@ -38,12 +38,22 @@ const NAMESPACED_ID = /^([A-Z][A-Z0-9]*)-[A-Z0-9]/;
 /** 无命名空间的裸编号，例如历史遗留的 `PERF001`。 */
 const BARE_ID = /^[A-Z]{2,}[0-9]{2,}$/;
 
+/**
+ * 标准编号白名单：形如 `ISO-8601`、`RFC-2119`、`SHA256`、`UTF-8`。
+ * 它们长得像规则编号，但属于标准名，不是协议规则，不应判为编号缺陷。
+ */
+const STANDARD_ID =
+  /^(?:ISO|IEC|IEEE|RFC|ANSI|ECMA|W3C|UTF|SHA|AES|RSA|TLS|SSL|HTTP|UUID|MD|SEMVER)(?:-?\d+(?:\.\d+)*)?$/;
+
 interface Definition {
   id: string;
   namespace: string;
 }
 
 function parseDefinition(token: string): Definition | null {
+  if (STANDARD_ID.test(token)) {
+    return null;
+  }
   const namespaced = token.match(NAMESPACED_ID);
   if (namespaced) {
     return { id: token, namespace: namespaced[1] };
@@ -142,13 +152,15 @@ console.log(
 );
 
 const byType: Record<string, number> = {};
+const BARE_PREFIX = '(未命名空间)';
 for (const ruleId of Object.keys(allIds)) {
-  const prefix = ruleId.includes('-') ? ruleId.split('-')[0] : '(未命名空间)';
+  const prefix = ruleId.includes('-') ? ruleId.split('-')[0] : BARE_PREFIX;
   byType[prefix] = (byType[prefix] || 0) + 1;
 }
 
 for (const [prefix, count] of Object.entries(byType).sort()) {
-  console.log(`  - ${prefix}-*: ${count} 个`);
+  const label = prefix === BARE_PREFIX ? prefix : `${prefix}-*`;
+  console.log(`  - ${label}: ${count} 个`);
 }
 
 console.log();
@@ -194,6 +206,12 @@ if (hasUnnamespaced) {
 if (hasUnknown) {
   console.error(
     `❌ FAIL: 发现 ${Object.keys(unknownNamespace).length} 个未知命名空间的规则编号:\n`,
+  );
+  console.error(
+    `  允许的命名空间: ${[...KNOWN_NAMESPACES].map((n) => `${n}-*`).join('、')}`,
+  );
+  console.error(
+    '  若该编号其实是标准名（如 ISO-8601、RFC-2119），把它加入本脚本的 STANDARD_ID 白名单，而不是注册命名空间。\n',
   );
 
   for (const [ruleId, files] of Object.entries(unknownNamespace).sort()) {

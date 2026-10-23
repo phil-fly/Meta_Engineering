@@ -389,12 +389,25 @@ def collect_protocol_entries(root: Path) -> dict[str, Any]:
     playbooks = [path for path in ["playbooks", "ai-agent-workspace/protocols/playbooks", "ai-agent-protocols/playbooks"] if (root / path).exists()]
     host, host_evidence = detect_host(root)
     default_entry = "AGENTS.md"
+    entry_advisory = None
     if host:
-        default_entry = HOST_DEFAULT_ENTRY[host]
+        host_entry = HOST_DEFAULT_ENTRY[host]
         evidence_text = "、".join(host_evidence)
-        if default_entry in existing:
+        if host_entry in existing:
+            default_entry = host_entry
             reason = f"检测到 {host} 宿主信号（{evidence_text}），继承既有 {default_entry}"
+        elif existing:
+            # 宿主信号只决定默认入口，不能推翻既有入口：否则会在已有 AGENTS.md 的仓库
+            # 里再造一个 CLAUDE.md，形成双真值源。
+            default_entry = existing[0]
+            reason = f"检测到 {host} 宿主信号（{evidence_text}），但既有 {default_entry} 入口存在，按最小修改继承 {default_entry}"
+            entry_advisory = (
+                f"检测到 {host} 宿主信号，但未生成该宿主默认入口 {host_entry}；"
+                f"已按最小修改继承既有 {default_entry}，避免双入口。"
+                f"若该宿主只读取 {host_entry}，需用户明确迁移后再生成。"
+            )
         else:
+            default_entry = host_entry
             reason = f"检测到 {host} 宿主信号（{evidence_text}），按该宿主默认入口生成 {default_entry}"
     elif "AGENTS.md" in existing:
         reason = "未识别宿主信号，继承既有 AGENTS.md"
@@ -417,6 +430,7 @@ def collect_protocol_entries(root: Path) -> dict[str, Any]:
         "host_evidence": host_evidence,
         "selected_entry": default_entry,
         "selection_reason": reason,
+        "entry_advisory": entry_advisory,
     }
 
 
@@ -886,6 +900,9 @@ def plan_package(
     })
     support_bytes_total = sum(path.stat().st_size for path in support_files)
     advisories: list[str] = []
+    entry_advisory = detection["protocol_entries"].get("entry_advisory")
+    if entry_advisory:
+        advisories.append(entry_advisory)
     if len(support_files) > max(SUPPORT_ASSET_ADVISORY_FILES, len(all_route_files) * 2):
         advisories.append(
             f"support 资产 {len(support_files)} 个随包落盘（路由文件仅 {len(all_route_files)} 个）；"
