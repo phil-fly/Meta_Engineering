@@ -23,6 +23,9 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 | ISSUE-0004 | 产品技能协作强度缺少交付物判定规则 | closed | P1 | 2026-10-22 | 2026-10-22 | `product-requirements-partner/SKILL.md` |
 | ISSUE-0005 | 两技能路径口径与工具降级说明漂移 | closed | P2 | 2026-10-22 | 2026-10-22 | 两技能 SKILL.md 与 `workflow-contracts.md` |
 | ISSUE-0006 | 协议技能未定义「只要方案预览」的任务分类 | closed | P2 | 2026-10-22 | 2026-10-22 | `maintain-agent-protocols/SKILL.md` |
+| ISSUE-0007 | 协议技能宿主信号覆盖既有入口，产出双入口方案 | closed | P2 | 2026-10-23 | 2026-10-23 | `protocol-package.py`、`CON-PACKAGE-ENTRY-MODEL-AWARE` |
+| ISSUE-0008 | 共享协议场景 5 判据未同步，首次交互绕过协作强度修复 | closed | P1 | 2026-10-23 | 2026-10-23 | `interactive-decision-protocol.md` 及其投影 |
+| ISSUE-0009 | `规则摄入` 在主流程身份上三处表述互相矛盾 | closed | P2 | 2026-10-23 | 2026-10-23 | `SKILL.md`、`workflow-routing.md` |
 
 ## 问题详情
 
@@ -113,7 +116,7 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 
 #### 现象与影响
 
-- 现象：`SKILL.md:28-45` 把 10 条请求类型和主辅流程仲裁规则缩进在 Step 1 内部，“识别请求类型”被埋进子项；`SKILL.md:12` 自称“只保留触发、流程和引用导航”，实际另有 6 个附加章节。
+- 现象：`SKILL.md:28-45` 把 8 类请求类型与 2 条主辅流程仲裁规则共 10 个列表项缩进在 Step 1 内部，“识别请求类型”被埋进子项；`SKILL.md:12` 自称“只保留触发、流程和引用导航”，实际另有 6 个附加章节。
 - 影响范围：执行 agent 需要靠缩进推断主流程；实测中执行 agent 报告“层级读起来矛盾”。
 - 复现条件：任何触发本技能的写入类任务。
 
@@ -244,3 +247,111 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 实施结果：判据下沉到 `references/protocol/workflow-routing.md` 的 Checkpoint 1（写入任务，授权 pending），`SKILL.md` 只保留指向契约的短句，不再自带独立判据。
 - 验证结果：四个静态校验脚本与单测通过；两处表述一致，`SKILL.md` 无与契约相反的判据。
 - 剩余风险：未再跑一次独立复测验证该分支；静态契约已闭合。
+
+### ISSUE-0007 协议技能宿主信号覆盖既有入口，产出双入口方案
+
+- 状态：closed
+- 严重度：P2
+- 首次发现：2026-10-23
+- 最近更新：2026-10-23
+- 负责人：技能维护
+- 关联问题：无
+- 关联方案/变更：`skills/maintain-agent-protocols/scripts/protocol-package.py`、`references/protocol/package-blueprint.md`、`README.md`、`references/protocol/guide.md`
+
+#### 现象与影响
+
+- 现象：`collect_protocol_entries` 命中宿主信号后直接取 `HOST_DEFAULT_ENTRY[host]`，忽略 `existing_entries`。目标仓已有 `AGENTS.md` 且存在 `.claude/` 时，方案预览提出新建 `CLAUDE.md`，`selection_reason` 不提既有入口，`--apply-entry` 会写出第二个入口。
+- 影响范围：同时维护 `AGENTS.md`（跨工具通用）与 `.claude/`（Claude Code 配置）的仓库。
+- 复现条件：根级 `AGENTS.md` 存在，同时存在 `.claude/` 或 `.claude/settings.local.json`。
+
+#### 证据与根因
+
+- 证据：构造 `/tmp/dualentry` 复现，`existing_entries: ['AGENTS.md']` 而 `selected_entry: CLAUDE.md`。
+- 根因：入口选择把「宿主默认入口」当成唯一判据，缺少「既有入口优先」的优先级；`artifact_conflicts` 只覆盖问题台账与条件产物，不覆盖入口文件。
+
+#### 修复方案
+
+- 目标：宿主信号不得推翻既有入口，且预览可见未生成的宿主默认入口。
+- 范围与拟改动：`collect_protocol_entries` 增加既有入口优先分支并返回 `entry_advisory`，`plan_package` 把该提示并入 `advisories`；同步 README、`guide.md` 与 `CON-PACKAGE-ENTRY-MODEL-AWARE`。
+- 风险：低；仅改变「有既有入口且宿主默认入口不存在」这一分支的选择结果。
+- 回滚方式：`git revert e2cd55f`。
+- 验证方式：新增 3 条单测（继承、复用、预览告警）与 `/tmp/dualentry` 手工复现。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：入口选择改为「宿主默认入口存在则复用，否则继承既有入口」，并在 `advisories` 中说明该宿主默认入口未生成。
+- 验证结果：`/tmp/dualentry` 下 `selected_entry` 由 `CLAUDE.md` 变为 `AGENTS.md`，`entry_patch.entry` 同为 `AGENTS.md`，未生成 `CLAUDE.md`；MAP 单测 74 → 77 通过，四个静态脚本 PASS。
+- 剩余风险：修复提交位于 PR #1（`e2cd55f`），本条随 PR #2 台账一并登记；若 #1 先合并，中间存在「已修复但未登记」的短暂窗口。
+
+### ISSUE-0008 共享协议场景 5 判据未同步，首次交互绕过协作强度修复
+
+- 状态：closed
+- 严重度：P1
+- 首次发现：2026-10-23
+- 最近更新：2026-10-23
+- 负责人：技能维护
+- 关联问题：ISSUE-0004
+- 关联方案/变更：`references/interactive-decision-protocol.md`、`skills/product-requirements-partner/references/shared/interactive-decision-protocol.md`
+
+#### 现象与影响
+
+- 现象：场景 5「协作强度选择」的决策依据仍写「是否提到 "写文档"、"生成 PRD" 等关键词」，与 ISSUE-0004 修正后的「把交付物作为本轮产出物索取」相反。
+- 影响范围：`SKILL.md` 启动流程在首次使用时会直接指向该场景，首次交互按关键词判、主路径按索取判，两条路径给出相反答案。
+- 复现条件：首次使用产品技能，用户只说「PRD 该怎么写」这类提及型咨询。
+
+#### 证据与根因
+
+- 证据：根级 `interactive-decision-protocol.md:143-146` 与产品技能投影 `:41-43` 均为旧判据。
+- 根因：ISSUE-0004 只在 `SKILL.md` 与 `workflow-contracts.md` 落地，漏掉共享协议这一处运行时资产；新增的契约测试也只断言前两处。
+
+#### 修复方案
+
+- 目标：场景 5 判据与主路径同口径，且真值源与投影一致。
+- 范围与拟改动：两处决策依据第三条改为「是否把交付物作为本轮产出物索取（仅提及 "写文档"、"PRD" 等名词不算）」。
+- 风险：低；`check-template-sync.py` 会拦截单边修改。
+- 回滚方式：`git revert` 本轮提交。
+- 验证方式：模板同步脚本与产品技能单测。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：根级与投影同时改为索取判据；`test_collaboration_mode_contract.py` 新增 3 条断言，覆盖投影判据、根级判据与两者一致。
+- 验证结果：`check-template-sync.py` PASS；产品技能单测 14 → 17 通过。
+- 剩余风险：无。
+
+### ISSUE-0009 `规则摄入` 在主流程身份上三处表述互相矛盾
+
+- 状态：closed
+- 严重度：P2
+- 首次发现：2026-10-23
+- 最近更新：2026-10-23
+- 负责人：技能维护
+- 关联问题：ISSUE-0003
+- 关联方案/变更：`skills/maintain-agent-protocols/SKILL.md`、`references/protocol/workflow-routing.md`、`README.md`
+
+#### 现象与影响
+
+- 现象：`SKILL.md` 一处称 `规则摄入` 不是主流程并列项，另一处又称「走规则摄入」，而 `workflow-routing.md` 把它列为写入任务仲裁表的一行主流程。
+- 影响范围：只问「这条规则该放哪里」的请求，主流程归属在契约与说明书之间不一致。
+- 复现条件：请求只判断规则维护位置，不要求落盘。
+
+#### 证据与根因
+
+- 证据：三处表述无法同时为真；`规则摄入` 的交付物是放置结论而非文件，按 Checkpoint 1 应属只读。
+- 根因：把 `规则摄入` 与写入主流程并列在写入表内，导致其只读身份与写入身份冲突。
+
+#### 修复方案
+
+- 目标：`规则摄入` 身份唯一——只读主流程，写入场景下仅作辅助流程。
+- 范围与拟改动：从写入任务表移出该行，改为只读优先级第 1 项；`SKILL.md` 限定改为「不作为创建、维护、升级同步、转换四类写入主流程的并列项」；README 仲裁摘要同步。
+- 风险：低。
+- 回滚方式：`git revert` 本轮提交。
+- 验证方式：引用、编号、占位符脚本与单测。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：`workflow-routing.md` 把该行从写入表移入只读优先级第 1 项；`SKILL.md` 与 README 的限定与摘要同步为「只读主流程 + 写入时辅助」。
+- 验证结果：四个静态校验脚本与 77 个单测通过。
+- 剩余风险：只读优先级由 3 项变 4 项，外部目标仓若引用旧序号需重新对齐。
