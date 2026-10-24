@@ -26,6 +26,10 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 | ISSUE-0007 | 协议技能宿主信号覆盖既有入口，产出双入口方案 | closed | P2 | 2026-10-23 | 2026-10-23 | `protocol-package.py`、`CON-PACKAGE-ENTRY-MODEL-AWARE` |
 | ISSUE-0008 | 共享协议场景 5 判据未同步，首次交互绕过协作强度修复 | closed | P1 | 2026-10-23 | 2026-10-23 | `interactive-decision-protocol.md` 及其投影 |
 | ISSUE-0009 | `规则摄入` 在主流程身份上三处表述互相矛盾 | closed | P2 | 2026-10-23 | 2026-10-23 | `SKILL.md`、`workflow-routing.md` |
+| ISSUE-0010 | 编号检查把标准名误判为裸编号或未知命名空间 | closed | P3 | 2026-10-23 | 2026-10-24 | `check-rule-ids.ts` |
+| ISSUE-0011 | `skill-structure.md` 出现连续空行 | closed | P3 | 2026-10-23 | 2026-10-24 | `references/protocol/skill-structure.md` |
+| ISSUE-0012 | 编号统计把未命名空间显示为 `(未命名空间)-*` | closed | P3 | 2026-10-23 | 2026-10-24 | `check-rule-ids.ts` |
+| ISSUE-0013 | 标准名白名单静默吞掉同前缀编号 | closed | P3 | 2026-10-24 | 2026-10-24 | `check-rule-ids.ts`、`README.md`、`rule-ingestion.md` |
 
 ## 问题详情
 
@@ -274,7 +278,7 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 目标：宿主信号不得推翻既有入口，且预览可见未生成的宿主默认入口。
 - 范围与拟改动：`collect_protocol_entries` 增加既有入口优先分支并返回 `entry_advisory`，`plan_package` 把该提示并入 `advisories`；同步 README、`guide.md` 与 `CON-PACKAGE-ENTRY-MODEL-AWARE`。
 - 风险：低；仅改变「有既有入口且宿主默认入口不存在」这一分支的选择结果。
-- 回滚方式：`git revert e2cd55f`。
+- 回滚方式：按 PR #1 的实际合并形态选择——merge commit 合并时 `e2cd55f` 是 `v1.0` 的祖先，`git revert e2cd55f` 可用；squash 合并时该提交不进入 `v1.0`，须 `git revert <squash 提交>`（会连同 PR #1 其余改动一并回退），或按文件手工还原 `collect_protocol_entries` 的入口选择分支。
 - 验证方式：新增 3 条单测（继承、复用、预览告警）与 `/tmp/dualentry` 手工复现。
 - Spec/ADR 影响：无。
 
@@ -355,3 +359,147 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 实施结果：`workflow-routing.md` 把该行从写入表移入只读优先级第 1 项；`SKILL.md` 与 README 的限定与摘要同步为「只读主流程 + 写入时辅助」。
 - 验证结果：四个静态校验脚本与 77 个单测通过。
 - 剩余风险：只读优先级由 3 项变 4 项，外部目标仓若引用旧序号需重新对齐。
+
+### ISSUE-0010 编号检查把标准名误判为裸编号或未知命名空间
+
+- 状态：closed
+- 严重度：P3
+- 首次发现：2026-10-23
+- 最近更新：2026-10-24
+- 负责人：技能维护
+- 关联问题：ISSUE-0013
+- 关联方案/变更：`skills/maintain-agent-protocols/scripts/check-rule-ids.ts`
+
+#### 现象与影响
+
+- 现象：`BARE_ID`（`^[A-Z]{2,}[0-9]{2,}$`）与 `NAMESPACED_ID` 把标准名当成规则编号——`- SHA256 校验` 被判为未命名空间裸编号，`- ISO-8601 时间格式` 被判为未知命名空间 `ISO-*`。
+- 影响范围：含时间、编码、协议标准名的文档（排障手册、安全约束）容易被误报为编号缺陷；审查当时全仓零命中，属潜在缺陷。
+- 复现条件：在 `references/` 或 `skills/` 的 md 定义位写入 `- SHA256 校验` 或 `- ISO-8601 时间格式`。
+
+#### 证据与根因
+
+- 证据：审查期探针文件写入上述两行后，脚本 FAIL，分别报 `SHA256` 缺少命名空间前缀、`ISO-8601` 使用未注册命名空间 `ISO-*`。
+- 根因：编号识别只假设「命名空间 + 数字」一种形态，没有区分标准名与协议规则编号。
+
+#### 修复方案
+
+- 目标：标准名不再被判为编号缺陷，同时不放松对真缺陷的拦截。
+- 范围与拟改动：新增 `STANDARD_ID` 白名单（ISO/IEC/IEEE/RFC/ANSI/ECMA/W3C/UTF/SHA/AES/RSA/TLS/SSL/HTTP/UUID/MD/SEMVER + 可选数字后缀），`parseDefinition` 命中即跳过。
+- 风险：白名单按前缀整体放行，可能连带放行同前缀的疑似规则编号；由 ISSUE-0013 跟进。
+- 回滚方式：merge commit 合并 PR #1 时 `git revert e2cd55f`；squash 合并时该提交不进入 `v1.0`，改为 revert 对应的 squash 提交，或手工移除 `STANDARD_ID` 判断。
+- 验证方式：探针文件（标准名 PASS、假编号 FAIL）、四个静态脚本与单测。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：`STANDARD_ID` 白名单落地，`parseDefinition` 在解析前放行。
+- 验证结果：探针写入 `ISO-8601`、`RFC-2119`、`SHA256`、`UTF-8` 时 PASS；写入 `FOO-001`、`BAR999` 时 FAIL 并列出文件。
+- 剩余风险：白名单粒度为前缀整体，同前缀规则编号的可见性由 ISSUE-0013 补齐；本条登记晚于修复提交 `e2cd55f`，未满足台账「先登记再修复」的时序。
+
+### ISSUE-0011 `skill-structure.md` 出现连续空行
+
+- 状态：closed
+- 严重度：P3
+- 首次发现：2026-10-23
+- 最近更新：2026-10-24
+- 负责人：技能维护
+- 关联问题：无
+- 关联方案/变更：`skills/maintain-agent-protocols/references/protocol/skill-structure.md`
+
+#### 现象与影响
+
+- 现象：「`skill-craft` 的通用结构脚本（外部工具链，未随本仓库分发）可能提示：」之后出现两行空白，而同文件其他列表块均为单空行分隔。
+- 影响范围：仅渲染与 diff 噪音，无行为影响。
+- 复现条件：查看该文件第 18-22 行。
+
+#### 证据与根因
+
+- 证据：审查期读到该处连续两个空行，与同文件其余段落格式不一致。
+- 根因：插入说明段时多留了一个换行。
+
+#### 修复方案
+
+- 目标：恢复单空行分隔。
+- 范围与拟改动：删除多余空行。
+- 风险：无。
+- 回滚方式：补回空行。
+- 验证方式：`check-cross-references.ts`（该文件被引用）与 `check-placeholders.ts`。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：删除多余空行，恢复单空行分隔。
+- 验证结果：四个静态校验脚本 PASS，110 个文件占位符检查通过。
+- 剩余风险：仓库没有 md 空行类 lint，同类问题只能靠审查发现。
+
+### ISSUE-0012 编号统计把未命名空间显示为 `(未命名空间)-*`
+
+- 状态：closed
+- 严重度：P3
+- 首次发现：2026-10-23
+- 最近更新：2026-10-24
+- 负责人：技能维护
+- 关联问题：无
+- 关联方案/变更：`skills/maintain-agent-protocols/scripts/check-rule-ids.ts`
+
+#### 现象与影响
+
+- 现象：统计输出把未命名空间编号的前缀显示为 `(未命名空间)-*`，读起来像存在一个叫「未命名空间」的命名空间。
+- 影响范围：排障时误读输出，以为该编号属于某个已登记族。
+- 复现条件：定义位出现裸编号（如 `PERF001`）后运行脚本。
+
+#### 证据与根因
+
+- 证据：`PERF001` 探针运行时输出 `- (未命名空间)-*: 1 个`。
+- 根因：前缀拼接无条件追加 `-*`，没有对占位标签单独处理。
+
+#### 修复方案
+
+- 目标：占位标签不参与命名空间格式拼接。
+- 范围与拟改动：统计输出处增加 label 判断，裸编号显示为 `(未命名空间)`。
+- 风险：无。
+- 回滚方式：merge commit 合并 PR #1 时 `git revert e2cd55f`；squash 合并时改为 revert 对应的 squash 提交，或手工还原统计输出处的前缀拼接。
+- 验证方式：探针运行并核对统计行。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：裸编号的统计行改为 `(未命名空间): N 个`，不再拼接 `-*`。
+- 验证结果：探针运行输出为 `(未命名空间): 1 个`；四个静态脚本 PASS。
+- 剩余风险：无。
+
+### ISSUE-0013 标准名白名单静默吞掉同前缀编号
+
+- 状态：closed
+- 严重度：P3
+- 首次发现：2026-10-24
+- 最近更新：2026-10-24
+- 负责人：技能维护
+- 关联问题：ISSUE-0010
+- 关联方案/变更：`skills/maintain-agent-protocols/scripts/check-rule-ids.ts`、`README.md`、`references/protocol/rule-ingestion.md`
+
+#### 现象与影响
+
+- 现象：`STANDARD_ID` 白名单按前缀整体放行，定义位写入 `TLS-1`、`HTTP-2`、`SHA256`、`PERF001` 时，前三个既不计数也不报错，只有 `PERF001` 被报出。
+- 影响范围：将来新增 `HTTP-01`、`TLS-2` 这类规则编号会静默通过检查。当前 `KNOWN_NAMESPACES` 与白名单无交集、297 个编号未变，属潜在缺陷。
+- 复现条件：在任意 md 定义位写入 `- TLS-1 传输层检查`。
+
+#### 证据与根因
+
+- 证据：探针文件写入上述四行后，输出仅报 `PERF001`，总数仍为 297，`TLS-1`、`HTTP-2`、`SHA256` 完全不可见。
+- 根因：`parseDefinition` 先做白名单判定并直接 `return null`，命中项从统计与报错中同时消失，没有留下计数或提示——与 ISSUE-0010 要消灭的「编号命名空间盲区」同源。
+
+#### 修复方案
+
+- 目标：白名单放行可见、可复核；已登记命名空间永不被白名单放行。
+- 范围与拟改动：`extractRuleIds` 单独收集被放行的标准名，`checkUniqueness` 汇总后每次运行打印「按标准名跳过: N 种 / M 处（…）」；`parseDefinition` 增加 `KNOWN_NAMESPACES` 优先判断；同步 `README.md` 与 `rule-ingestion.md` 的校验说明。
+- 风险：低；仅新增输出与一条优先级判断，不改变既有 297 个编号的判定。
+- 回滚方式：按 PR #1 合并形态选择——merge commit 合并时 `git revert 9669125`；squash 合并时该提交不进入 `v1.0`，改为 revert 对应的 squash 提交，或手工还原 `parseDefinition` 与 `extractRuleIds`。
+- 验证方式：探针复现、命名空间冲突实验、四个静态脚本与 77 个单测。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：白名单放行改为「已知命名空间优先」并单独收集，运行输出新增跳过行与复核提示；README 与 `rule-ingestion.md` 同步该行为。
+- 验证结果：探针输出「按标准名跳过: 3 种 / 3 处（HTTP-2、SHA256、TLS-1）」，`PERF001` 仍 FAIL；临时把 `HTTP` 注册为命名空间后 `HTTP-2` 计入 `HTTP-*`，未被吞掉；全仓该行为 0 种 / 0 处，297 个编号不变；四个静态脚本 PASS、77 个单测 OK。
+- 剩余风险：跳过行只给编号不给文件路径，同前缀规则编号混入时仍需人工定位；修复在 PR #1（`9669125`）、登记在 PR #2，仍属「修复先于登记」。
