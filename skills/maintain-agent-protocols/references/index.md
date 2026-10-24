@@ -17,7 +17,7 @@
 - `protocol/skill-structure.md`：技能自身目录结构说明，覆盖多层 `references/`、`templates/` 和结构校验 warning 处理。
 - `protocol/user-protocol-template.md`：用户级协议模板，可直接复用后按项目裁剪。
 - `protocol/project-protocol-template.md`：项目级协议模板，可直接复用后按仓库约束裁剪。
-- `protocol/route-card-template.md`：工程路由卡片模板，可落盘到 `ai-agent-protocols/templates/route-card.md`。
+- `protocol/route-card-template.md`：工程路由卡片模板，可落盘到目标仓 `ai-agent-workspace/protocols/templates/route-card.md`；旧项目可兼容 `ai-agent-protocols/templates/route-card.md`。
 - `../templates/user-protocol.md`、`project-protocol.md`、`route-card.md`：复制到目标仓 `ai-agent-workspace/protocols/templates/`，旧项目可兼容 `ai-agent-protocols/templates/`。
 - `../templates/issues.md`：问题台账模板；实例化后默认落盘到目标仓 `ai-agent-workspace/issues.md`，已有根级 `issues.md` 时按兼容真值源规则使用。
 - `../templates/frontend-design-system-review-prompt.md`：复制到目标仓协议模板目录，作为前端设计系统基线调查与变更审查的独立只读提示语；它不在 `references/protocol/` 维护镜像正文。

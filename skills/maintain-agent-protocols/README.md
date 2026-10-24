@@ -27,8 +27,8 @@
 它适合处理这类问题：
 
 - 如何把零散协作规则整理成稳定协议。
-- 如何区分用户级、项目级、工程路由、场景手册和临时规则。
-- 如何判断一条规则属于原则、约束、工作流、模板、检查项或知识背景。
+- 如何区分用户级、项目级、工程路由、场景手册、检查清单和本地临时约定（协议层级表见 `references/protocol/guide.md`，本手册不另立分类）。
+- 如何判断一条规则该编号为工作流 `WF-*`、约束 `CON-*` 还是检查项 `CHK-*`（见 `references/protocol/rule-ingestion.md`）。
 - 如何降低协议冲突、误触发、重复维护和上下文成本。
 - 如何为目标仓生成或维护 `AGENTS.md`、`CLAUDE.md`、既有 `CODEX.md` 迁移兼容、`ai-agent-workspace/protocols/` 或兼容 `ai-agent-protocols/`。
 
@@ -56,7 +56,7 @@
 ## 通用使用流程
 
 1. 先识别请求类型；同时命中多个类型时按最终交付物选一个主流程，审查维度作为辅助流程。
-2. 再判断目标层级：用户级、项目级、工程域、场景手册、检查项、模板、知识或临时约定。
+2. 再判断目标层级：用户级、项目级、工程路由、场景手册、检查清单或本地临时约定（协议层级表见 `references/protocol/guide.md`）。
 3. 只读取对应参考文件，避免一次性加载全部资料。
 4. 修改前声明生效入口、真值源和影响范围。
 5. 修改时采用最小变更，避免重复写同一规则正文。
@@ -67,8 +67,9 @@
 入口文件默认规则：
 
 - 用户明确指定入口文件时，按用户当前要求执行。
-- 用户未指定时，先识别当前模型或工具环境：Codex/OpenAI 场景默认生成或维护 `AGENTS.md`；Claude/Anthropic 场景默认生成或维护 `CLAUDE.md`。
-- 无法识别模型时默认使用 `AGENTS.md`。
+- 用户未指定且目标仓**已有**入口文件时，继承既有入口，不按宿主信号另建第二个：命中 `.claude/` 但仓库已有 `AGENTS.md` 时仍用 `AGENTS.md`，并在 `selection_reason` 与 `advisories` 中说明该宿主默认入口未生成。
+- 用户未指定且目标仓没有既有入口时，按**真实宿主信号**选择默认入口：命中 `.claude/` 等 Claude 信号时用 `CLAUDE.md`；命中 `.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 时用 `AGENTS.md`。
+- 既没有既有入口也没有任何宿主信号时，按 `CON-PACKAGE-ENTRY-FALLBACK` 回退到 `AGENTS.md`，并在生成方案预览的 `selection_reason` 中说明这是回退默认值，不伪装成模型感知判断。
 - `CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
 
 编号默认规则：
@@ -245,15 +246,40 @@
 
 ## 常用验证
 
-修改后至少检查：
+以下命令以**技能根目录**为工作目录（源码仓为 `skills/maintain-agent-protocols/`，安装态为宿主技能目录，例如 `~/.claude/skills/maintain-agent-protocols/`）。随技能分发的脚本都从自身位置解析仓库/技能根，不依赖调用时的 cwd。
 
 ```bash
-python3 skills/maintain-agent-protocols/scripts/check-template-sync.py
-node skills/maintain-agent-protocols/scripts/check-cross-references.ts
-node skills/maintain-agent-protocols/scripts/check-rule-ids.ts
-node skills/maintain-agent-protocols/scripts/check-placeholders.ts
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s skills/maintain-agent-protocols/scripts -p 'test_*.py' -v
+python3 scripts/check-template-sync.py
+node scripts/check-cross-references.ts
+node scripts/check-rule-ids.ts
+node scripts/check-placeholders.ts
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py' -v
 ```
+
+`check-rule-ids.ts` 同时校验编号唯一性与命名空间合法性：定义位出现的裸编号（例如历史遗留的 `PERF001`）或未登记命名空间会直接失败，不再对校验不可见。标准名（`ISO-8601`、`RFC-2119`、`SHA256` 等）按白名单放行、不计入规则编号，但每次运行都会打印「按标准名跳过」一行；白名单按前缀整体放行，若同前缀混入规则编号（`TLS-1`、`HTTP-2`），只会出现在该行，需人工复核。已登记命名空间的前缀优先于白名单，不会被吞掉。
+
+白名单与跳过行没有自动回归测试，改动后按下述探针复现（临时文件，跑完即删）：
+
+```bash
+printf '# probe\n\n- TLS-1 检查\n- HTTP-2 检查\n- SHA256 检查\n- PERF001 裸编号\n' > references/__probe_std.md
+node scripts/check-rule-ids.ts   # 预期退出码 1
+rm references/__probe_std.md
+```
+
+预期输出（`PERF001` 是故意注入的真缺陷，退出码 1 属预期）：
+
+```text
+按标准名跳过: 3 种 / 3 处（HTTP-2、SHA256、TLS-1）
+  白名单按前缀整体放行；若其中混入规则编号（如 TLS-1、HTTP-2），会只出现在本行，需人工复核。
+❌ FAIL: 发现 1 个未命名空间的规则编号:
+  PERF001 缺少命名空间前缀，出现在:
+```
+
+若跳过行为空，说明 `isStandardName` 的判定或调用点被改动，属于回归。探针必须落在 `references/` 或 `skills/` 下才会被扫描，且务必删除，否则 `PERF001` 会持续 FAIL。探针内容用 `printf` 而非 heredoc 书写，避免文档里的示例列表被 `check-rule-ids.ts` 当成真实定义位。
+
+扫描器**不跳过围栏代码块**，这是刻意的：`product-requirements-partner/references/memory-system.md` 的 `CONF-001`、`DEC-001` 就是写在 `markdown` 围栏内的模板占位符，跳过围栏会让 `CONF-*`、`DEC-*` 两族整体消失（297 → 295）而脚本仍报 PASS，正好退回本脚本要消灭的编号盲区。因此 297 这个数字含这 2 个模板占位符；写文档时不要把示例写成 `- XXX-001` 形式的列表项或标题。
+
+`validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；不可用时跳过该项，并在结果中说明它未运行。
 
 如果本轮没有修改模板、共享运行时资产或协议包工具链，仍应说明哪些检查未运行及其剩余风险。
 
@@ -262,15 +288,20 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s skills/maintain-agent-
 创建或补齐目标仓协议包时，优先用脚本把生成过程结构化：
 
 ```bash
-python3 skills/maintain-agent-protocols/scripts/protocol-package.py detect <target-repo>
-python3 skills/maintain-agent-protocols/scripts/protocol-package.py plan <target-repo> --mode project
-python3 skills/maintain-agent-protocols/scripts/protocol-package.py scaffold <target-repo> --mode project
-python3 skills/maintain-agent-protocols/scripts/protocol-package.py validate <target-repo>
+python3 scripts/protocol-package.py detect <target-repo>
+python3 scripts/protocol-package.py plan <target-repo> --mode project
+python3 scripts/protocol-package.py scaffold <target-repo> --mode project
+python3 scripts/protocol-package.py validate <target-repo>
 ```
 
 `detect` 输出排除自有技能/生成目录后的项目证据，并为每类证据提供来源类型、样本数、内容样本门槛、置信度和反证；排除按已知真实路径执行，不把目标仓任意 `skills/` 目录当成工具源码。泛化语义内容规则只命中一个实现文件时保留为待调查信号，不能越过项目路由阈值；结构证据或达到规则公开样本门槛的独立实现样本才可支持路由。`plan` 输出拟生成文件、直接证据路由、reference-only 支持资产、闭包预算告警、可审阅的根入口 unified diff、完整 `checkpoint_state` 和条件设计产物；`requires` 只进入路由索引的“阅读依赖”列，不选择依赖路由或抬高证据置信度。full 模式只扩大选择范围，不制造项目证据；没有直接证据的路由标为 `完整覆盖`，置信度保持 `0.00`。`scaffold` 默认跳过既有文件，并写入机器可读的 `protocol-package-state.json`；support asset 按整个生成包计算一次引用闭包和深度、文件数、字节预算，正式 route 不重复复制为 support，超限时停止生成。只有显式传入 `--design-system` 且检测到真实前端实现时才计划、生成或强校验 `design-tokens.md`；空仓、仅文档或仅测试证据不会创建该文件，且即使使用 `--overwrite` 也不会覆盖既有文件。
 
 默认不会接线根入口。显式 `--apply-entry` 只接受带 BEGIN/END marker、标题和当前协议包 `README.md` 路径的规范化入口块；应用后立即验证，失败则恢复原入口或删除本轮新建入口。`validate` 检查规范化生效入口、生成包内递归 Markdown 引用、状态字段与有序阶段、`WF-*`、`CHK-*`、协议包目录、模板资产、路由索引内容、阅读依赖和占位符泄漏；显式 Markdown 链接即使使用裸文件名也必须可达，裸行内代码文件名只有被生成映射消费时才视为导航。该验证证明静态包与接线一致，不等价于真实 Codex 宿主已经发现或按预期触发 Skill。
+
+生成方案预览读两类规模与依据信息：
+
+- 生效入口的选择依据来自目标仓真实宿主信号（`.claude/`、`.codex/`、`.cursor/`、`.github/copilot-instructions.md` 等），没有信号时 `selection_reason` 会明确写成回退默认值，不会伪装成模型感知判断。
+- `support_summary` 给出路由文件数、支持资产数与字节数、以及仅由支持资产覆盖的领域；`advisories` 用非阻塞提示说明协议包实际体积与路由裁剪结果的差额。`advisories` 只提示不阻止落盘，`warnings` 才是阻止 `scaffold` 的预算超限。
 
 ## 输出闭环
 

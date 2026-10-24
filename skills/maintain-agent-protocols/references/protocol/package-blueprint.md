@@ -24,7 +24,7 @@
 可执行工具链：
 
 - `scripts/protocol-package.py detect <target-repo>`：把目标仓入口、协议目录和技术栈证据输出为 JSON；证据包含来源类型、样本数、置信度和反证，技能自身源码、参考文档、模板和既有生成协议目录默认排除。
-- `scripts/protocol-package.py plan <target-repo> --mode minimal|project|full [--design-system]`：按 manifest 生成拟落盘文件、路由裁剪和检查清单计划；显式选项才加入设计系统产物。
+- `scripts/protocol-package.py plan <target-repo> --mode minimal|project|full [--design-system]`：按 manifest 生成拟落盘文件、路由裁剪和检查清单计划；显式选项才加入设计系统产物。计划同时输出 `support_summary`（路由文件数、支持资产数与字节数、仅由支持资产覆盖的领域）和非阻塞 `advisories`，用于在预览阶段暴露协议包的实际体积，而不是只在文件清单里隐含。
 - `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full [--design-system] [--apply-entry]`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖协议包资产；既有 `design-tokens.md` 永不被通用模板覆盖；support asset 闭包超出预算时停止生成；默认只输出根入口 unified diff，显式 `--apply-entry` 才应用接线并立即验证，失败时恢复原入口或删除本轮新建入口。
 - `scripts/protocol-package.py validate <target-repo> [--design-system]`：递归检查规范化入口 marker、生成包内 Markdown 引用、完整 checkpoint 契约、`WF-*`/`CHK-*`、路由与阅读依赖状态和占位符；显式选项才强校验唯一 `design-tokens.md`、必备明细和回填状态。
 
@@ -33,6 +33,8 @@
 `protocol-package-state.json` 必须包含 `schema`、`mode`、`package_dir`、`entry`、`entry_patch_status`、有序 `required`、有序前缀 `completed` 和 `status`。`planned`、`generated`、`validated`、`invalid` 必须分别与阶段进度一致；验证成功写入 `validated`，失败写入 `invalid`，支持跨进程审计而不是只拼装返回值或补齐空壳状态。
 
 项目版路由按目标仓直接实现证据裁剪：文件类型、目录结构或配置命中可作为强结构证据；泛化语义内容规则只命中一个实现文件时仍是待调查信号，置信度必须低于路由阈值，默认至少两个独立实现文件命中后才可支持项目路由。受源码类型约束的框架入口签名可显式使用单样本门槛；每条证据输出必须公开 `min_content_samples`，不得在决策函数中隐藏特例。manifest 的 `requires` 仅描述阅读关系，不会递归把依赖路由列为 `selected_routes` 或标成项目证据支持。每条 `requires` 必须进入 `routes/index.md` 的“阅读依赖”列：已生成依赖写可达链接，未生成依赖明确标记“源规则依赖未落盘”。若直接路由正文引用其他工程文档，生成器先按源文件目录解析裸文件名，再仅对工程规则中的唯一 basename 做跨目录解析；解析成功的引用进入同一个全包级 `support/engineering/` reference-only 闭包并重写为生成路径。正式 route 文件不重复复制为 support，这些支持资产也不进入路由选择或提升项目证据置信度。闭包预算按整个生成包累计，默认受最大深度、文件数和总字节数约束；超限必须在计划中报告并阻止 scaffold，不能对每条路由重置预算或静默截断成悬空包。`always_include` 是实际文件裁剪清单，未列文件不会因为同属 source glob 而复制。
+
+被选中路由正文引用的工程规则文档会作为 reference-only 支持资产随包落盘，包含跨领域继承（例如后端路由继承 `core/` 规则）。因此协议包体积会明显大于路由文件数，这是保持引用可达的有意设计，不是裁剪失效：`plan` 必须通过 `support_summary` 和 `advisories` 把该差额、以及"仅由支持资产覆盖、没有独立路由入口的领域"显式暴露在预览中，供用户确认后再落盘。
 
 脚本验证属于静态生成包与入口一致性检查，不证明真实 Codex/Claude 等宿主已经发现 Skill、选择了该入口或在生产任务中稳定触发；宿主触发率必须通过独立运行时实验验证。
 
@@ -52,8 +54,8 @@
 模型入口规则：
 
 - `CON-PACKAGE-ENTRY-USER-SPECIFIED`：用户明确指定入口文件时，按用户当前要求执行。
-- `CON-PACKAGE-ENTRY-MODEL-AWARE`：用户未指定时，必须主动判断当前模型或工具环境；Codex/OpenAI 场景默认生成或维护 `AGENTS.md`，Claude/Anthropic 场景默认生成或维护 `CLAUDE.md`。
-- `CON-PACKAGE-ENTRY-FALLBACK`：无法识别模型或工具环境时，默认使用 `AGENTS.md`。
+- `CON-PACKAGE-ENTRY-MODEL-AWARE`：用户未指定时，先继承目标仓既有入口；只有没有任何既有入口时，才判断当前模型或工具环境并按宿主默认入口生成（Codex/OpenAI 场景 `AGENTS.md`，Claude/Anthropic 场景 `CLAUDE.md`）。判断依据必须来自目标仓真实宿主信号（`.claude/`、`.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 等配置或目录标记）；不得把默认值反向断言为模型感知结论，`selection_reason` 必须写明实际依据。宿主信号命中但继承了其他既有入口时，必须在 `advisories` 中说明该宿主默认入口未生成，不得静默形成双入口。
+- `CON-PACKAGE-ENTRY-FALLBACK`：无法识别模型或工具环境时，默认使用 `AGENTS.md`，并在 `selection_reason` 中说明未识别到宿主信号与既有入口，不得复用模型感知措辞。
 - `CON-PACKAGE-ENTRY-CODEX-LEGACY`：`CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
 - `CON-PACKAGE-ENTRY-MIGRATION`：若既有入口与模型默认入口不同，预览中必须说明保留、迁移或别名策略，并确保只有一个可编辑真值源。
 
@@ -173,6 +175,7 @@ ai-agent-workspace/product/design/design-tokens.md
 - 通用安全、性能和质量入口可作为条件适用路由生成，但正文必须写明适用触发条件，避免把未启用架构写成项目事实。
 - Agent 治理、证据范围、资产一致性等与协议维护相关的内容归为通用治理路由，默认只生成索引或轻量入口。
 - 未发现证据的语言和框架路由默认不生成；如果用户需要保留，应在生成报告中标为用户确认的扩展范围。
+- 检查清单按路由随包落盘，属于"按任务读取"的材料：前端路由会带上该领域检查清单，即使目标仓当前只用到其中一小部分；检查清单不按单条证据逐项裁剪，其体积由 `support_summary` 一并暴露。
 
 路由索引标注规则：
 

@@ -19,10 +19,35 @@ SPEC.loader.exec_module(check_template_sync)
 
 class InteractiveRuntimeTests(unittest.TestCase):
     def test_installed_runtime_requires_all_headings_without_source_repo(self) -> None:
-        issues = check_template_sync.validate_interactive_runtime("# 交互式决策协议\n")
+        for projection in check_template_sync.INTERACTIVE_PROJECTIONS:
+            with self.subTest(skill=projection["skill"]):
+                issues = check_template_sync.validate_interactive_runtime(
+                    "# 交互式决策协议\n", None, projection
+                )
 
-        self.assertIn("missing runtime heading: ## 设计原则", issues)
-        self.assertIn("missing runtime heading: ## 用户体验目标", issues)
+                self.assertIn("missing runtime heading: ## 设计原则", issues)
+                self.assertIn("missing runtime heading: ## 用户体验目标", issues)
+
+    def test_installed_runtime_must_not_depend_on_the_other_skill(self) -> None:
+        for projection in check_template_sync.INTERACTIVE_PROJECTIONS:
+            with self.subTest(skill=projection["skill"]):
+                runtime = projection["path"].read_text(encoding="utf-8")
+
+                self.assertNotIn(projection["excluded_skill"], runtime)
+
+    def test_each_installed_projection_matches_the_authoring_source(self) -> None:
+        source = check_template_sync.INTERACTIVE_SOURCE.read_text(encoding="utf-8")
+
+        for projection in check_template_sync.INTERACTIVE_PROJECTIONS:
+            with self.subTest(skill=projection["skill"]):
+                runtime = projection["path"].read_text(encoding="utf-8")
+
+                self.assertEqual(
+                    check_template_sync.validate_interactive_runtime(
+                        runtime, source, projection
+                    ),
+                    [],
+                )
 
 
 class FrontendReviewPromptTests(unittest.TestCase):

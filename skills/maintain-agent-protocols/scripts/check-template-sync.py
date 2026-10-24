@@ -7,6 +7,9 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[1]
+SKILLS_ROOT = REPO_ROOT / "skills"
+MAINTAIN_ROOT = SKILLS_ROOT / "maintain-agent-protocols"
+PRP_ROOT = SKILLS_ROOT / "product-requirements-partner"
 
 PAIRS = [
     ("templates/user-protocol.md", "references/protocol/user-protocol-template.md"),
@@ -14,12 +17,20 @@ PAIRS = [
     ("templates/route-card.md", "references/protocol/route-card-template.md"),
 ]
 
+# Shared runtime assets ship with every skill that reads them at runtime, so each
+# consuming skill carries its own copy of the cross-skill authoring truth source.
 SHARED_COPY_PAIRS = [
-    ("references/shared/target-workspace-layout.md", "references/target-workspace-layout.md"),
+    (
+        MAINTAIN_ROOT / "references/shared/target-workspace-layout.md",
+        REPO_ROOT / "references/target-workspace-layout.md",
+    ),
+    (
+        PRP_ROOT / "references/shared/target-workspace-layout.md",
+        REPO_ROOT / "references/target-workspace-layout.md",
+    ),
 ]
 
-INTERACTIVE_RUNTIME = "references/shared/interactive-decision-protocol.md"
-INTERACTIVE_SOURCE = "references/interactive-decision-protocol.md"
+INTERACTIVE_SOURCE = REPO_ROOT / "references/interactive-decision-protocol.md"
 FRONTEND_REVIEW_PROMPT = "templates/frontend-design-system-review-prompt.md"
 FRONTEND_REVIEW_REQUIRED_MARKERS = [
     "## 0. 执行边界与证据规则",
@@ -69,28 +80,67 @@ DESIGN_TOKENS_REQUIRED_MARKERS = [
     "## 18. Maintenance Contract",
     "## 19. Change Log",
 ]
-INTERACTIVE_REQUIRED_HEADINGS = [
-    "## 设计原则",
-    "#### 场景 1: 模型入口文件选择",
-    "#### 场景 2: 生成模式选择",
-    "#### 场景 3: 真值源冲突解决",
-    "#### 场景 4: 工程路由裁剪策略",
-    "## 选项设计标准",
-    "## 降级策略",
-    "## 实施检查清单",
-    "### maintain-agent-protocols",
-    "## 用户体验目标",
-]
-INTERACTIVE_PROJECTION_BLOCKS = [
-    ("## 设计原则", "## 交互式场景清单", "## 交互式场景清单"),
-    ("#### 场景 1: 模型入口文件选择", "#### 场景 2: 生成模式选择", "#### 场景 2: 生成模式选择"),
-    ("#### 场景 2: 生成模式选择", "#### 场景 3: 真值源冲突解决", "#### 场景 3: 真值源冲突解决"),
-    ("#### 场景 3: 真值源冲突解决", "#### 场景 4: 工程路由裁剪策略", "#### 场景 4: 工程路由裁剪策略"),
-    ("#### 场景 4: 工程路由裁剪策略", "### product-requirements-partner", "## 选项设计标准"),
-    ("## 选项设计标准", "## 降级策略", "## 降级策略"),
-    ("## 降级策略", "## 实施检查清单", "## 实施检查清单"),
-    ("## 实施检查清单", "## 与现有协议的集成", "## 与现有协议的集成"),
-    ("## 用户体验目标", "---", "---"),
+INTERACTIVE_PROJECTIONS = [
+    {
+        "skill": "maintain-agent-protocols",
+        "excluded_skill": "product-requirements-partner",
+        "path": MAINTAIN_ROOT / "references/shared/interactive-decision-protocol.md",
+        "required_headings": [
+            "## 设计原则",
+            "#### 场景 1: 模型入口文件选择",
+            "#### 场景 2: 生成模式选择",
+            "#### 场景 3: 真值源冲突解决",
+            "#### 场景 4: 工程路由裁剪策略",
+            "## 选项设计标准",
+            "## 降级策略",
+            "## 实施检查清单",
+            "### maintain-agent-protocols",
+            "## 用户体验目标",
+        ],
+        "blocks": [
+            ("## 设计原则", "## 交互式场景清单", "## 交互式场景清单"),
+            ("#### 场景 1: 模型入口文件选择", "#### 场景 2: 生成模式选择", "#### 场景 2: 生成模式选择"),
+            ("#### 场景 2: 生成模式选择", "#### 场景 3: 真值源冲突解决", "#### 场景 3: 真值源冲突解决"),
+            ("#### 场景 3: 真值源冲突解决", "#### 场景 4: 工程路由裁剪策略", "#### 场景 4: 工程路由裁剪策略"),
+            ("#### 场景 4: 工程路由裁剪策略", "### product-requirements-partner", "## 选项设计标准"),
+            ("## 选项设计标准", "## 降级策略", "## 降级策略"),
+            ("## 降级策略", "## 实施检查清单", "## 实施检查清单"),
+            ("## 实施检查清单", "## 与现有协议的集成", "## 与现有协议的集成"),
+            ("## 用户体验目标", "---", "---"),
+        ],
+        "integration_source_end": "### product-requirements-partner",
+        "integration_runtime_end": "## 用户体验目标",
+    },
+    {
+        "skill": "product-requirements-partner",
+        "excluded_skill": "maintain-agent-protocols",
+        "path": PRP_ROOT / "references/shared/interactive-decision-protocol.md",
+        "required_headings": [
+            "## 设计原则",
+            "#### 场景 5: 协作强度选择",
+            "#### 场景 6: 目标目录选择",
+            "#### 场景 7: Scene 跳转确认",
+            "#### 场景 8: [Meta] 层级判断",
+            "## 选项设计标准",
+            "## 降级策略",
+            "## 实施检查清单",
+            "### product-requirements-partner",
+            "## 用户体验目标",
+        ],
+        "blocks": [
+            ("## 设计原则", "## 交互式场景清单", "## 交互式场景清单"),
+            ("#### 场景 5: 协作强度选择", "#### 场景 6: 目标目录选择", "#### 场景 6: 目标目录选择"),
+            ("#### 场景 6: 目标目录选择", "#### 场景 7: Scene 跳转确认", "#### 场景 7: Scene 跳转确认"),
+            ("#### 场景 7: Scene 跳转确认", "#### 场景 8: [Meta] 层级判断", "#### 场景 8: [Meta] 层级判断"),
+            ("#### 场景 8: [Meta] 层级判断", "## 选项设计标准", "## 选项设计标准"),
+            ("## 选项设计标准", "## 降级策略", "## 降级策略"),
+            ("## 降级策略", "## 实施检查清单", "## 实施检查清单"),
+            ("## 实施检查清单", "## 与现有协议的集成", "## 与现有协议的集成"),
+            ("## 用户体验目标", "---", "---"),
+        ],
+        "integration_source_end": "## 用户体验目标",
+        "integration_runtime_end": "## 用户体验目标",
+    },
 ]
 
 
@@ -100,24 +150,33 @@ def extract_block(content: str, start: str, end: str, offset: int = 0) -> str:
     return content[start_index:end_index].strip()
 
 
-def validate_interactive_runtime(runtime_content: str, source_content: str | None = None) -> list[str]:
+def validate_interactive_runtime(
+    runtime_content: str,
+    source_content: str | None,
+    projection: dict[str, object],
+) -> list[str]:
     issues: list[str] = []
-    if "product-requirements-partner" in runtime_content:
-        issues.append("must not depend on product-requirements-partner")
+    required_headings: list[str] = projection["required_headings"]  # type: ignore[assignment]
+    blocks: list[tuple[str, str, str]] = projection["blocks"]  # type: ignore[assignment]
+    skill = projection["skill"]
+    excluded_skill = projection["excluded_skill"]
 
-    for heading in INTERACTIVE_REQUIRED_HEADINGS:
+    if excluded_skill in runtime_content:
+        issues.append(f"must not depend on {excluded_skill}")
+
+    for heading in required_headings:
         if heading not in runtime_content:
             issues.append(f"missing runtime heading: {heading}")
 
     if source_content is None:
         return issues
 
-    for heading in INTERACTIVE_REQUIRED_HEADINGS:
+    for heading in required_headings:
         if heading not in source_content:
             issues.append(f"missing source heading: {heading}")
 
     try:
-        for start, source_end, runtime_end in INTERACTIVE_PROJECTION_BLOCKS:
+        for start, source_end, runtime_end in blocks:
             source_block = extract_block(source_content, start, source_end)
             runtime_block = extract_block(runtime_content, start, runtime_end)
             if source_block != runtime_block:
@@ -128,18 +187,18 @@ def validate_interactive_runtime(runtime_content: str, source_content: str | Non
         runtime_offset = runtime_content.index(integration_heading)
         source_integration = extract_block(
             source_content,
-            "### maintain-agent-protocols",
-            "### product-requirements-partner",
+            f"### {skill}",
+            projection["integration_source_end"],  # type: ignore[arg-type]
             source_offset,
         )
         runtime_integration = extract_block(
             runtime_content,
-            "### maintain-agent-protocols",
-            "## 用户体验目标",
+            f"### {skill}",
+            projection["integration_runtime_end"],  # type: ignore[arg-type]
             runtime_offset,
         )
         if source_integration != runtime_integration:
-            issues.append("out-of-sync maintain-agent-protocols integration")
+            issues.append(f"out-of-sync {skill} integration")
     except ValueError as error:
         issues.append(f"cannot parse projection: {error}")
     return issues
@@ -183,25 +242,27 @@ def main() -> int:
         if left_content != right_content:
             mismatches.append((left, right))
 
-    for packaged, authoring in SHARED_COPY_PAIRS:
-        packaged_path = ROOT / packaged
+    for packaged_path, authoring_path in SHARED_COPY_PAIRS:
+        packaged_rel = packaged_path.relative_to(REPO_ROOT).as_posix()
         if not packaged_path.exists():
-            missing.append(packaged)
+            missing.append(packaged_rel)
             continue
 
-        authoring_path = REPO_ROOT / authoring
         if authoring_path.exists() and packaged_path.read_bytes() != authoring_path.read_bytes():
-            mismatches.append((packaged, authoring))
+            mismatches.append((packaged_rel, authoring_path.relative_to(REPO_ROOT).as_posix()))
 
-    interactive_runtime_path = ROOT / INTERACTIVE_RUNTIME
-    if not interactive_runtime_path.exists():
-        missing.append(INTERACTIVE_RUNTIME)
-    else:
-        runtime_content = interactive_runtime_path.read_text(encoding="utf-8")
-        source_path = REPO_ROOT / INTERACTIVE_SOURCE
-        source_content = source_path.read_text(encoding="utf-8") if source_path.exists() else None
-        for issue in validate_interactive_runtime(runtime_content, source_content):
-            mismatches.append((INTERACTIVE_RUNTIME, issue))
+    source_content = (
+        INTERACTIVE_SOURCE.read_text(encoding="utf-8") if INTERACTIVE_SOURCE.exists() else None
+    )
+    for projection in INTERACTIVE_PROJECTIONS:
+        runtime_path: Path = projection["path"]  # type: ignore[assignment]
+        runtime_rel = runtime_path.relative_to(REPO_ROOT).as_posix()
+        if not runtime_path.exists():
+            missing.append(runtime_rel)
+            continue
+        runtime_content = runtime_path.read_text(encoding="utf-8")
+        for issue in validate_interactive_runtime(runtime_content, source_content, projection):
+            mismatches.append((runtime_rel, issue))
 
     frontend_review_path = ROOT / FRONTEND_REVIEW_PROMPT
     if not frontend_review_path.exists():

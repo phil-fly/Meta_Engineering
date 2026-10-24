@@ -27,12 +27,14 @@
 | PRD 评审 | `评审这个 PRD，找出 blocker 和待确认项` | `references/prd-protocols.md` |
 | 需求定稿与交付 | `按最新确认状态定稿 PRD，并生成开发交付摘要` | `references/final-state-delivery.md`、`references/implementation-delivery.md`、状态校验脚本 |
 | 竞品调研 | `查一下类似产品，看看我们为什么还值得做` | `references/research-and-competition.md` |
-| 页面结构 | `设计这个功能的用户流程和页面结构` | `SKILL.md` Scene 3 |
-| 实体模型 | `定义这个模块的实体、状态机和字段行为` | `SKILL.md` Scene 4 |
+| 页面结构 | `设计这个功能的用户流程和页面结构` | `references/workflow-contracts.md` Scene Contract「交互结构」 |
+| 实体模型 | `定义这个模块的实体、状态机和字段行为` | `references/workflow-contracts.md` Scene Contract「实体定义」 |
 | 设计交付 | `为这个页面生成设计说明或 mockup` | `references/design-artifacts.md`、`references/design-handoff.md` |
 | 技能改造 | `[Meta] 以后需求讨论时先问目标用户` | `SKILL.md` 的 `[Meta]` 改造模式 |
 
 ## 目录说明
+
+运行时的读取顺序与场景映射以 `SKILL.md` 的“参考导航”表为唯一真值源；本节是仓库视角的资产清单，额外覆盖测试、脚本和许可证等非运行时资产，不作为触发路由依据。
 
 - `SKILL.md`：技能触发、主流程、行为边界和参考导航。
 - `references/strategy-foundation.md`：立项、价值、范围和决策依据。
@@ -70,12 +72,14 @@
 
 ## 常用验证
 
+以下命令以**技能根目录**为工作目录（源码仓为 `skills/product-requirements-partner/`，安装态为宿主技能目录）。随技能分发的脚本从自身位置解析路径，不依赖调用时的 cwd。
+
 ```bash
-python3 <skill-craft-root>/scripts/validate-metadata.py --path skills/product-requirements-partner
-python3 <skill-craft-root>/scripts/validate-structure.py --path skills/product-requirements-partner
-python3 -m unittest discover -s skills/product-requirements-partner/tests -v
+python3 -m unittest discover -s tests -v
 # 项目记忆模式下运行；同时检查规范路径与兼容路径冲突
-python3 skills/product-requirements-partner/scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json
+python3 scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json
 # 没有 CONFIRMATIONS.md 且使用 legacy current 时运行
-python3 skills/product-requirements-partner/scripts/validate-legacy-current.py --path <legacy-authoritative-document>
+python3 scripts/validate-legacy-current.py --path <legacy-authoritative-document>
 ```
+
+`validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发。若宿主已提供该工具链，按该工具链自身的安装路径调用，并传入 `--path skills/product-requirements-partner`；不可用时跳过该项并说明它未运行。

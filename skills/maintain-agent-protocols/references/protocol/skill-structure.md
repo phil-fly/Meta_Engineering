@@ -18,7 +18,7 @@ scripts/
 
 ## 结构校验反证
 
-`skill-craft` 的通用结构脚本可能提示：
+`skill-craft` 的通用结构脚本（外部工具链，未随本仓库分发）可能提示：
 
 - `templates/` 是 deprecated directory。
 - `references/` 下存在多层目录。
