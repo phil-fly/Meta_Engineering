@@ -384,15 +384,15 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 #### 修复方案
 
 - 目标：标准名不再被判为编号缺陷，同时不放松对真缺陷的拦截。
-- 范围与拟改动：新增 `STANDARD_ID` 白名单（ISO/IEC/IEEE/RFC/ANSI/ECMA/W3C/UTF/SHA/AES/RSA/TLS/SSL/HTTP/UUID/MD/SEMVER + 可选数字后缀），`parseDefinition` 命中即跳过。
+- 范围与拟改动：新增 `STANDARD_ID` 白名单（ISO/IEC/IEEE/RFC/ANSI/ECMA/W3C/UTF/SHA/AES/RSA/TLS/SSL/HTTP/UUID/MD/SEMVER + 可选数字后缀），在 `extractRuleIds` 的定义位判定处命中即放行；判据收敛为 `isStandardName()` 单一函数，`parseDefinition` 只负责解析，不再判断白名单。
 - 风险：白名单按前缀整体放行，可能连带放行同前缀的疑似规则编号；由 ISSUE-0013 跟进。
-- 回滚方式：merge commit 合并 PR #1 时 `git revert e2cd55f`；squash 合并时该提交不进入 `v1.0`，改为 revert 对应的 squash 提交，或手工移除 `STANDARD_ID` 判断。
+- 回滚方式：merge commit 合并 PR #1 时 `git revert e2cd55f`；squash 合并时该提交不进入 `v1.0`，改为 revert 对应的 squash 提交，或手工移除 `isStandardName()` 及其调用点。
 - 验证方式：探针文件（标准名 PASS、假编号 FAIL）、四个静态脚本与单测。
 - Spec/ADR 影响：无。
 
 #### 实施与验证
 
-- 实施结果：`STANDARD_ID` 白名单落地，`parseDefinition` 在解析前放行。
+- 实施结果：`STANDARD_ID` 白名单落地。判定先落在 `parseDefinition`，`9669125` 把放行与收集合并到 `extractRuleIds`，`1f64757` 再收敛为 `isStandardName()` 单点并删除 `parseDefinition` 内的死分支——按本条定位代码时以 `extractRuleIds` 为准。
 - 验证结果：探针写入 `ISO-8601`、`RFC-2119`、`SHA256`、`UTF-8` 时 PASS；写入 `FOO-001`、`BAR999` 时 FAIL 并列出文件。
 - 剩余风险：白名单粒度为前缀整体，同前缀规则编号的可见性由 ISSUE-0013 补齐；本条登记晚于修复提交 `e2cd55f`，未满足台账「先登记再修复」的时序。
 
@@ -487,19 +487,19 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 #### 证据与根因
 
 - 证据：探针文件写入上述四行后，输出仅报 `PERF001`，总数仍为 297，`TLS-1`、`HTTP-2`、`SHA256` 完全不可见。
-- 根因：`parseDefinition` 先做白名单判定并直接 `return null`，命中项从统计与报错中同时消失，没有留下计数或提示——与 ISSUE-0010 要消灭的「编号命名空间盲区」同源。
+- 根因：白名单判定命中后直接跳过，命中项从统计与报错中同时消失，没有留下计数或提示——与 ISSUE-0010 要消灭的「编号命名空间盲区」同源。发现时判定位于 `parseDefinition`；`9669125` 把判定上移到 `extractRuleIds`，`1f64757` 收敛为 `isStandardName()` 单点。
 
 #### 修复方案
 
 - 目标：白名单放行可见、可复核；已登记命名空间永不被白名单放行。
-- 范围与拟改动：`extractRuleIds` 单独收集被放行的标准名，`checkUniqueness` 汇总后每次运行打印「按标准名跳过: N 种 / M 处（…）」；`parseDefinition` 增加 `KNOWN_NAMESPACES` 优先判断；同步 `README.md` 与 `rule-ingestion.md` 的校验说明。
+- 范围与拟改动：`extractRuleIds` 单独收集被放行的标准名，`checkUniqueness` 汇总后每次运行打印「按标准名跳过: N 种 / M 处（…）」；`isStandardName()` 增加 `KNOWN_NAMESPACES` 优先判断；同步 `README.md` 与 `rule-ingestion.md` 的校验说明，并在 README 补探针复现步骤。
 - 风险：低；仅新增输出与一条优先级判断，不改变既有 297 个编号的判定。
-- 回滚方式：按 PR #1 合并形态选择——merge commit 合并时 `git revert 9669125`；squash 合并时该提交不进入 `v1.0`，改为 revert 对应的 squash 提交，或手工还原 `parseDefinition` 与 `extractRuleIds`。
-- 验证方式：探针复现、命名空间冲突实验、四个静态脚本与 77 个单测。
+- 回滚方式：按 PR #1 合并形态选择——merge commit 合并时 `git revert 9669125`（`1f64757` 只做判据收敛与文档补充，可单独保留）；squash 合并时该提交不进入 `v1.0`，改为 revert 对应的 squash 提交，或手工还原 `isStandardName()` 与 `extractRuleIds` 的跳过分支。
+- 验证方式：按 `README.md`「常用验证」中的探针步骤复现（写入 `TLS-1`/`HTTP-2`/`SHA256`/`PERF001` 后核对跳过行与 `PERF001` 仍 FAIL）、命名空间冲突实验、四个静态脚本与 77 个单测。
 - Spec/ADR 影响：无。
 
 #### 实施与验证
 
-- 实施结果：白名单放行改为「已知命名空间优先」并单独收集，运行输出新增跳过行与复核提示；README 与 `rule-ingestion.md` 同步该行为。
+- 实施结果：白名单放行改为「已知命名空间优先」并单独收集，运行输出新增跳过行与复核提示；README 与 `rule-ingestion.md` 同步该行为，README 另补探针命令与预期输出。
 - 验证结果：探针输出「按标准名跳过: 3 种 / 3 处（HTTP-2、SHA256、TLS-1）」，`PERF001` 仍 FAIL；临时把 `HTTP` 注册为命名空间后 `HTTP-2` 计入 `HTTP-*`，未被吞掉；全仓该行为 0 种 / 0 处，297 个编号不变；四个静态脚本 PASS、77 个单测 OK。
-- 剩余风险：跳过行只给编号不给文件路径，同前缀规则编号混入时仍需人工定位；修复在 PR #1（`9669125`）、登记在 PR #2，仍属「修复先于登记」。
+- 剩余风险：跳过行只给编号不给文件路径，同前缀规则编号混入时仍需人工定位；仓库无 `.ts` 测试框架，该行没有自动回归，只能靠 README 探针人工执行；修复在 PR #1（`9669125`、`1f64757`）、登记在 PR #2，仍属「修复先于登记」。
