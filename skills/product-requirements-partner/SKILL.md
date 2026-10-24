@@ -30,9 +30,9 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 ## 启动流程
 
 1. 判断当前问题处在哪个产品场景：价值发现、流程结构、交互结构、实体定义、设计交付、PRD 评审、竞品调研或技能改造。
-2. 判断协作强度（首次使用时使用交互式选择，详见仓库根共享参考 `interactive-decision-protocol` 场景 5）：
-   - `轻量讨论`：用户只想 brainstorm、快速判断、问一个局部问题或暂不落盘。直接讨论，不初始化目标仓产物目录。
-   - `产物沉淀`：用户要求写 PRD、立项文档、设计说明、mockup、调研报告或明确要生成文件。先确认目标文件或建议目录；生成 PRD 时先判断需求是否涉及 UI、页面、交互或前端体验，涉及时必须同步覆盖页面设计需求与线稿。用户要求定稿或最终需求交付时读取 `references/final-state-delivery.md`；要求开发 handoff、实现摘要或 PR 文案时再读取 `references/implementation-delivery.md`。
+2. 判断协作强度（首次使用时使用交互式选择，详见 `references/shared/interactive-decision-protocol.md` 场景 5）。判定顺序固定为：先看是否把交付物作为本轮产出物索取，再看是否需要长期记忆，最后才看是否要求落盘。
+   - `轻量讨论`：用户只想 brainstorm、快速判断、问一个局部问题，或仅提及交付物名词做方法咨询，未把任何交付物作为本轮产出物索取。直接讨论，不初始化目标仓产物目录。
+   - `产物沉淀`：用户把 PRD、立项文档、设计说明、mockup、调研报告等作为本轮产出物索取（如“写个 PRD”“出个线稿”），或明确要求生成文件。仅提及交付物名词的咨询（如“PRD 该怎么写”）仍属 `轻量讨论`。用户说“先别写文件”时仍按本档交付完整内容，只是不落盘；落盘与否只决定是否写文件，不降低内容完整度。先确认目标文件或建议目录；生成 PRD 时先判断需求是否涉及 UI、页面、交互或前端体验，涉及时必须同步覆盖页面设计需求与线稿。用户要求定稿或最终需求交付时读取 `references/final-state-delivery.md`；要求开发 handoff、实现摘要或 PR 文案时再读取 `references/implementation-delivery.md`。
    - `项目记忆模式`：长期项目、多轮协作、用户要求记住决策，或已经存在 `ai-agent-workspace/product/memory/` 或兼容 `docs/00_MEMORY/`。读取项目记忆并按阈值写入。
 3. 只有进入 `产物沉淀` 或 `项目记忆模式` 且需要项目结构时，才检查目标仓产物入口。新项目使用交互式选择确认目标目录（场景 6）；已有 `docs/` 项目可继续作为兼容真值源。
 4. 若存在项目记忆，读取：
@@ -54,7 +54,7 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 | 项目记忆、初始化、确认记录、决策记录、TODO | `references/memory-system.md` |
 | 确认记录校验与当前状态投影 | `scripts/validate-confirmations.py` |
 | 旧项目 current 标记校验 | `scripts/validate-legacy-current.py` |
-| 目标仓统一产物目录和兼容路径 | 共享参考 `target-workspace-layout` |
+| 目标仓统一产物目录和兼容路径 | `references/shared/target-workspace-layout.md` |
 | 协作强度、Scene 契约、Meta 示例 | `references/workflow-contracts.md` |
 | 竞品调研、市场替代方案、证据对比 | `references/research-and-competition.md` |
 | 设计指导文档、待定项、线稿、组件 demo | `references/design-artifacts.md` |
@@ -62,13 +62,13 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 
 ## 工具优先级
 
-| 操作 | 首选方式 |
-| --- | --- |
-| 查找项目记忆或需求资产 | `rg --files`、`rg` |
-| 修改技能文件 | `apply_patch` |
-| 修改需求文档 | 先读目标章节，再局部编辑 |
-| 验证技能结构 | `skill-craft` 的 `validate-metadata.py`、`validate-structure.py` |
-| 视觉 mockup 验证 | 浏览器打开或截图检查 |
+| 操作 | 首选方式 | 降级条件 | 降级方式 |
+| --- | --- | --- | --- |
+| 查找项目记忆或需求资产 | `rg --files`、`rg` | 命令不可用 | 逐层 `ls` 定位 |
+| 修改技能文件 | `apply_patch` | 补丁无法唯一匹配 | 缩小上下文后重试 |
+| 修改需求文档 | 先读目标章节，再局部编辑 | 文件过大或结构不明 | 只改命中章节，不动无关段落 |
+| 验证技能结构 | `skill-craft` 的 `validate-metadata.py`、`validate-structure.py` | 外部工具链未安装 | 跳过并声明未运行，改跑 `tests/` 与状态校验脚本 |
+| 视觉 mockup 验证 | 浏览器打开或截图检查 | 无法渲染 | 标注未做视觉验证，不声称已确认 |
 
 ## Scene Contract
 
@@ -76,7 +76,7 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 
 ## 流程步骤
 
-五个主 Scene 的详细步骤见 `references/workflow-contracts.md`。快速判断：价值发现处理想法和痛点；流程与范围处理 MVP；交互结构处理页面和导航；实体定义处理状态、字段和权限；设计与交付处理设计说明、mockup 和 handoff。
+五个主 Scene 为价值发现、流程与范围、交互结构、实体定义、设计与交付；另有 PRD 评审、定稿与最终交付、竞品调研三道门禁。快速判断：价值发现处理想法和痛点；流程与范围处理 MVP；交互结构处理页面和导航；实体定义处理状态、字段和权限；设计与交付处理设计说明、mockup 和 handoff。
 
 ### PRD 编写
 
