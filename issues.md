@@ -30,6 +30,7 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 | ISSUE-0011 | `skill-structure.md` 出现连续空行 | closed | P3 | 2026-10-23 | 2026-10-24 | `references/protocol/skill-structure.md` |
 | ISSUE-0012 | 编号统计把未命名空间显示为 `(未命名空间)-*` | closed | P3 | 2026-10-23 | 2026-10-24 | `check-rule-ids.ts` |
 | ISSUE-0013 | 标准名白名单静默吞掉同前缀编号 | closed | P3 | 2026-10-24 | 2026-10-24 | `check-rule-ids.ts`、`README.md`、`rule-ingestion.md` |
+| ISSUE-0014 | 编号检查自述「忽略示例」与实际计数不符 | closed | P3 | 2026-10-24 | 2026-10-24 | `check-rule-ids.ts`、`README.md` |
 
 ## 问题详情
 
@@ -503,3 +504,39 @@ candidate → investigating → confirmed → planned → in_progress → verifi
 - 实施结果：白名单放行改为「已知命名空间优先」并单独收集，运行输出新增跳过行与复核提示；README 与 `rule-ingestion.md` 同步该行为，README 另补探针命令与预期输出。
 - 验证结果：探针输出「按标准名跳过: 3 种 / 3 处（HTTP-2、SHA256、TLS-1）」，`PERF001` 仍 FAIL；临时把 `HTTP` 注册为命名空间后 `HTTP-2` 计入 `HTTP-*`，未被吞掉；全仓该行为 0 种 / 0 处，297 个编号不变；四个静态脚本 PASS、77 个单测 OK。
 - 剩余风险：跳过行只给编号不给文件路径，同前缀规则编号混入时仍需人工定位；仓库无 `.ts` 测试框架，该行没有自动回归，只能靠 README 探针人工执行；修复在 PR #1（`9669125`、`1f64757`）、登记在 PR #2，仍属「修复先于登记」。
+
+### ISSUE-0014 编号检查自述「忽略示例」与实际计数不符
+
+- 状态：closed
+- 严重度：P3
+- 首次发现：2026-10-24
+- 最近更新：2026-10-24
+- 负责人：技能维护
+- 关联问题：无
+- 关联方案/变更：`skills/maintain-agent-protocols/scripts/check-rule-ids.ts`、`README.md`
+
+#### 现象与影响
+
+- 现象：脚本每次打印「忽略模板资产、正文引用和示例」，但围栏代码块内的示例仍被计入：在 `references/` 放一个 `markdown` 围栏、内容为 `- FOO-001 示例编号`，脚本计为 `FOO-*` 并 FAIL。
+- 影响范围：文档作者按自述以为示例安全；更危险的是「照自述修掉」会把 `CONF-001`、`DEC-001` 一起跳过——这两条是 `product-requirements-partner/references/memory-system.md:115`、`:225` 围栏内的模板占位符，跳过围栏后编号 297 → 295、`CONF-*` 与 `DEC-*` 两族整体消失而脚本仍报 PASS，正好退回 PR #1 要消灭的编号盲区。
+- 复现条件：任意 md 的围栏内写入 `- FOO-001 示例编号`。
+
+#### 证据与根因
+
+- 证据：围栏探针运行后编号 298 个、报 `FOO-001 使用了未注册命名空间`；给 `extractRuleIds` 临时加围栏跳过后编号 295 个、脚本 PASS、`CONF-*` 与 `DEC-*` 消失。
+- 根因：`extractRuleIds` 逐行匹配定义位，不维护围栏状态；而输出文案把「未实现的意图」写成了已实现的行为。
+
+#### 修复方案
+
+- 目标：自述与行为一致，且不改变计数语义。
+- 范围与拟改动：输出文案改为「忽略模板资产与正文引用；代码块内的示例同样计入，不做围栏跳过」；`extractRuleIds` 补注释写明为何不跳过围栏（附 297 → 295 证据）；README 补同款说明并注明 297 含这 2 个模板占位符。
+- 风险：低；仅文案与注释。若将来真要跳过围栏，必须先为 `CONF-001`、`DEC-001` 找到围栏外的定义位。
+- 回滚方式：还原输出文案与注释（无逻辑变更）。
+- 验证方式：`check-rule-ids.ts` 计数仍为 297、四个静态脚本 PASS；围栏内 `FOO-001` 探针仍 FAIL，与新自述一致。
+- Spec/ADR 影响：无。
+
+#### 实施与验证
+
+- 实施结果：文案改为「代码块内的示例同样计入，不做围栏跳过」；`extractRuleIds` 注释记录 297 → 295 的反例；README 的「常用验证」补同款说明与 297 的构成。
+- 验证结果：297 个编号不变、跳过 0 种 / 0 处；`check-template-sync`、引用 145 条、占位符 110 文件全部 PASS；围栏探针仍 FAIL，符合新自述。
+- 剩余风险：计数没有基线断言，297 只是当前值——若将来把 `CONF-001`/`DEC-001` 移出 `memory-system.md`，计数会静默降到 295；修复在 PR #1（`c9e00a9`）、登记在 PR #2，仍属「修复先于登记」。
