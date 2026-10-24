@@ -48,6 +48,9 @@ const BARE_ID = /^[A-Z]{2,}[0-9]{2,}$/;
  * （例如 `TLS-1`、`HTTP-2`）。为避免这类命中退回静默，本脚本：
  * 1. 已知命名空间优先于白名单，`KNOWN_NAMESPACES` 内的前缀永不被白名单吞掉；
  * 2. 每次运行都打印「按标准名跳过」的条目，使放行可见、可复核。
+ *
+ * 判定点只有一处：`extractRuleIds`。`parseDefinition` 只负责把已确定
+ * 不是标准名的 token 解析成规则编号，不再重复判断白名单。
  */
 const STANDARD_ID =
   /^(?:ISO|IEC|IEEE|RFC|ANSI|ECMA|W3C|UTF|SHA|AES|RSA|TLS|SSL|HTTP|UUID|MD|SEMVER)(?:-?\d+(?:\.\d+)*)?$/;
@@ -57,15 +60,21 @@ function prefixOf(token: string): string {
   return token.split('-')[0];
 }
 
+/**
+ * 是否为需要放行的标准名：命中白名单，且前缀不是已登记命名空间。
+ * 已知命名空间优先，保证 `KNOWN_NAMESPACES` 内的编号不会被白名单吞掉。
+ */
+function isStandardName(token: string): boolean {
+  return STANDARD_ID.test(token) && !KNOWN_NAMESPACES.has(prefixOf(token));
+}
+
 interface Definition {
   id: string;
   namespace: string;
 }
 
+/** 解析规则编号；调用方须先用 `isStandardName` 排除标准名。 */
 function parseDefinition(token: string): Definition | null {
-  if (STANDARD_ID.test(token) && !KNOWN_NAMESPACES.has(prefixOf(token))) {
-    return null;
-  }
   const namespaced = token.match(NAMESPACED_ID);
   if (namespaced) {
     return { id: token, namespace: namespaced[1] };
@@ -92,7 +101,7 @@ function extractRuleIds(content: string): Extraction {
     if (!match) continue;
 
     const token = match[1];
-    if (STANDARD_ID.test(token) && !KNOWN_NAMESPACES.has(prefixOf(token))) {
+    if (isStandardName(token)) {
       standards.push(token);
       continue;
     }

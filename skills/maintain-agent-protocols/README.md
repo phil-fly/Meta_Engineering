@@ -258,6 +258,25 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py'
 
 `check-rule-ids.ts` 同时校验编号唯一性与命名空间合法性：定义位出现的裸编号（例如历史遗留的 `PERF001`）或未登记命名空间会直接失败，不再对校验不可见。标准名（`ISO-8601`、`RFC-2119`、`SHA256` 等）按白名单放行、不计入规则编号，但每次运行都会打印「按标准名跳过」一行；白名单按前缀整体放行，若同前缀混入规则编号（`TLS-1`、`HTTP-2`），只会出现在该行，需人工复核。已登记命名空间的前缀优先于白名单，不会被吞掉。
 
+白名单与跳过行没有自动回归测试，改动后按下述探针复现（临时文件，跑完即删）：
+
+```bash
+printf '# probe\n\n- TLS-1 检查\n- HTTP-2 检查\n- SHA256 检查\n- PERF001 裸编号\n' > references/__probe_std.md
+node scripts/check-rule-ids.ts   # 预期退出码 1
+rm references/__probe_std.md
+```
+
+预期输出（`PERF001` 是故意注入的真缺陷，退出码 1 属预期）：
+
+```text
+按标准名跳过: 3 种 / 3 处（HTTP-2、SHA256、TLS-1）
+  白名单按前缀整体放行；若其中混入规则编号（如 TLS-1、HTTP-2），会只出现在本行，需人工复核。
+❌ FAIL: 发现 1 个未命名空间的规则编号:
+  PERF001 缺少命名空间前缀，出现在:
+```
+
+若跳过行为空，说明 `isStandardName` 的判定或调用点被改动，属于回归。探针必须落在 `references/` 或 `skills/` 下才会被扫描，且务必删除，否则 `PERF001` 会持续 FAIL。探针内容用 `printf` 而非 heredoc 书写，避免文档里的示例列表被 `check-rule-ids.ts` 当成真实定义位。
+
 `validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；不可用时跳过该项，并在结果中说明它未运行。
 
 如果本轮没有修改模板、共享运行时资产或协议包工具链，仍应说明哪些检查未运行及其剩余风险。
