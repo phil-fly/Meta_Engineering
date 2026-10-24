@@ -277,6 +277,8 @@ rm references/__probe_std.md
 
 若跳过行为空，说明 `isStandardName` 的判定或调用点被改动，属于回归。探针必须落在 `references/` 或 `skills/` 下才会被扫描，且务必删除，否则 `PERF001` 会持续 FAIL。探针内容用 `printf` 而非 heredoc 书写，避免文档里的示例列表被 `check-rule-ids.ts` 当成真实定义位。
 
+扫描器**不跳过围栏代码块**，这是刻意的：`product-requirements-partner/references/memory-system.md` 的 `CONF-001`、`DEC-001` 就是写在 `markdown` 围栏内的模板占位符，跳过围栏会让 `CONF-*`、`DEC-*` 两族整体消失（297 → 295）而脚本仍报 PASS，正好退回本脚本要消灭的编号盲区。因此 297 这个数字含这 2 个模板占位符；写文档时不要把示例写成 `- XXX-001` 形式的列表项或标题。
+
 `validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；不可用时跳过该项，并在结果中说明它未运行。
 
 如果本轮没有修改模板、共享运行时资产或协议包工具链，仍应说明哪些检查未运行及其剩余风险。

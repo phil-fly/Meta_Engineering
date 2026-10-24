@@ -91,6 +91,14 @@ interface Extraction {
   standards: string[];
 }
 
+/**
+ * 提取定义位的编号。
+ *
+ * 刻意不跳过 ``` 围栏。`product-requirements-partner/references/memory-system.md`
+ * 的 `CONF-001`、`DEC-001` 就是写在 `markdown` 围栏里的模板占位符；一旦跳过围栏，
+ * 这两族会整体消失（297 → 295）而脚本仍报 PASS，正好退回本脚本要消灭的编号盲区。
+ * 代价是文档里的示例编号也会被计入，需要时用 `STANDARD_ID` 白名单或改写示例规避。
+ */
 function extractRuleIds(content: string): Extraction {
   const ids: Record<string, string> = {};
   const standards: string[] = [];
@@ -189,7 +197,7 @@ const { allIds, duplicates, unnamespaced, unknownNamespace, standardsSkipped } =
 console.log(`检查范围: ${ROOT}\n`);
 console.log(`发现规则定义编号: ${Object.keys(allIds).length} 个`);
 console.log(
-  '扫描规则: 只统计列表项、标题或表格首列中的规则定义；忽略模板资产、正文引用和示例。',
+  '扫描规则: 只统计列表项、标题或表格首列中的规则定义；忽略模板资产与正文引用；代码块内的示例同样计入，不做围栏跳过。',
 );
 
 const byType: Record<string, number> = {};
