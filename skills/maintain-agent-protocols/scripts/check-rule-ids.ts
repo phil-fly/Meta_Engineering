@@ -2,11 +2,13 @@
 /**
  * 检查规则编号唯一性与命名空间合法性
  *
- * 做两件事：
+ * 做三件事：
  * 1. 唯一性：同一编号不得在多个文件中被定义为规则。
  * 2. 命名空间：规则定义位的编号必须落在已知命名空间内。
  *    历史缺陷是只识别 `WF-`、`CON-`、`CHK-` 三个前缀，导致 `PERF001`
  *    这类"长得像编号但不在任何命名空间"的定义对校验完全不可见（假阴性）。
+ * 3. 标准名放行可见化：白名单命中的标准名不计入规则编号，但每次运行都打印
+ *    跳过条目，避免同前缀的疑似规则编号（`TLS-1`、`HTTP-2`）被静默吞掉。
  */
 
 import { readFileSync, readdirSync, statSync } from 'fs';
@@ -41,9 +43,19 @@ const BARE_ID = /^[A-Z]{2,}[0-9]{2,}$/;
 /**
  * 标准编号白名单：形如 `ISO-8601`、`RFC-2119`、`SHA256`、`UTF-8`。
  * 它们长得像规则编号，但属于标准名，不是协议规则，不应判为编号缺陷。
+ *
+ * 白名单是「按前缀整体放行」，因此会连带放行同前缀的疑似规则编号
+ * （例如 `TLS-1`、`HTTP-2`）。为避免这类命中退回静默，本脚本：
+ * 1. 已知命名空间优先于白名单，`KNOWN_NAMESPACES` 内的前缀永不被白名单吞掉；
+ * 2. 每次运行都打印「按标准名跳过」的条目，使放行可见、可复核。
  */
 const STANDARD_ID =
   /^(?:ISO|IEC|IEEE|RFC|ANSI|ECMA|W3C|UTF|SHA|AES|RSA|TLS|SSL|HTTP|UUID|MD|SEMVER)(?:-?\d+(?:\.\d+)*)?$/;
+
+/** 取编号的前缀段，用于判断是否落在已知命名空间。 */
+function prefixOf(token: string): string {
+  return token.split('-')[0];
+}
 
 interface Definition {
   id: string;
@@ -51,7 +63,7 @@ interface Definition {
 }
 
 function parseDefinition(token: string): Definition | null {
-  if (STANDARD_ID.test(token)) {
+  if (STANDARD_ID.test(token) && !KNOWN_NAMESPACES.has(prefixOf(token))) {
     return null;
   }
   const namespaced = token.match(NAMESPACED_ID);
@@ -64,21 +76,34 @@ function parseDefinition(token: string): Definition | null {
   return null;
 }
 
-function extractRuleIds(content: string): Record<string, string> {
+interface Extraction {
+  ids: Record<string, string>;
+  /** 被白名单放行的标准名，按出现顺序去重，用于运行时可见化。 */
+  standards: string[];
+}
+
+function extractRuleIds(content: string): Extraction {
   const ids: Record<string, string> = {};
+  const standards: string[] = [];
   const lines = content.split('\n');
 
   for (const line of lines) {
     const match = line.match(DEFINITION_LINE);
     if (!match) continue;
 
-    const definition = parseDefinition(match[1]);
+    const token = match[1];
+    if (STANDARD_ID.test(token) && !KNOWN_NAMESPACES.has(prefixOf(token))) {
+      standards.push(token);
+      continue;
+    }
+
+    const definition = parseDefinition(token);
     if (!definition) continue;
 
     ids[definition.id] = definition.namespace;
   }
 
-  return ids;
+  return { ids, standards };
 }
 
 function shouldCheck(filePath: string): boolean {
@@ -102,6 +127,7 @@ function checkUniqueness() {
   const allIds: Record<string, string[]> = {};
   const unnamespaced: Record<string, string[]> = {};
   const unknownNamespace: Record<string, string[]> = {};
+  const standardsSkipped: Record<string, string[]> = {};
 
   const scan = (dir: string) => {
     try {
@@ -109,8 +135,13 @@ function checkUniqueness() {
         if (!shouldCheck(mdFile)) continue;
 
         const content = readFileSync(mdFile, 'utf-8');
-        const ids = extractRuleIds(content);
+        const { ids, standards } = extractRuleIds(content);
         const relPath = relative(ROOT, mdFile);
+
+        for (const token of standards) {
+          if (!standardsSkipped[token]) standardsSkipped[token] = [];
+          standardsSkipped[token].push(relPath);
+        }
 
         for (const [ruleId, namespace] of Object.entries(ids)) {
           if (!allIds[ruleId]) allIds[ruleId] = [];
@@ -140,10 +171,11 @@ function checkUniqueness() {
     }
   }
 
-  return { allIds, duplicates, unnamespaced, unknownNamespace };
+  return { allIds, duplicates, unnamespaced, unknownNamespace, standardsSkipped };
 }
 
-const { allIds, duplicates, unnamespaced, unknownNamespace } = checkUniqueness();
+const { allIds, duplicates, unnamespaced, unknownNamespace, standardsSkipped } =
+  checkUniqueness();
 
 console.log(`检查范围: ${ROOT}\n`);
 console.log(`发现规则定义编号: ${Object.keys(allIds).length} 个`);
@@ -161,6 +193,26 @@ for (const ruleId of Object.keys(allIds)) {
 for (const [prefix, count] of Object.entries(byType).sort()) {
   const label = prefix === BARE_PREFIX ? prefix : `${prefix}-*`;
   console.log(`  - ${label}: ${count} 个`);
+}
+
+const skipped = Object.entries(standardsSkipped).sort(
+  (a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]),
+);
+const skippedOccurrences = skipped.reduce((sum, [, files]) => sum + files.length, 0);
+const PREVIEW_LIMIT = 10;
+const preview = skipped
+  .slice(0, PREVIEW_LIMIT)
+  .map(([token, files]) => (files.length > 1 ? `${token}×${files.length}` : token))
+  .join('、');
+const truncated = skipped.length > PREVIEW_LIMIT ? '…' : '';
+console.log(
+  `按标准名跳过: ${skipped.length} 种 / ${skippedOccurrences} 处` +
+    (preview ? `（${preview}${truncated}）` : ''),
+);
+if (skippedOccurrences > 0) {
+  console.log(
+    '  白名单按前缀整体放行；若其中混入规则编号（如 TLS-1、HTTP-2），会只出现在本行，需人工复核。',
+  );
 }
 
 console.log();

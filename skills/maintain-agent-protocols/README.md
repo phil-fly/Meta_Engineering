@@ -256,7 +256,7 @@ node scripts/check-placeholders.ts
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py' -v
 ```
 
-`check-rule-ids.ts` 同时校验编号唯一性与命名空间合法性：定义位出现的裸编号（例如历史遗留的 `PERF001`）或未登记命名空间会直接失败，不再对校验不可见。
+`check-rule-ids.ts` 同时校验编号唯一性与命名空间合法性：定义位出现的裸编号（例如历史遗留的 `PERF001`）或未登记命名空间会直接失败，不再对校验不可见。标准名（`ISO-8601`、`RFC-2119`、`SHA256` 等）按白名单放行、不计入规则编号，但每次运行都会打印「按标准名跳过」一行；白名单按前缀整体放行，若同前缀混入规则编号（`TLS-1`、`HTTP-2`），只会出现在该行，需人工复核。已登记命名空间的前缀优先于白名单，不会被吞掉。
 
 `validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；不可用时跳过该项，并在结果中说明它未运行。
 
