@@ -28,8 +28,8 @@
 | PRD 评审 | `评审这个 PRD，找出 blocker 和待确认项` | `references/prd-protocols.md` |
 | 需求定稿与交付 | `按最新确认状态定稿 PRD，并生成开发交付摘要` | `references/final-state-delivery.md`、`references/implementation-delivery.md`、状态校验脚本 |
 | 竞品调研 | `查一下类似产品，看看我们为什么还值得做` | `references/research-and-competition.md` |
-| 页面结构 | `设计这个功能的用户流程和页面结构` | `references/workflow-contracts.md` Scene Contract「交互结构」 |
-| 实体模型 | `定义这个模块的实体、状态机和字段行为` | `references/workflow-contracts.md` Scene Contract「实体定义」 |
+| 页面结构 | `设计这个功能的用户流程和页面结构` | `references/workflow-contracts.md` WF-M3 交互结构 |
+| 实体模型 | `定义这个模块的实体、状态机和字段行为` | `references/workflow-contracts.md` WF-M4 实体定义 |
 | 设计交付 | `为这个页面生成设计说明或 mockup` | `references/design-artifacts.md`、`references/design-handoff.md` |
 | 技能改造 | `[Meta] 以后需求讨论时先问目标用户` | `SKILL.md` 的 `[Meta]` 改造模式 |
 
@@ -46,7 +46,7 @@
 - `scripts/validate-confirmations.py`：解析唯一确认源，校验线性快照链，并按目标 `Scope/Version` 输出当前状态 JSON。
 - `scripts/validate-legacy-current.py`：校验旧项目 current 基线的唯一 frontmatter 标记。
 - `tests/test_confirmation_state.py`：覆盖空注册表、唯一 active、断链、split-brain、范围过滤和 legacy 标记。
-- `references/workflow-contracts.md`：协作强度、Scene 契约、`[Meta]` 层级示例和闭环状态。
+- `references/workflow-contracts.md`：协作强度、WF 注册区（WF-M/T/G）、横切协议（CX-1~CX-5）和 `[Meta]` 层级示例。
 - `references/research-and-competition.md`：竞品调研、替代方案矩阵和证据要求。
 - `references/design-artifacts.md`：设计指导文档、待定项、线稿和组件 demo。
 - `references/design-handoff.md`：设计 token、静态/交互原型分层、HTML mockup 和开发交付说明。

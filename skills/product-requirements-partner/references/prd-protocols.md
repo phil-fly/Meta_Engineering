@@ -66,7 +66,7 @@ If the depth is unclear, default to `New module`; do not default to the heaviest
 
 ---
 
-## UI-Related Page Design Requirements & Wireframes Gate
+## UI-Related Page Design Requirements & Wireframes Gate（CX-2 UI 线稿门）
 
 Every generated PRD must first decide whether the requirement changes or introduces UI: user-facing pages/views, interaction flows, navigation, frontend states, visual information architecture, or user-visible permissions. Only UI-related PRDs must include page-related design requirements and low-fidelity page wireframes.
 
@@ -95,7 +95,7 @@ The Framework PRD is not just a summary; it is a **coherence check**. It uses th
 ### Section 1: Background & Value Scope
 *Reference or summarize `ai-agent-workspace/product/strategy/` or compatible `docs/01_STRATEGY/`.*
 - **Target Audience:** Who are we building for?
-- **Core Value:** What is the "Tangible Anchor" (from Scene 1)?
+- **Core Value:** What is the "Tangible Anchor" (from WF-M1)?
 - **MVP Boundary:** Explicit In/Out list.
 
 ### Section 2: Critical User Journeys (Pass 1: Mental Model)
@@ -290,7 +290,7 @@ If the user only asks for review, do not modify files.
 
 ---
 
-## Delivery Final Checks
+## Delivery Final Checks（WF-G1 交付终检）
 
 Run this before declaring a PRD ready. This is a delivery gate, not a review finding list; use the PRD Review Protocol for findings and closure.
 

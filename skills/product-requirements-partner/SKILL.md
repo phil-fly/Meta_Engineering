@@ -36,10 +36,10 @@ description: "产品想法、价值验证、MVP、竞品调研、用户流程、
 ## 启动流程
 
 1. 判断当前问题处在哪个产品场景：价值发现、流程结构、交互结构、实体定义、设计交付、PRD 评审、竞品调研或技能改造。
-2. 判断协作强度（首次使用时使用交互式选择，详见 `references/shared/interactive-decision-protocol.md` 场景 5）。判定顺序固定为：先看是否把交付物作为本轮产出物索取，再看是否需要长期记忆，最后才看是否要求落盘。
-   - `轻量讨论`：用户只想 brainstorm、快速判断、问一个局部问题，或仅提及交付物名词做方法咨询，未把任何交付物作为本轮产出物索取。直接讨论，不初始化目标仓产物目录。
-   - `产物沉淀`：用户把 PRD、立项文档、设计说明、mockup、调研报告等作为本轮产出物索取（如“写个 PRD”“出个线稿”），或明确要求生成文件。仅提及交付物名词的咨询（如“PRD 该怎么写”）仍属 `轻量讨论`。用户说“先别写文件”时仍按本档交付完整内容，只是不落盘；落盘与否只决定是否写文件，不降低内容完整度。先确认目标文件或建议目录；生成 PRD 时先判断需求是否涉及 UI、页面、交互或前端体验，涉及时必须同步覆盖页面设计需求与线稿。用户要求定稿或最终需求交付时读取 `references/final-state-delivery.md`；要求开发 handoff、实现摘要或 PR 文案时再读取 `references/implementation-delivery.md`。
-   - `项目记忆模式`：长期项目、多轮协作、用户要求记住决策，或已经存在 `ai-agent-workspace/product/memory/` 或兼容 `docs/00_MEMORY/`。读取项目记忆并按阈值写入。
+2. 判断协作强度（首次使用时使用交互式选择，详见 `references/shared/interactive-decision-protocol.md` 场景 5）。判定顺序固定为：先看是否把交付物作为本轮产出物索取，再看是否需要长期记忆，最后才看是否要求落盘。三档触发与行为以 `references/workflow-contracts.md` 的协作强度表为唯一权威：
+   - `轻量讨论`：brainstorm、快速判断、局部问题，或仅提及交付物名词做方法咨询（如“PRD 该怎么写”）。直接讨论，不初始化目标仓产物目录。
+   - `产物沉淀`：把 PRD、立项、设计说明、mockup、调研报告等作为本轮产出物索取，或明确要求生成文件。“先别写文件”只停止落盘，不降低内容完整度。
+   - `项目记忆模式`：长期项目、多轮协作、用户要求记住决策，或已存在项目记忆目录。
 3. 只有进入 `产物沉淀` 或 `项目记忆模式` 且需要项目结构时，才检查目标仓产物入口。新项目使用交互式选择确认目标目录（场景 6）；已有 `docs/` 项目可继续作为兼容真值源。
 4. 若存在项目记忆，读取：
     - `ai-agent-workspace/product/memory/CONTEXT_SNAPSHOT.md` 或兼容 `docs/00_MEMORY/CONTEXT_SNAPSHOT.md`
@@ -51,20 +51,20 @@ description: "产品想法、价值验证、MVP、竞品调研、用户流程、
 
 ## 参考导航
 
-| 场景 | 优先读取 |
+| 编号 / 触发词 | 优先读取 |
 | --- | --- |
+| WF-M1~M5、协作强度、CX-1~CX-5、Meta 示例 | `references/workflow-contracts.md` |
 | 价值与范围、立项文档 | `references/strategy-foundation.md` |
-| PRD 编写、PRD 评审、文档层级、输入分级、深度选择、交付终检 | `references/prd-protocols.md` |
-| 需求定稿、最终需求 handoff | `references/final-state-delivery.md` |
-| 开发 handoff、实现摘要、PR 文案 | `references/implementation-delivery.md`（先完成最终需求状态投影） |
-| 项目记忆、初始化、确认记录、决策记录、TODO | `references/memory-system.md` |
+| WF-T1 / WF-T2：PRD 编写、PRD 评审、文档层级、输入分级、深度选择、交付终检 | `references/prd-protocols.md` |
+| WF-G1：需求定稿、最终需求 handoff | `references/final-state-delivery.md` |
+| WF-G1 实现交付：开发 handoff、实现摘要、PR 文案 | `references/implementation-delivery.md`（先完成最终需求状态投影） |
+| CX-3：项目记忆、初始化、确认记录、决策记录、TODO | `references/memory-system.md` |
 | 确认记录校验与当前状态投影 | `scripts/validate-confirmations.py` |
 | 旧项目 current 标记校验 | `scripts/validate-legacy-current.py` |
 | 目标仓统一产物目录和兼容路径 | `references/shared/target-workspace-layout.md` |
-| 协作强度、Scene 契约、Meta 示例 | `references/workflow-contracts.md` |
-| 竞品调研、市场替代方案、证据对比 | `references/research-and-competition.md` |
-| 设计指导文档、待定项、线稿、组件 demo | `references/design-artifacts.md` |
-| 设计 tokens、HTML mockup、开发交付说明 | `references/design-handoff.md` |
+| WF-T3：竞品调研、市场替代方案、证据对比 | `references/research-and-competition.md` |
+| WF-M5：设计指导文档、待定项、线稿、组件 demo | `references/design-artifacts.md` |
+| WF-M5：设计 tokens、HTML mockup、开发交付说明 | `references/design-handoff.md` |
 
 ## 工具优先级
 
@@ -78,51 +78,18 @@ description: "产品想法、价值验证、MVP、竞品调研、用户流程、
 | 验证技能结构 | `python3 -m unittest discover -s tests -v`；可选 `skill-craft` | Python 或外部工具链不可用 | 声明未运行，保留测试缺口 |
 | 视觉 mockup 验证 | 浏览器打开或截图检查 | 无法渲染 | 标注未做视觉验证，不声称已确认 |
 
-## Scene Contract
-
-每个场景的最小输入、标准输出、可写文件和不可写条件见 `references/workflow-contracts.md`。遇到轻量讨论、产物沉淀或项目记忆模式边界不清时，先读该文件再行动。
-
 ## 流程步骤
 
-五个主 Scene 为价值发现、流程与范围、交互结构、实体定义、设计与交付；另有 PRD 评审、定稿与最终交付、竞品调研三道门禁。快速判断：价值发现处理想法和痛点；流程与范围处理 MVP；交互结构处理页面和导航；实体定义处理状态、字段和权限；设计与交付处理设计说明、mockup 和 handoff。
+工作流分四层：`WF-M1`~`WF-M5` 是主干顺序流水线（价值发现、流程与范围、交互结构、实体定义、设计与交付），可停在任意环节；`WF-T1`~`WF-T3` 是任务型工作流（PRD 编写、PRD 评审、竞品调研），可独立触发并回填主干；`WF-G1` 定稿与最终交付是唯一出口门；`CX-1`~`CX-5` 是横切协议，在标注步骤生效。每个 WF 的完整定义（触发、输入、步骤、输出、退出条件）以 `references/workflow-contracts.md` 的 WF 注册区为唯一权威；遇到协作强度或 WF 边界不清时，先读该文件再行动。
 
-### PRD 编写
-
-触发：用户要求写 PRD、生成 PRD、补 PRD，或把需求整理成可开发文档。
-
-做法：
-
-读取 `references/prd-protocols.md`。起草前先按 Input Classification 标注关键输入，按 Depth Selection 说明深度与依据；然后判定需求是否涉及 UI、页面、交互、导航、前端状态或用户可见体验；涉及时，Framework PRD 和 Feature PRD 必须包含页面相关设计需求与低保真页面线稿：Framework PRD 在 Screen Tree 后覆盖关键页面的用途、内容区块、状态、主操作和导航，并给出核心流程线稿；Feature PRD 在 Frontend Specs 中覆盖受影响页面、组件层级、状态/空态/错误态、权限可见性和对应线稿。纯后台、API、数据、平台、权限策略或内部流程等不改变用户界面的 PRD 不强制生成线稿，应在页面设计小节标注 `N/A` 或说明不适用原因。UI 信息不足时用稳定 `[待定项-XXX]` 说明缺口、影响和需要用户决定的问题，不得直接省略。
-
-退出条件：若需求涉及 UI，关键用户旅程均落到页面，关键页面均有设计需求和低保真线稿，或有明确待定项说明为什么暂不能画；若不涉及 UI，已明确标注页面设计与线稿不适用；并在交付前通过 Delivery Final Checks。
-
-### PRD 评审
-
-触发：用户要求 review、评审、找问题、补 PRD、看需求是否可开发。
-
-做法：
-
-读取目标文档或片段，按 `references/prd-protocols.md` 的 PRD Review Protocol 输出 `Blocker`、`Clarification`、`Suggestion`。用户确认后再改文档；可选择原地修改、新版本文档或只给评论。
-
-退出条件：所有发现都归类为已解决、延后处理、明确排除或转入后续任务。
-
-### 定稿与最终交付
-
-触发：用户要求定稿、输出最终版、开发交付、handoff、提 PR 或生成 PR 标题/描述。
-
-做法：先读取 `references/final-state-delivery.md`，锁定唯一 `Scope/Version` 并投影当前需求。当前对话中对象、范围和结论明确的用户指令可直接作为本轮权威输入；进入项目记忆模式时，已有记录先校验基线再追加本轮快照并复验，空注册表先写首条 `add` 再校验，然后运行 `scripts/validate-confirmations.py --project <project-root> --scope <scope_id@version> --json` 投影当前状态。只有无确认注册表且必须依赖旧产物时才运行 `scripts/validate-legacy-current.py`。用户还要求开发 handoff、实现摘要或 PR 文案时，再读取 `references/implementation-delivery.md`，用实际变更和验证结果核对产品范围与实现支撑变更。不得把 diff 当作需求来源，也不得把讨论时间线直接改写成最终文档。
-
-退出条件：最终产物只包含当前已确认状态、用户确认的当前版本 Out/Deferred 和仍影响实现的待定项；需求标记 `Ready for development` 时 blocking pending 为 0 且无当前状态冲突；只有读取实现证据并通过验证后，才能把实现标记为 `Verified`。所有历史残留均已删除、隔离，或逐项通过排除项准入门。
-
-### 竞品调研
-
-触发：用户要求查竞品、市场替代方案、benchmark、类似产品或验证有没有现成解法。
-
-做法：
-
-先明确调研问题和目标用户，再按 `references/research-and-competition.md` 查证或整理 3-5 个替代方案。只把竞品转化为需求启发，不直接照搬功能；明确“不采纳项”和原因。
-
-退出条件：形成替代方案矩阵，并反哺 Scene 1 的价值锚点或 Scene 2 的范围判断。
+| 编号 | 触发 | 优先读取 |
+| --- | --- | --- |
+| WF-M1~M5 | 价值发现、流程与范围、交互结构、实体定义、设计与交付 | `references/workflow-contracts.md` |
+| WF-T1 | 写 PRD、生成 PRD、补 PRD、整理成可开发文档 | `references/prd-protocols.md` |
+| WF-T2 | review、评审、找问题、看需求是否可开发 | `references/prd-protocols.md` |
+| WF-T3 | 查竞品、市场替代方案、benchmark、现成解法 | `references/research-and-competition.md` |
+| WF-G1 | 定稿、输出最终版、开发交付、handoff、提 PR | `references/final-state-delivery.md`（实现交付再读 `references/implementation-delivery.md`） |
+| CX-1~CX-5 | 领域约束、UI 线稿、记忆确认链、`[Meta]` 改造、发现项闭环 | `references/workflow-contracts.md` |
 
 ## 行为准则
 
@@ -142,19 +109,6 @@ description: "产品想法、价值验证、MVP、竞品调研、用户流程、
 - Agent 提出的新增能力在写入需求、验收标准、任务或代码前必须获得对象和范围明确的用户接受；需要长期落盘时再登记 `CONF-*`。实际 diff 只能证明实现事实，不能创建设需求。实现支撑仅限行为保持、内部、非契约、非安全、非数据语义的变更；迁移、依赖锁定、日志/监控、生成 API 契约等触及数据、权限、安全、外部契约或可观察语义时，必须按产品范围门禁处理，无法证明行为保持时按 `blocking` 处理。
 - 默认采用最小文档改动；避免为了“完整”制造无关模板。
 
-## 依赖链
-
-- Scene 2 的范围判断必须继承 Scene 1 的价值锚点，不能脱离原痛点重写目标。
-- Scene 3 的页面结构必须继承 Scene 2 的关键用户旅程。
-- UI 相关 PRD 必须在实体定义前沉淀页面设计需求和低保真线稿，不能只写功能清单或后台逻辑；非 UI PRD 不强制线稿。
-- Scene 4 的实体定义必须继承 Scene 2 的流程和 Scene 3 的页面结构。
-- Scene 5 的设计交付必须继承已确认的交互结构、实体状态和待定项结论；已有产品或目标仓还必须先继承生产 Token、主题、组件、布局和响应式真值源，不得平行新建一套设计参数。
-- DECISIONS 只能来自用户明确确认；TODO 可以来自不确定项，但必须标注触发原因。
-- 对同一 `Requirement ID + Scope/Version`，确认记录必须形成线性快照链，最新记录是唯一通过校验的 `active`；旧 Context、Session、批注和旧版本只作为证据，不得反向覆盖当前状态。链校验失败、目标范围不明或替代关系不清时必须询问。
-- 定稿与最终交付的输入必须继承已确认当前状态和实际变更，不得从对话历史重新生成需求范围。
-- 竞品调研结论必须回连到价值锚点、范围边界或待确认项，不能作为孤立资料堆积。
-- `[Meta]` 改造必须先判断层级，再确定目标文件，最后写入验证。
-
 ## `[Meta]` 改造模式
 
 `[Meta0]` 表示用户建议改 Layer 0 技能本身；`[Meta1]` 表示用户建议改个人/项目偏好；`[Meta]` 由 Agent 判断。
@@ -169,7 +123,7 @@ description: "产品想法、价值验证、MVP、竞品调研、用户流程、
 6. 写入后读回验证，并说明更新了哪个文件。
 
 示例：
-详见 `references/workflow-contracts.md`。
+详见 `references/workflow-contracts.md` 的 CX-4。
 
 ## 输出约束
 
