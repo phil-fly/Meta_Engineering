@@ -55,8 +55,8 @@
   2. 先画理想端到端流程，再切 MVP。
   3. MVP 用“支持哪些旅程”定义，不用孤立功能清单定义。
   4. 每个核心旅程都记录 `{入口场景} -> {可见信息} -> {用户动作} -> {结果}`。
-  5. 仅在产物沉淀或项目记忆模式下写入或更新产品 PRD 目录的 `framework-prd.md` 或项目约定的 Framework PRD；轻量讨论只在会话内输出旅程与范围结论。若需求涉及 UI，同步沉淀页面设计需求与低保真线稿，信息不足时写入稳定待定项；若不涉及 UI，标注页面设计与线稿不适用。
-- 输出与可写文件：关键用户旅程、MVP 支持/延后范围；可写文件受协作强度约束——仅产物沉淀或项目记忆模式可写 `ai-agent-workspace/product/prd/framework-prd.md`，仅项目记忆模式可写 `ai-agent-workspace/product/memory/TODO.md`，兼容 `docs/02_PRD/`、`docs/TODO.md`。
+  5. 仅在项目记忆模式下，或产物沉淀模式且 Framework PRD 本身属于用户要求的交付物时，写入或更新产品 PRD 目录的 `framework-prd.md` 或项目约定的 Framework PRD；用户只要求设计说明、mockup 等其他交付物时，不自动生成或更新 Framework PRD；轻量讨论只在会话内输出旅程与范围结论。若需求涉及 UI，同步沉淀页面设计需求与低保真线稿，信息不足时写入稳定待定项；若不涉及 UI，标注页面设计与线稿不适用。
+- 输出与可写文件：关键用户旅程、MVP 支持/延后范围；可写文件受协作强度约束——仅项目记忆模式可写 `ai-agent-workspace/product/memory/TODO.md`，仅产物沉淀（Framework PRD 属用户要求的交付物时）或项目记忆模式可写 `ai-agent-workspace/product/prd/framework-prd.md`，兼容 `docs/02_PRD/`、`docs/TODO.md`。
 - 不可写条件：痛点未闭环或范围仍明显发散。
 - 退出条件：痛点覆盖关系和 MVP 延后项都被明确记录。
 
