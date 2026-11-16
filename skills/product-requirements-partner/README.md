@@ -24,6 +24,7 @@
 | 新产品想法 | `帮我梳理这个产品想法是否值得做` | `references/strategy-foundation.md` |
 | MVP 范围 | `把这个想法拆成首版 MVP 用户旅程` | `references/prd-protocols.md` |
 | PRD 编写 | `写这个功能的 PRD` | `references/prd-protocols.md` |
+| 单次常规 PRD（无项目记忆） | `只写一份常规 PRD，不需要项目记忆` | 优先宿主 `prd-authoring`；需要端到端协作时读 `references/prd-protocols.md` |
 | PRD 评审 | `评审这个 PRD，找出 blocker 和待确认项` | `references/prd-protocols.md` |
 | 需求定稿与交付 | `按最新确认状态定稿 PRD，并生成开发交付摘要` | `references/final-state-delivery.md`、`references/implementation-delivery.md`、状态校验脚本 |
 | 竞品调研 | `查一下类似产品，看看我们为什么还值得做` | `references/research-and-competition.md` |
@@ -38,7 +39,7 @@
 
 - `SKILL.md`：技能触发、主流程、行为边界和参考导航。
 - `references/strategy-foundation.md`：立项、价值、范围和决策依据。
-- `references/prd-protocols.md`：PRD 层级、命名、UI 相关页面设计需求、线稿、写作原则和评审协议。
+- `references/prd-protocols.md`：PRD 层级、命名、输入分级、深度选择、UI 相关页面设计需求、线稿、写作原则、评审协议和交付终检。
 - `references/final-state-delivery.md`：目标范围、当前需求状态投影、历史隔离和需求交付门禁。
 - `references/implementation-delivery.md`：实现变更分类、证据映射、实现状态和 PR/handoff 门禁。
 - `references/memory-system.md`：项目记忆、初始化、确认记录、TODO、决策记录和写入阈值。

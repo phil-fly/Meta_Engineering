@@ -1,6 +1,6 @@
 # PRD Protocols Reference
 
-This document defines the structural standards, naming conventions, and writing strategies for Product Requirement Documents (PRDs). New projects use `ai-agent-workspace/product/prd/`; existing projects may keep compatible `docs/02_PRD/` as the confirmed source of truth.
+This document defines the structural standards, naming conventions, input classification, depth selection, delivery checks, and writing strategies for Product Requirement Documents (PRDs). New projects use `ai-agent-workspace/product/prd/`; existing projects may keep compatible `docs/02_PRD/` as the confirmed source of truth.
 
 ---
 
@@ -29,6 +29,40 @@ Two distinct levels. Never collapse them into one file.
 |-------|------|-------|-------|
 | **Level 1** | **Framework PRD** | Entire Product / MVP | The "Skeleton". Connects value, journeys, screen structure, UI-related page design requirements, wireframes, and data model when UI is in scope. |
 | **Level 2** | **Feature PRD** | Single Module | The "Flesh". Detailed logic, UI-related page design requirements, wireframes, edge cases, field-level rules, UI states. |
+
+---
+
+## Input Classification
+
+Before drafting, classify each material input that affects scope, flow, permission, state, calculation, or delivery commitment:
+
+| Type | Meaning | How to write |
+|------|---------|--------------|
+| **Confirmed fact** | Provided by the user, confirmed in a document, or traceable to an approved source | State it directly and cite the source |
+| **Product judgment** | A trade-off based on product experience | Mark it as a recommendation or judgment and explain the basis |
+| **Assumption** | Not verified but temporarily used to move forward | `[Assumption, TBD]` or "假设（待验证）"; state the impact if wrong |
+| **Open question** | Must be decided by the user or team | `[待定项-XXX]` with `blocking`/`non-blocking`, decision owner, and the decision needed |
+
+Only classify inputs that change scope, key flows, permissions, states, calculations, or delivery commitments. Do not label every sentence.
+
+Relationship to pending items: `[待定项-XXX]` is an open question that needs a decision; `[Assumption, TBD]` is a temporary assumption used to keep drafting. Do not create a second numbering system for open questions.
+
+---
+
+## Depth Selection and Default-Off Modules
+
+Choose the lightest depth that still supports the next decision. State the depth and its reason before drafting.
+
+| Depth | Trigger | Default coverage |
+|-------|---------|------------------|
+| **Small iteration** | Single-module change, low risk, reversible | Goal, scope, user flow, boundaries; entities, wireframes, and acceptance only when relevant |
+| **New module** | New functional module or cross-page flow | Framework summary + full Feature structure |
+| **New product / MVP** | New product, MVP, or multiple modules | Full Framework structure + Feature Index |
+| **Regulated flow** | Money, PII, permissions, audit, compliance, or public release | The matching depth above plus permissions, audit, reversal, exceptions, and escalation |
+
+Default-off sections: standalone acceptance-criteria matrix, non-goals, metrics, milestones, launch plan, appendix. Do not write them unless the user asks, a downstream decision needs them, or the domain requires them. Keep only the acceptance needed to verify the change.
+
+If the depth is unclear, default to `New module`; do not default to the heaviest structure.
 
 ---
 
@@ -154,10 +188,12 @@ When finalizing for development, use the pending rubric in `final-state-delivery
 - **Interactions:** Input validation, loading states, error states.
 - **Display Logic:** "If status is X, show Y."
 
-### 3. Backend Logic (The Brain)
-- **Data Operations:** precise CRUD operations on Entities defined in Framework.
-- **State Machine:** State transition diagrams for relevant entities.
-- **Edge Cases:** Network failure, concurrency, empty states.
+### 3. Business Rules & State Semantics (The Product Brain)
+- **Business rules:** Validation, permissions, eligibility, calculation, and display rules.
+- **State machine:** State transition diagrams for relevant entities, including triggers, guards, and user-visible outcomes.
+- **Field behavior:** Which fields are visible, editable, required, or system-derived.
+- **Edge Cases:** Network failure, concurrency, empty states, retries, and conflicts.
+- **Technical handoff:** Database schema, API contracts, framework choices, and storage design belong to technical design documents, not this PRD.
 
 ---
 
@@ -251,6 +287,27 @@ Before editing, ask or infer the safest mode:
 - Comment-only: good when the user wants review without changing files.
 
 If the user only asks for review, do not modify files.
+
+---
+
+## Delivery Final Checks
+
+Run this before declaring a PRD ready. This is a delivery gate, not a review finding list; use the PRD Review Protocol for findings and closure.
+
+| Check | Pass standard |
+|-------|---------------|
+| **Product contract** | Target user, trigger moment, completion outcome, shared object, and trust/control points are clear |
+| **Scope** | In/out, deferred items, and non-goals are explicit |
+| **Traceability** | Key requirements trace back to value, pain point, or user journey |
+| **Depth fit** | The document matches Small iteration / New module / New product / Regulated flow |
+| **Consistency** | Each role, object, status, calculation, and rule has one authoritative definition |
+| **Boundaries** | Permissions, errors, empty states, concurrency, retry/reversal have product-level definitions |
+| **Consequential actions** | Money, permissions, publishing, deletion, approval, and compliance have confirmation and escalation paths where relevant |
+| **No fabrication** | Unconfirmed content is marked as assumption or open question, not stated as fact |
+| **Document discipline** | No empty templates, repeated conclusions, or leaked internal checklists |
+| **Delivery integrity** | File name, version, Scope/Version, links, and handoff targets are correct |
+
+Do not include this checklist in the final PRD unless the user explicitly asks for a review record.
 
 ---
 
