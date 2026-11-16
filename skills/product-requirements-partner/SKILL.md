@@ -1,6 +1,6 @@
 ---
 name: product-requirements-partner
-description: "产品需求讨论与产品交付协作伙伴。Use when the user wants to discuss a product idea, validate value, define MVP scope, write, review, or finalize PRDs, compare competitors, do product research, design user flows, define entities or data models, plan interaction structure, create UI/UX design guidance, produce mockups, or prepare development handoff. Trigger on product strategy, product idea, 需求讨论, 立项, PRD, 需求定稿, 最终交付, MVP, 用户流程, 信息架构, 交互设计, 实体定义, 状态机, 竞品, 调研, mockup, design spec, handoff, and [Meta]/[Meta0]/[Meta1] requests about improving this product-management skill. Do not use for ordinary code implementation, generic code review, infrastructure debugging, security analysis, or agent-protocol governance unless the request is about product requirements or this skill's own product workflow."
+description: "产品想法、价值验证、MVP、竞品调研、用户流程、交互设计、PRD 编写/评审/定稿、设计与开发交付，含项目记忆、确认快照与 [Meta] 技能改造。Use for end-to-end product work, PRD, or design handoff; not for code-only tasks."
 ---
 
 # Product Requirements Partner
@@ -27,6 +27,12 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 - 安全审计、依赖治理、Agent 协议设计；除非这些问题正在作为产品需求被讨论。
 - 未经用户确认就把一次性偏好沉淀为长期技能规则。
 
+与宿主插件的分工：
+
+- 只写一份常规 PRD、不需要项目记忆或交付状态治理时，优先使用宿主提供的 `prd-authoring`。
+- 需要从价值发现推进到 MVP、实体、设计交付或实现交付，或需要 `CONFIRMATIONS.md`、`Scope/Version`、定稿状态投影时，使用本技能。
+- 两者同时可用时，按用户是否要求项目记忆、确认链、设计/实现交付来判断，不按“谁先被提到”判断；没有插件时，本技能仍可执行单次 PRD。
+
 ## 启动流程
 
 1. 判断当前问题处在哪个产品场景：价值发现、流程结构、交互结构、实体定义、设计交付、PRD 评审、竞品调研或技能改造。
@@ -48,7 +54,7 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 | 场景 | 优先读取 |
 | --- | --- |
 | 价值与范围、立项文档 | `references/strategy-foundation.md` |
-| PRD 编写、PRD 评审、文档层级 | `references/prd-protocols.md` |
+| PRD 编写、PRD 评审、文档层级、输入分级、深度选择、交付终检 | `references/prd-protocols.md` |
 | 需求定稿、最终需求 handoff | `references/final-state-delivery.md` |
 | 开发 handoff、实现摘要、PR 文案 | `references/implementation-delivery.md`（先完成最终需求状态投影） |
 | 项目记忆、初始化、确认记录、决策记录、TODO | `references/memory-system.md` |
@@ -62,12 +68,14 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 
 ## 工具优先级
 
+工具名以宿主原生能力为准；下表以 Trae 为例，不构成对其他宿主的硬依赖。
+
 | 操作 | 首选方式 | 降级条件 | 降级方式 |
 | --- | --- | --- | --- |
-| 查找项目记忆或需求资产 | `rg --files`、`rg` | 命令不可用 | 逐层 `ls` 定位 |
-| 修改技能文件 | `apply_patch` | 补丁无法唯一匹配 | 缩小上下文后重试 |
+| 查找项目记忆或需求资产 | 宿主文件/内容搜索（Trae：Glob、Grep） | 工具不可用 | 逐层目录浏览 |
+| 修改技能或需求文件 | 宿主编辑工具（Trae：Edit、Write） | 无法唯一匹配 | 缩小上下文后重试 |
 | 修改需求文档 | 先读目标章节，再局部编辑 | 文件过大或结构不明 | 只改命中章节，不动无关段落 |
-| 验证技能结构 | `skill-craft` 的 `validate-metadata.py`、`validate-structure.py` | 外部工具链未安装 | 跳过并声明未运行，改跑 `tests/` 与状态校验脚本 |
+| 验证技能结构 | `python3 -m unittest discover -s tests -v`；可选 `skill-craft` | Python 或外部工具链不可用 | 声明未运行，保留测试缺口 |
 | 视觉 mockup 验证 | 浏览器打开或截图检查 | 无法渲染 | 标注未做视觉验证，不声称已确认 |
 
 ## Scene Contract
@@ -84,9 +92,9 @@ description: "产品需求讨论与产品交付协作伙伴。Use when the user 
 
 做法：
 
-读取 `references/prd-protocols.md`。生成 PRD 时先判定需求是否涉及 UI、页面、交互、导航、前端状态或用户可见体验；涉及时，Framework PRD 和 Feature PRD 必须包含页面相关设计需求与低保真页面线稿：Framework PRD 在 Screen Tree 后覆盖关键页面的用途、内容区块、状态、主操作和导航，并给出核心流程线稿；Feature PRD 在 Frontend Specs 中覆盖受影响页面、组件层级、状态/空态/错误态、权限可见性和对应线稿。纯后台、API、数据、平台、权限策略或内部流程等不改变用户界面的 PRD 不强制生成线稿，应在页面设计小节标注 `N/A` 或说明不适用原因。UI 信息不足时用稳定 `[待定项-XXX]` 说明缺口、影响和需要用户决定的问题，不得直接省略。
+读取 `references/prd-protocols.md`。起草前先按 Input Classification 标注关键输入，按 Depth Selection 说明深度与依据；然后判定需求是否涉及 UI、页面、交互、导航、前端状态或用户可见体验；涉及时，Framework PRD 和 Feature PRD 必须包含页面相关设计需求与低保真页面线稿：Framework PRD 在 Screen Tree 后覆盖关键页面的用途、内容区块、状态、主操作和导航，并给出核心流程线稿；Feature PRD 在 Frontend Specs 中覆盖受影响页面、组件层级、状态/空态/错误态、权限可见性和对应线稿。纯后台、API、数据、平台、权限策略或内部流程等不改变用户界面的 PRD 不强制生成线稿，应在页面设计小节标注 `N/A` 或说明不适用原因。UI 信息不足时用稳定 `[待定项-XXX]` 说明缺口、影响和需要用户决定的问题，不得直接省略。
 
-退出条件：若需求涉及 UI，关键用户旅程均落到页面，关键页面均有设计需求和低保真线稿，或有明确待定项说明为什么暂不能画；若不涉及 UI，已明确标注页面设计与线稿不适用。
+退出条件：若需求涉及 UI，关键用户旅程均落到页面，关键页面均有设计需求和低保真线稿，或有明确待定项说明为什么暂不能画；若不涉及 UI，已明确标注页面设计与线稿不适用；并在交付前通过 Delivery Final Checks。
 
 ### PRD 评审
 
@@ -195,4 +203,4 @@ python3 scripts/validate-legacy-current.py --path <legacy-authoritative-document
 
 第二条命令在项目记忆模式下运行；第三条命令仅在没有确认注册表且必须依赖 legacy current 时运行。结构或状态校验失败时不得声称完成对应范围的最终状态投影。若改动了来源、许可、目录或公开说明，同步检查根 README 和本技能 README。
 
-`validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；不可用时跳过该项并说明它未运行。
+`validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；若宿主已提供则作为可选结构校验，不可用时跳过并说明未运行，改跑 `tests/` 与状态校验脚本。
