@@ -193,7 +193,7 @@ When finalizing for development, use the pending rubric in `final-state-delivery
 - **State machine:** State transition diagrams for relevant entities, including triggers, guards, and user-visible outcomes.
 - **Field behavior:** Which fields are visible, editable, required, or system-derived.
 - **Edge Cases:** Network failure, concurrency, empty states, retries, and conflicts.
-- **Technical handoff:** Database schema, API contracts, framework choices, and storage design belong to technical design documents, not this PRD.
+- **Product vs. technical boundary:** Database schema, internal storage design, framework choices, and implementation-level API details belong to technical design documents. Externally observable API behavior, integration contracts, business semantics, and user-visible error behavior stay in this PRD.
 
 ---
 
@@ -297,7 +297,7 @@ Run this before declaring a PRD ready. This is a delivery gate, not a review fin
 | Check | Pass standard |
 |-------|---------------|
 | **Product contract** | Target user, trigger moment, completion outcome, shared object, and trust/control points are clear |
-| **Scope** | In/out, deferred items, and non-goals are explicit |
+| **Scope** | In-scope requirements and deferred items are explicit. Non-goals are documented only when they prevent material scope ambiguity or are needed for downstream decisions. |
 | **Traceability** | Key requirements trace back to value, pain point, or user journey |
 | **Depth fit** | The document matches Small iteration / New module / New product / Regulated flow |
 | **Consistency** | Each role, object, status, calculation, and rule has one authoritative definition |

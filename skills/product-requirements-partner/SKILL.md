@@ -1,6 +1,6 @@
 ---
 name: product-requirements-partner
-description: "端到端产品需求协作：价值发现、MVP、竞品、用户流程/交互、PRD 编写/评审/定稿、实体状态、UI 线稿/mockup、开发交付与 [Meta] 技能改造，含项目记忆与确认快照。Use for end-to-end product work, PRD finalization, or design handoff; not for code-only tasks."
+description: "产品想法、价值验证、MVP、竞品调研、用户流程、交互设计、PRD 编写/评审/定稿、设计与开发交付，含项目记忆、确认快照与 [Meta] 技能改造。Use for end-to-end product work, PRD, or design handoff; not for code-only tasks."
 ---
 
 # Product Requirements Partner
