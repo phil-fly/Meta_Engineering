@@ -153,9 +153,9 @@ The goal: a stakeholder looking at the mockup should immediately understand what
 ## Iteration Workflow
 
 ```
-1. Scene 3 (Interaction Design) + Scene 4 (Entity Definition) produce: page list, information hierarchy, entity model
+1. WF-M3 (Interaction Design) + WF-M4 (Entity Definition) produce: page list, information hierarchy, entity model
         ↓
-2. Scene 5 reads the single design-tokens.md when frontend implementation exists; it backfills a missing file from production or creates one before the first frontend implementation, then creates first-pass HTML mockups
+2. WF-M5 reads the single design-tokens.md when frontend implementation exists; it backfills a missing file from production or creates one before the first frontend implementation, then creates first-pass HTML mockups
         ↓
 3. Visual review: open in browser, discuss, edit HTML only
         ↓
@@ -207,9 +207,9 @@ File: `ai-agent-workspace/product/design/handoff/{screen-name}.md` or compatible
 
 ---
 
-## Scene 3/4 → Scene 5 Transition
+## WF-M3/M4 → WF-M5 Transition
 
-Before starting mockups, confirm this checklist is complete from Scene 3 (Interaction Design) and Scene 4 (Entity Definition):
+Before starting mockups, confirm this checklist is complete from WF-M3 (Interaction Design) and WF-M4 (Entity Definition):
 
 - [ ] Screen list defined (from Screen Tree in Framework PRD)
 - [ ] Each screen's information hierarchy described

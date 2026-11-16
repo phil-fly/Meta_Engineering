@@ -1,4 +1,4 @@
-# Memory System Reference
+# Memory System Reference（CX-3 记忆与确认链）
 
 Schemas, update rules, and initialization protocol for project memory, plus guidance on separating reusable skill behavior from project-specific product memory. New projects should use `ai-agent-workspace/product/`; existing projects may keep compatible `docs/` paths as the confirmed source of truth.
 
@@ -89,7 +89,7 @@ Compatible legacy path: `docs/00_MEMORY/CONTEXT_SNAPSHOT.md`.
 ```
 
 **Update trigger:** 
-- User tells a specific story (Scene 1).
+- User tells a specific story (WF-M1).
 - User sets a hard constraint.
 - User explicitly corrects a misunderstanding.
 
