@@ -25,6 +25,10 @@ SHARED_COPY_PAIRS = [
         REPO_ROOT / "references/target-workspace-layout.md",
     ),
     (
+        MAINTAIN_ROOT / "references/shared/information-first.md",
+        REPO_ROOT / "references/collaboration-principles/information-first.md",
+    ),
+    (
         PRP_ROOT / "references/shared/target-workspace-layout.md",
         REPO_ROOT / "references/target-workspace-layout.md",
     ),

@@ -16,6 +16,10 @@
 
 - [`target-workspace-layout`](references/target-workspace-layout.md)：用户目标仓 AI 协作产物的统一入口目录、兼容路径和新技能接入规则。
 
+## 协作原则
+
+- [`信息优先原则`](references/collaboration-principles/information-first.md)：信息传达优先于叙事技巧；技术文章、产品说明、技术方案等信息型内容默认直接表达。本文件是唯一编辑真值源，技能安装态副本由 `skills/maintain-agent-protocols/references/shared/information-first.md` 同步，相关 WF 门禁在场景手册中引用。
+
 ## 技能说明索引
 
 - [`maintain-agent-protocols`](skills/maintain-agent-protocols/README.md)：AI Agent 协作协议与规则路由的创建、审查、维护和快速使用手册。
