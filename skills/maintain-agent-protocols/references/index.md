@@ -48,4 +48,5 @@
 
 - `shared/interactive-decision-protocol.md`：关键决策的原生问询、选项设计和降级规则；仅保留本 Skill 所需内容的安装态投影。
 - `shared/target-workspace-layout.md`：目标仓统一产物目录、兼容路径和真值源规则。
-- 这两个文件是随 Skill 安装的运行时资产；源码仓根级 `references/` 是跨技能编辑真值源，使用 `scripts/check-template-sync.py` 检查精确副本或当前 Skill 专用投影同步。
+- `shared/information-first.md`：协作原则「信息优先原则」的安装态精确副本；编辑真值源在源码仓根级 `references/collaboration-principles/information-first.md`，`scenarios/playbooks.md` 的相关 WF 门禁引用本副本。
+- 这些文件是随 Skill 安装的运行时资产；源码仓根级 `references/` 是跨技能编辑真值源，使用 `scripts/check-template-sync.py` 检查精确副本或当前 Skill 专用投影同步。

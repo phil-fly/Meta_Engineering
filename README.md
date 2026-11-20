@@ -18,7 +18,7 @@
 
 ## 协作原则
 
-- [`信息优先原则`](references/collaboration-principles/information-first.md)：信息传达优先于叙事技巧；技术文章、产品说明、技术方案等信息型内容默认直接表达，相关 WF 门禁在场景手册中引用。
+- [`信息优先原则`](references/collaboration-principles/information-first.md)：信息传达优先于叙事技巧；技术文章、产品说明、技术方案等信息型内容默认直接表达。本文件是唯一编辑真值源，技能安装态副本由 `skills/maintain-agent-protocols/references/shared/information-first.md` 同步，相关 WF 门禁在场景手册中引用。
 
 ## 技能说明索引
 
