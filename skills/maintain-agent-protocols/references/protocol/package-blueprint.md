@@ -1,0 +1,264 @@
+# 目标仓协议包蓝图
+
+本文件说明使用本技能在目标仓落盘协议包时，应创建哪些文件、文件内容从哪里来，以及哪些行为不会自动发生。新项目默认协议包路径为 `ai-agent-workspace/protocols/`；目标仓已存在 `ai-agent-protocols/` 时可兼容继承。跨技能统一布局见 `../shared/target-workspace-layout.md`。
+
+## 触发边界
+
+`CON-PACKAGE-TRIGGER-NO-AUTO-CREATE`：技能被读取或命中触发词时，不自动创建目录或文件。
+
+仅当用户明确提出以下意图时，才在目标仓落盘或修改协议包：
+
+- 创建协议包。
+- 补齐协议目录。
+- 生成模板目录。
+- 生成或维护 `playbooks/`、`routes/`、`checks/`、`templates/`。
+- 把当前协议入口引用的文件补齐。
+- 用户明确要求，或当前任务已命中共享 Token、Theme、全局组件默认样式或共享视觉体系治理。
+
+`CON-PACKAGE-TRIGGER-EXPLAIN-ONLY`：如果用户只是在询问规则、设计或差异，应先解释，不落盘。
+
+## 生成方案预览
+
+`WF-PACKAGE-PREVIEW`：落盘前必须先给用户一份生成方案预览，并等待确认。预览只说明计划，不创建文件。
+
+可执行工具链：
+
+- `scripts/protocol-package.py detect <target-repo>`：把目标仓入口、协议目录和技术栈证据输出为 JSON；证据包含来源类型、样本数、置信度和反证，技能自身源码、参考文档、模板和既有生成协议目录默认排除。
+- `scripts/protocol-package.py plan <target-repo> --mode minimal|project|full [--design-system]`：按 manifest 生成拟落盘文件、路由裁剪和检查清单计划；显式选项才加入设计系统产物。计划同时输出 `support_summary`（路由文件数、支持资产数与字节数、仅由支持资产覆盖的领域）和非阻塞 `advisories`，用于在预览阶段暴露协议包的实际体积，而不是只在文件清单里隐含。
+- `scripts/protocol-package.py scaffold <target-repo> --mode minimal|project|full [--design-system] [--apply-entry]`：按计划写入协议包；默认跳过既有文件，只有显式 `--overwrite` 才覆盖协议包资产；既有 `design-tokens.md` 永不被通用模板覆盖；support asset 闭包超出预算时停止生成；默认只输出根入口 unified diff，显式 `--apply-entry` 才应用接线并立即验证，失败时恢复原入口或删除本轮新建入口。
+- `scripts/protocol-package.py validate <target-repo> [--design-system]`：递归检查规范化入口 marker、生成包内 Markdown 引用、完整 checkpoint 契约、`WF-*`/`CHK-*`、路由与阅读依赖状态和占位符；显式选项才强校验唯一 `design-tokens.md`、必备明细和回填状态。
+
+脚本输出用于生成方案预览和生成报告，不替代用户确认。默认 `scaffold` 不维护根级生效入口，因此执行者完成入口维护前，`validate` 应返回失败。规范化入口块必须同时包含唯一 BEGIN/END marker、`## AI Agent Protocol Package` 标题和当前 `{package_dir}/README.md` 路径；只有标题、空 marker 或旧包路径都不算已接线。显式 `--apply-entry` 是受控接线选项，应用后自动运行同一验证，失败时入口必须回滚。
+
+`protocol-package-state.json` 必须包含 `schema`、`mode`、`package_dir`、`entry`、`entry_patch_status`、有序 `required`、有序前缀 `completed` 和 `status`。`planned`、`generated`、`validated`、`invalid` 必须分别与阶段进度一致；验证成功写入 `validated`，失败写入 `invalid`，支持跨进程审计而不是只拼装返回值或补齐空壳状态。
+
+项目版路由按目标仓直接实现证据裁剪：文件类型、目录结构或配置命中可作为强结构证据；泛化语义内容规则只命中一个实现文件时仍是待调查信号，置信度必须低于路由阈值，默认至少两个独立实现文件命中后才可支持项目路由。受源码类型约束的框架入口签名可显式使用单样本门槛；每条证据输出必须公开 `min_content_samples`，不得在决策函数中隐藏特例。manifest 的 `requires` 仅描述阅读关系，不会递归把依赖路由列为 `selected_routes` 或标成项目证据支持。每条 `requires` 必须进入 `routes/index.md` 的“阅读依赖”列：已生成依赖写可达链接，未生成依赖明确标记“源规则依赖未落盘”。若直接路由正文引用其他工程文档，生成器先按源文件目录解析裸文件名，再仅对工程规则中的唯一 basename 做跨目录解析；解析成功的引用进入同一个全包级 `support/engineering/` reference-only 闭包并重写为生成路径。正式 route 文件不重复复制为 support，这些支持资产也不进入路由选择或提升项目证据置信度。闭包预算按整个生成包累计，默认受最大深度、文件数和总字节数约束；超限必须在计划中报告并阻止 scaffold，不能对每条路由重置预算或静默截断成悬空包。`always_include` 是实际文件裁剪清单，未列文件不会因为同属 source glob 而复制。
+
+被选中路由正文引用的工程规则文档会作为 reference-only 支持资产随包落盘，包含跨领域继承（例如后端路由继承 `core/` 规则）。因此协议包体积会明显大于路由文件数，这是保持引用可达的有意设计，不是裁剪失效：`plan` 必须通过 `support_summary` 和 `advisories` 把该差额、以及"仅由支持资产覆盖、没有独立路由入口的领域"显式暴露在预览中，供用户确认后再落盘。
+
+脚本验证属于静态生成包与入口一致性检查，不证明真实 Codex/Claude 等宿主已经发现 Skill、选择了该入口或在生产任务中稳定触发；宿主触发率必须通过独立运行时实验验证。
+
+预览只包含会改变生成结果的事实：生效入口与真值源、生成模式、拟写路径、实际路径映射、项目证据与待确认项，以及触发断链和风险。编号沿用现有体系；模板来源和不适用路由不重复展开。
+
+- `CON-PACKAGE-FACT-VERIFIED`：项目事实表记录事实、状态、来源、写入位置和规范词；已验证状态必须来自本轮读取或工具输出，模板不算项目事实，证据不足则标为待确认。
+- `CON-PACKAGE-NORM-NO-EVIDENCE`：只有已验证且长期适用的项目事实可使用强规范词；待确认、跨项目通用或未启用内容使用 `应`、`建议` 或条件表达。
+
+## 内容来源
+
+`CON-PACKAGE-CONTENT-SOURCE`：目标仓文件应从技能内 `references/` 派生，不要凭空编写，也不要复制外部仓库路径。
+
+技能内 `templates/` 目录提供可复制资产。协议模板默认进入目标仓 `ai-agent-workspace/protocols/templates/`，旧项目兼容 `ai-agent-protocols/templates/`；`templates/design-tokens.md` 只在显式进入 Design System Governance 且需要共享载体时实例化，已有项目可继承 `docs/03_DESIGN/design-tokens.md`。协议模板镜像应保持同步；独立设计系统审查模板不替代日常局部修改流程。
+
+落盘前为项目协议、用户协议和场景手册各选择一个既有或默认真值源；工程路由、检查与模板使用 `ai-agent-workspace/protocols/`，旧项目可整体兼容 `ai-agent-protocols/`。Design System Governance 可使用 `ai-agent-workspace/product/design/design-tokens.md` 或既有 `docs/03_DESIGN/design-tokens.md`，不可双写；生成证据只进入报告。
+
+模型入口规则：
+
+- `CON-PACKAGE-ENTRY-USER-SPECIFIED`：用户明确指定入口文件时，按用户当前要求执行。
+- `CON-PACKAGE-ENTRY-MODEL-AWARE`：用户未指定时，先继承目标仓既有入口；只有没有任何既有入口时，才判断当前模型或工具环境并按宿主默认入口生成（Codex/OpenAI 场景 `AGENTS.md`，Claude/Anthropic 场景 `CLAUDE.md`）。判断依据必须来自目标仓真实宿主信号（`.claude/`、`.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 等配置或目录标记）；不得把默认值反向断言为模型感知结论，`selection_reason` 必须写明实际依据。宿主信号命中但继承了其他既有入口时，必须在 `advisories` 中说明该宿主默认入口未生成，不得静默形成双入口。
+- `CON-PACKAGE-ENTRY-FALLBACK`：无法识别模型或工具环境时，默认使用 `AGENTS.md`，并在 `selection_reason` 中说明未识别到宿主信号与既有入口，不得复用模型感知措辞。
+- `CON-PACKAGE-ENTRY-CODEX-LEGACY`：`CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
+- `CON-PACKAGE-ENTRY-MIGRATION`：若既有入口与模型默认入口不同，预览中必须说明保留、迁移或别名策略，并确保只有一个可编辑真值源。
+
+编号规则：
+
+- `CON-PACKAGE-ID-WORKFLOW`：工作流和执行流程使用 `WF-*`。
+- `CON-PACKAGE-ID-CONSTRAINT`：约束和边界规则使用 `CON-*`。
+- `CON-PACKAGE-ID-CHECK`：检查项和验收项使用 `CHK-*`。
+- `CON-PACKAGE-ID-INHERIT`：目标仓已有编号时继承既有编号，不为同一规则创建新编号。
+- `CON-PACKAGE-ID-UNIQUE`：新增编号前必须扫描同一真值源，避免同类型编号冲突。
+- `CON-PACKAGE-ID-REPORT`：生成报告必须列出新增、继承、弃用或迁移的编号。
+
+`CON-PACKAGE-PLAYBOOK-SINGLE-SOURCE`：若目标仓已有根级 `playbooks/` 且内容应继续生效，默认不要再生成同内容的协议包 `playbooks/*.md`；需要协议包内入口时，只写索引或别名说明，指向根级真值源。若用户明确要求迁移到统一协议目录，应先说明迁移影响，并避免保留两套可编辑正文。
+
+## 入口兼容与别名
+
+当生效用户协议使用 `@playbooks`、`@routes`、`@checks` 等抽象入口时，目标仓必须满足以下任一条件，避免首次读取失败：
+
+- 在用户协议的“路径变量”中声明真实映射，例如 `@playbooks = ai-agent-workspace/protocols/playbooks`。
+- 在协议包 README 或入口说明中声明同一映射，并确保用户协议引用该说明。
+- 生成兼容入口，例如根级 `playbooks/README.md` 指向 `ai-agent-workspace/protocols/playbooks/` 或兼容协议目录，或根级 `playbooks/<task>.md` 作为别名文件指向协议包内真值源。
+
+兼容入口规则：
+
+- `CON-PACKAGE-ALIAS-LIGHTWEIGHT`：兼容入口只写跳转、映射和真值源说明，不复制完整正文。
+- `CON-PACKAGE-ALIAS-RESOLVABLE`：如果用户协议引用 `@playbooks/coding.md`，生成后必须能解析到真实文件或别名文件。
+- `CON-PACKAGE-ALIAS-CANONICAL-ENTRY`：生成生效用户协议时，任务分类、场景手册、工程路由和检查入口必须写展开后的真实路径；`@playbooks`、`@routes` 和 `@checks` 只保留在路径变量表或入口说明中。
+- `CON-PACKAGE-ALIAS-NO-GUESS`：不得要求后续模型把 `@playbooks/coding.md` 自行解释为某个目录；若真实真值源是根级 `playbooks/`，必须在路径变量表中显式写 `@playbooks = playbooks`。
+- `CON-PACKAGE-ALIAS-NO-COMPAT`：如果选择不生成兼容入口，必须在生成报告中说明原因，并把用户协议中的路径变量改成真实目录。
+- `CON-PACKAGE-ALIAS-REPORT`：生成报告应列出抽象入口、真实路径、兼容入口和验证结果。
+
+```text
+ai-agent-workspace/protocols/README.md
+  → references/protocol/guide.md 的目录职责、入口策略和维护边界
+
+ai-agent-workspace/protocols/user/AGENTS.md
+  → 仅当用户协议正文真值源选在协议包内时，来自 references/protocol/user-protocol-template.md；否则只写根级用户协议入口说明
+
+ai-agent-workspace/protocols/project/AGENTS.md
+  → 仅当项目协议正文真值源选在协议包内时，来自 references/protocol/project-protocol-template.md；否则只写根级项目协议入口说明
+
+ai-agent-workspace/protocols/routes/**
+  → 项目版按粒度选择目标仓证据支持的 references/engineering/** 对应目录和文件；完整版才复制完整路由覆盖
+
+ai-agent-workspace/protocols/playbooks/*.md
+  → 仅当场景手册正文真值源选在协议包内时，来自 references/scenarios/playbooks.md 中同名场景章节；否则只写根级手册别名或索引
+
+ai-agent-workspace/protocols/checks/*.md
+  → references/checks/checklists.md 中同名检查清单章节
+
+ai-agent-workspace/protocols/templates/user-protocol.md
+  → templates/user-protocol.md
+
+ai-agent-workspace/protocols/templates/project-protocol.md
+  → templates/project-protocol.md
+
+ai-agent-workspace/protocols/templates/route-card.md
+  → templates/route-card.md
+
+ai-agent-workspace/protocols/templates/issues.md
+  → templates/issues.md；实例化后默认落盘为目标仓 `ai-agent-workspace/issues.md`，已有根级 `issues.md` 时按问题台账真值源规则兼容使用
+
+ai-agent-workspace/protocols/templates/frontend-design-system-review-prompt.md
+  → templates/frontend-design-system-review-prompt.md；仅用于独立只读审查，日常设计与开发读取 routes/checks 门禁
+
+ai-agent-workspace/product/design/design-tokens.md
+  → templates/design-tokens.md；仅在显式 --design-system 时创建，创建后必须据生产实现回填参数和真值源关系
+```
+
+目标仓已采用 `ai-agent-protocols/` 时，可把上述路径整体映射到兼容目录；映射必须写入入口说明或生成报告，且不得同时保留两套可编辑正文。
+
+## 生成规则
+
+- `CON-PACKAGE-GENERATE-MINIMAL-EDIT`：目标仓已有同名文件时，先读取并做最小修改，不覆盖用户内容。
+- `CON-PACKAGE-GENERATE-SKELETON`：目标仓没有同名文件时，按蓝图创建骨架并填充可执行内容。
+- `CON-PACKAGE-GENERATE-PROJECT-MODE`：默认生成模式是项目版；除非用户明确要求完整版，不生成目标仓未采用的语言、框架或平台路由。
+- `CON-PACKAGE-GENERATE-ENTRY-PRUNING`：生成用户协议时，场景手册、工程路由和检查入口只列本次实际生成、目标仓既有存在或已生成兼容入口的真实路径；未采用路由只写入生成报告。
+- `CON-PACKAGE-GENERATE-FILE-LEVEL`：项目版必须支持文件级路由粒度；不要因为发现一个后端证据就生成全部后端语言路由。
+- `CON-PACKAGE-GENERATE-PLAYBOOK-SPLIT`：若协议包 `playbooks/` 被选为场景手册真值源，`playbooks/*.md` 应拆分为独立文件，每个文件只包含一个任务流程。
+- `CON-PACKAGE-GENERATE-ROOT-PLAYBOOK`：若根级 `playbooks/` 被选为场景手册真值源，协议包内不要复制同名正文；可创建协议包内 `playbooks/README.md` 或单文件别名说明，指向根级手册。
+- `CON-PACKAGE-GENERATE-TEMPLATE-SCOPE`：`templates/*.md` 只放可复用格式骨架、填写规则和可实例化的通用协议条款，不承载目标仓专属决策或一次性任务约定。
+- `CON-PACKAGE-GENERATE-ISSUE-LEDGER-SINGLE-SOURCE`：问题台账模板只提供可实例化骨架；实例化后的 `issues.md` 必须按 `issue-tracking.md` 选择唯一可编辑真值源，不得把协议包模板和目标仓台账同时当作问题正文维护。
+- `CON-PACKAGE-GENERATE-EVIDENCE-REPORT-ONLY`：从目标仓扫描得到的读取文件清单、事实来源、置信度标注和生成过程记录只在生成报告中说明，不写入落盘协议正文、协议包 `README.md` 或入口说明。
+- `CON-PACKAGE-GENERATE-NO-PLACEHOLDER`：生效协议、协议包 `README.md` 和入口说明不得保留 `<project>`、`<install-command>`、`<path>` 等模板占位符；证据不足时删除该项或写为待确认，不把占位符交给后续 Agent 猜测。
+- `CON-PACKAGE-GENERATE-TEMPLATE-SYNC`：修改技能内模板正文时，应同步更新 `templates/` 与 `references/protocol/` 下对应模板参考文件。
+- `CON-PACKAGE-GENERATE-ROUTE-LAYERING`：`routes/**` 应保留领域分层，避免把所有工程规则压成单个大文件。
+- `CON-PACKAGE-GENERATE-CHECKS-SCOPE`：`checks/*.md` 只放检查项，不放长流程或教程。
+- `CON-PACKAGE-GENERATE-PATH-BASE`：每个生成文件的路径引用必须统一口径。协议包内文件引用根级文件时，使用 `../`、`../../` 等当前文件相对路径，或明确写 `仓库根：<path>`；不要写基准不明的裸路径。
+- `CON-PACKAGE-GENERATE-DESIGN-TOKENS`：前端证据可选择前端路由，但不自动触发治理文档；仅显式 `--design-system` 且检测到真实前端实现时创建或继承唯一 `design-tokens.md`，按生产实现回填后才能通过对应验证；空仓、仅文档或仅测试证据不得创建或强校验该文件。
+- `CON-PACKAGE-GENERATE-DESIGN-TOKENS-NO-OVERWRITE`：协议包工具即使收到 `--overwrite` 也必须跳过既有 `design-tokens.md`；更新只能由 Agent 读取现有内容和生产实现后按最小修改完成。
+- `CON-PACKAGE-GENERATE-DESIGN-TOKENS-CONFLICT`：推荐路径与兼容路径同时存在可编辑正文时，`scaffold` 必须停止，等待真值源裁决；不得选择其一继续生成或覆盖。
+
+## 触发链路规则
+
+生成或升级协议包时，按 `trigger-stability-guide.md` 做轻量触发链路检查。检查结果进入预览或报告，不写入生效协议正文。
+
+- `CON-PACKAGE-TRIGGER-STABILITY-CHECK`：创建、升级同步或协议工程审查时，应检查任务入口、场景手册、工程路由、项目级约束和检查项之间是否存在明显断链。
+- `CON-PACKAGE-TRIGGER-WF-GATE`：创建、升级同步或协议工程审查时，应检查高频和高风险约束是否被相关场景手册门禁节点触达；只在项目协议中孤立出现的关键约束应列为断链或延后强化项。
+- `CON-PACKAGE-TRIGGER-STABILITY-NO-ENGINE`：除非另有脚本实现，不声称已运行自动验证引擎；结论应标注来自已读文件、`rg` 搜索结果或待确认推断。
+- `CON-PACKAGE-TRIGGER-STABILITY-PREVIEW`：升级同步时若建议强化 playbooks、routes 或 checks，必须在升级预览中列出拟修改文件和强化原因，并让用户选择“只同步规则”或“同步规则 + 强化触发链路”。
+- `CON-PACKAGE-TRIGGER-STABILITY-GENERATE`：新建协议包时，可以把通用触发条件直接写入新生成的 playbooks 或 routes/index；仍需保持短引用，不复制完整约束正文。
+- `CON-PACKAGE-TRIGGER-STABILITY-REPORT`：生成报告应说明高/中/低稳定触发结论、不能稳定触发的约束或路由、已强化项、未强化项和剩余风险。
+
+## 三档生成模式
+
+```text
+最小版  → 根协议或协议包入口 + 必要 playbooks/checks/templates；不主动生成工程 routes，除非入口已引用。
+项目版  → 默认模式；基于目标仓证据裁剪 routes，只生成当前技术栈、目录和任务类型需要的文件级入口。
+完整版  → 用户明确要求时使用；包含 UI、JavaScript/TypeScript、Go、Java、Rust、Python、核心工程、安全、性能、平台和治理等完整路由。
+```
+
+项目版裁剪规则：
+
+- 发现生产页面、组件、客户端样式或真实 UI 入口时，可生成必要前端路由，但不自动创建 `design-tokens.md`；只有显式进入 Design System Governance 时才加入该产物。参数明细不通过扩增路由数量承载。
+- 发现 `go.mod` 时，可生成 Go 后端路由；发现 Maven/Gradle 文件时，可生成 Java 路由；发现 `Cargo.toml` 时，可生成 Rust 路由；发现 `pyproject.toml`、`requirements.txt`、`setup.py`、`Pipfile` 或 Python 服务源码时，可生成 Python 路由；未发现的语言路由不生成。
+- 发现 API、数据库、鉴权、日志、配置或服务目录证据时，可生成对应 `routes/core/` 细分入口；只发现其中一类时，不展开其他无证据细项。
+- 通用安全、性能和质量入口可作为条件适用路由生成，但正文必须写明适用触发条件，避免把未启用架构写成项目事实。
+- Agent 治理、证据范围、资产一致性等与协议维护相关的内容归为通用治理路由，默认只生成索引或轻量入口。
+- 未发现证据的语言和框架路由默认不生成；如果用户需要保留，应在生成报告中标为用户确认的扩展范围。
+- 检查清单按路由随包落盘，属于"按任务读取"的材料：前端路由会带上该领域检查清单，即使目标仓当前只用到其中一小部分；检查清单不按单条证据逐项裁剪，其体积由 `support_summary` 一并暴露。
+
+路由索引标注规则：
+
+- `项目证据支持`：目标仓文件、配置、源码或用户明确说明证明该路由当前适用。
+- `条件适用`：当前未证明常驻适用，但任务触发时应读取，例如安全、性能、风险控制。
+- `通用治理`：协议维护、证据范围、Agent 边界、生成报告等治理类路由。
+- `完整覆盖`：仅用于用户显式选择完整版但目标仓没有直接证据的路由；选择原因是覆盖模式，证据置信度保持 `0.00`，不得标成项目证据支持。
+
+项目版 `routes/index.md` 和各子目录索引必须标注以上三类之一；不允许只列路径而不说明适用状态。
+
+条件适用路由还应写明触发条件；高风险或高频条件路由应能从相关 playbook 读到短触发语句。若目标仓已有 playbook 真值源，默认最小修改补充引用；若用户选择只升级规则，不修改 playbook，则在报告中把该项归为延后处理。
+
+锚点式引用规则：
+
+- OpenSpec、风险控制、规范同步、审查闭环等高频规则，只在项目协议保留一个入口锚点。
+- 规则正文已经在同一协议章节、场景手册、检查清单或工程路由展开时，不要再作为结构化项目约束重复写一遍。
+- 需要强调项目特例时，项目协议只写“项目差异”和“锚点引用”，不复制通用规则全文。
+
+完整版规则：
+
+- 保留完整覆盖能力，但必须在预览中说明会生成与当前仓库无直接证据的通用路由。
+- 完整版中的未验证技术栈规则不得写入项目级协议正文；只作为通用路由或模板资产存在。
+- 完整版选择和直接证据判断必须分离；`selected by full mode` 不等于 `directly supported`，无直接证据时使用 `完整覆盖`/`full-coverage` 并保持证据置信度为 `0.00`。
+
+## 同步验证
+
+维护技能内模板正文后，优先运行：
+
+```bash
+python3 scripts/check-template-sync.py
+```
+
+该脚本检查以下文件必须完全同步：
+
+```text
+templates/user-protocol.md          == references/protocol/user-protocol-template.md
+templates/project-protocol.md       == references/protocol/project-protocol-template.md
+templates/route-card.md             == references/protocol/route-card-template.md
+```
+
+`templates/frontend-design-system-review-prompt.md` 不维护镜像正文；脚本检查其必备调查维度、证据规则、问题格式和完成门，防止设计/开发门禁左移时误删独立审查能力。`templates/design-tokens.md` 同样不维护第二份正文，脚本检查其真值源关系和各参数域必备章节。
+
+## 最小协议包
+
+当用户要求“补齐可用协议包”但未要求完整工程路由时，至少创建入口、必要场景手册、必要检查项和模板资产；未被入口引用或用户未选择的场景文件不要强行生成：
+
+```text
+ai-agent-workspace/
+└── protocols/
+    ├── README.md
+    ├── playbooks/
+    │   ├── <必要任务手册>.md
+    │   └── README.md
+    ├── checks/
+    │   ├── <必要检查清单>.md
+    │   └── README.md
+    └── templates/
+        ├── user-protocol.md
+        ├── project-protocol.md
+        └── route-card.md
+```
+
+如用户协议已经引用 `routes/`，还应同步创建对应路由入口文件，避免入口悬空。
+
+如果目标仓已有根级 `playbooks/` 并选择继续作为真值源，最小协议包中的协议 `playbooks/` 目录可改为只包含 `README.md` 或别名文件，不复制根级手册正文。
+
+## 闭环检查
+
+落盘后必须使用 `../checks/checklists.md` 的 `maintenance-checklist` 执行闭环检查。本文件只说明协议包生成场景，不复制检查项正文。
+
+生成报告应与生效协议分离，至少包含：
+
+- 本次生成模式和确认依据。
+- 本轮问询方式：原生确认/问询、普通文本问询或无需问询。
+- 模型入口判断依据，以及最终生效入口文件。
+- 编号清单：新增、继承、弃用或迁移的 `WF-*`、`CON-*`、`CHK-*`。
+- 创建、修改、跳过的文件清单。
+- 项目事实证据表和待确认项。
+- 抽象入口映射和兼容入口验证结果。
+- 占位符处理结果。
+- 无关技术栈路由检查结果。
+- 路由索引三类标注结果。
+- 触发稳定性检查结果、强化选择和剩余断链风险。
+- 约束门禁绑定结果，以及未绑定约束的处理分类。
+- 重复展开压缩结果。
+- 使用者下一步，例如确认入口文件名、审阅待确认事实、删除未采用路由或在 `git add` 前复查生成报告。

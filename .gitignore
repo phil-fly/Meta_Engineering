@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Tool scratch (sandboxed test/temp directories)
+.wbtmp/
+
+# WorkBuddy AI 项目数据（本地记忆与技能状态，不入库）
+.workbuddy-ai/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

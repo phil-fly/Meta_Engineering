@@ -1,0 +1,316 @@
+# Maintain Agent Protocols 使用手册
+
+## 目录
+
+- [定位](#定位)
+- [快速入口](#快速入口)
+- [通用使用流程](#通用使用流程)
+- [不同场景怎么快用](#不同场景怎么快用)
+  - [1. 创建用户级协议](#1-创建用户级协议)
+  - [2. 创建项目级协议](#2-创建项目级协议)
+  - [3. 维护或合并规则](#3-维护或合并规则)
+  - [4. 协议包升级同步](#4-协议包升级同步)
+  - [5. 审查协议体系](#5-审查协议体系)
+  - [6. 判断原则、约束与工作流](#6-判断原则约束与工作流)
+  - [7. 生成工程路由](#7-生成工程路由)
+  - [8. 维护技能自身](#8-维护技能自身)
+- [常用验证](#常用验证)
+- [协议包工具链](#协议包工具链)
+- [输出闭环](#输出闭环)
+
+## 定位
+
+`maintain-agent-protocols` 用于创建、审查、重构和维护 AI Agent 协作协议与规则路由。
+
+新项目默认把协议产物放入目标仓统一入口 `ai-agent-workspace/protocols/`；已有项目若采用 `ai-agent-protocols/`，可继续作为兼容真值源，但必须声明映射并避免双写。
+
+它适合处理这类问题：
+
+- 如何把零散协作规则整理成稳定协议。
+- 如何区分用户级、项目级、工程路由、场景手册、检查清单和本地临时约定（协议层级表见 `references/protocol/guide.md`，本手册不另立分类）。
+- 如何判断一条规则该编号为工作流 `WF-*`、约束 `CON-*` 还是检查项 `CHK-*`（见 `references/protocol/rule-ingestion.md`）。
+- 如何降低协议冲突、误触发、重复维护和上下文成本。
+- 如何为目标仓生成或维护 `AGENTS.md`、`CLAUDE.md`、既有 `CODEX.md` 迁移兼容、`ai-agent-workspace/protocols/` 或兼容 `ai-agent-protocols/`。
+
+不适合直接处理普通功能开发、普通代码审查、一般架构讨论或项目调试；除非任务目标是维护 Agent 协作协议、规则路由或技能本身。
+
+## 快速入口
+
+| 场景 | 你可以这样提问 | 优先读取 |
+| --- | --- | --- |
+| 创建协议 | `帮这个仓库生成 AI Agent 协作协议` | `references/protocol/index.md`、`references/protocol/package-blueprint.md` |
+| 维护协议 | `把这些规则合并进现有 AGENTS.md` | `references/protocol/index.md`、`references/protocol/guide.md` |
+| 协议升级同步 | `对照最新协议技能，升级当前项目协议包` | `references/protocol/index.md`、`references/protocol/guide.md`、`references/protocol/package-blueprint.md` |
+| 多类型请求仲裁 | `先审查触发问题，再修复当前协议` | `references/protocol/workflow-routing.md` |
+| 问题台账与修复方案 | `排障结果如何落盘并在修复前形成方案` | `references/protocol/issue-tracking.md`、`templates/issues.md`、`references/checks/checklists.md` |
+| 审查协议 | `审查这套协议有没有冲突和遗漏` | `references/protocol/protocol-engineer.md`、`references/checks/index.md` |
+| 规则摄入 | `这条规则应该放在哪里` | `references/protocol/rule-ingestion.md` |
+| 工作流整理 | `把这些任务流程整理成 playbook` | `references/scenarios/index.md`、`references/scenarios/playbooks.md` |
+| 工程路由 | `给前端/API/安全规则做路由` | `references/engineering/index.md` |
+| 企业级 SaaS 设计协议 | `把企业级 SaaS 控制台设计规则吸收到协议里` | `references/scenarios/playbooks.md`、`references/engineering/frontend/enterprise-saas-design.md`、`references/checks/checklists.md` |
+| 前端路由 | `补充前端结构、状态、测试、UI 稳定性、可访问性或组件系统规则` | `references/engineering/frontend/index.md` |
+| 前端设计系统维护 | `帮我建立或维护共享 Design System / design-tokens.md` | `references/engineering/frontend/design-system-maintenance.md`、`templates/design-tokens.md`；独立审查再读 `templates/frontend-design-system-review-prompt.md` |
+| Spec-first | `开发任务是否需要先更新规范` | `references/protocol/openspec-workflow.md` |
+| 技能结构维护 | `检查这个技能目录结构是否合理` | `references/protocol/skill-structure.md` |
+
+## 通用使用流程
+
+1. 先识别请求类型；同时命中多个类型时按最终交付物选一个主流程，审查维度作为辅助流程。
+2. 再判断目标层级：用户级、项目级、工程路由、场景手册、检查清单或本地临时约定（协议层级表见 `references/protocol/guide.md`）。
+3. 只读取对应参考文件，避免一次性加载全部资料。
+4. 修改前声明生效入口、真值源和影响范围。
+5. 修改时采用最小变更，避免重复写同一规则正文。
+6. 结束时说明变更范围、验证结果、剩余风险和未覆盖范围。
+
+主流程仲裁规则：写入任务以创建、升级同步、维护或转换为主流程；一般审查、触发稳定性审查和协议工程只作为辅助分析维度。只读任务按契约顺序选主流程：只判断规则该维护在哪里时走规则摄入，否则依次优先触发稳定性审查、协议工程、一般审查。只有候选流程会改变写入范围、覆盖策略或真值源且证据无法裁决时才询问用户。
+
+入口文件默认规则：
+
+- 用户明确指定入口文件时，按用户当前要求执行。
+- 用户未指定且目标仓**已有**入口文件时，继承既有入口，不按宿主信号另建第二个：命中 `.claude/` 但仓库已有 `AGENTS.md` 时仍用 `AGENTS.md`，并在 `selection_reason` 与 `advisories` 中说明该宿主默认入口未生成。
+- 用户未指定且目标仓没有既有入口时，按**真实宿主信号**选择默认入口：命中 `.claude/` 等 Claude 信号时用 `CLAUDE.md`；命中 `.codex/`、`.cursor/`、`.github/copilot-instructions.md`、`.gemini/`、`.windsurf/` 时用 `AGENTS.md`。
+- 既没有既有入口也没有任何宿主信号时，按 `CON-PACKAGE-ENTRY-FALLBACK` 回退到 `AGENTS.md`，并在生成方案预览的 `selection_reason` 中说明这是回退默认值，不伪装成模型感知判断。
+- `CODEX.md` 或 `codex.md` 只作为既有历史文件的兼容、迁移或显式用户要求对象；不得在 Codex 场景默认新建。
+
+编号默认规则：
+
+- 工作流编号使用 `WF-*`，例如 `WF-CODING`。
+- 约束编号使用 `CON-*`，例如 `CON-PROJECT-001`。
+- 检查项编号使用 `CHK-*`，例如 `CHK-MAINT-001`。
+- 问题台账模板默认实例化为目标仓 `ai-agent-workspace/issues.md`；已有根级 `issues.md` 时继续使用其作为兼容真值源，不能并行维护两份问题正文。
+- 生成或维护协议时，新增、移动或重命名以上项目必须同步编号引用。
+
+## 不同场景怎么快用
+
+### 1. 创建用户级协议
+
+适用：想建立跨项目通用协作偏好、任务分类、优先级和长期原则。
+
+快速做法：
+
+1. 读取 `references/protocol/user-protocol-template.md`。
+2. 只保留长期原则、入口路由和优先级。
+3. 不写具体命令、工程细节或长检查清单。
+4. 若引用 `@playbooks`、`@routes` 或 `@checks`，必须声明真实路径或生成兼容入口。
+5. 工程路由和检查入口只保留本次实际生成、既有存在或已兼容的路径。
+
+示例请求：
+
+```text
+基于我的协作偏好生成一份用户级 AGENTS.md，只保留入口和长期原则。
+```
+
+### 2. 创建项目级协议
+
+适用：想记录仓库专属架构、命令、测试、发布、业务边界和项目例外。
+
+快速做法：
+
+1. 先扫描项目事实，不凭模板编造项目约束。
+2. 读取 `references/protocol/project-protocol-template.md`。
+3. 涉及 API、数据结构、配置、权限或架构时，检查是否需要同步项目 Spec。
+4. 缺少证据的通用规则只能写成 `应`、`建议` 或 `如项目采用...`。
+
+示例请求：
+
+```text
+为当前仓库生成项目级 Agent 协议，按已验证技术栈裁剪规则。
+```
+
+### 3. 维护或合并规则
+
+适用：已有协议，需要添加、合并、拆分或降级规则。
+
+快速做法：
+
+1. 先判断新规则类型和适用范围。
+2. 检查是否已有等价规则。
+3. 只选择一个主真值源，其他位置只保留入口或引用。
+4. 对每个发现标记为已解决、延后处理、明确排除或转入后续任务。
+
+示例请求：
+
+```text
+把下面这些协作规则摄入当前协议，说明每条规则应该放在哪里。
+```
+
+### 4. 协议包升级同步
+
+适用：项目仓库已经用本技能生成过 `AGENTS.md`、`CLAUDE.md`、根级 `playbooks/`、`ai-agent-workspace/protocols/` 或兼容 `ai-agent-protocols/`，现在技能新增或更新了长期约束，需要把项目仓库同步到新规则。
+
+快速做法：
+
+1. 先识别当前项目的生效入口、真值源和兼容入口，不假设目录结构。
+2. 对照最新技能 `references/` 与目标仓现有协议做差异审查，区分新增约束、变更约束、项目特例和不适用规则。
+3. 先输出升级预览，说明拟修改文件、编号变化、待确认项和不适用项。
+4. 确认后按最小修改同步，保持单一真值源，不重建整包，不平行生成两套正文。
+5. 最后按已解决、延后处理、明确排除、转入后续任务归类发现，并说明验证结果和剩余风险。
+
+标准提示词：
+
+```text
+对照最新的 maintain-agent-protocols 技能规则，审查并升级当前项目仓库的协议包。
+
+要求：
+1. 先识别当前项目的生效入口和真值源，包括 AGENTS.md、CLAUDE.md、根级 playbooks/、ai-agent-workspace/protocols/ 或 ai-agent-protocols/，不要假设路径。
+2. 保持现有真值源不变，除非我明确要求迁移；不要生成两套可编辑正文。
+3. 先输出升级预览，再执行修改。预览中说明：
+   - 当前真值源和兼容入口
+   - 拟修改文件
+   - 新增、变更、迁移或弃用的 WF-*、CON-*、CHK-* 编号
+   - 新增约束来自哪些技能 reference
+   - 待确认项、不适用项和潜在冲突
+4. 只按最小修改同步新增或变更的长期约束，不重写无关内容，不覆盖项目特有规则。
+5. 如果新约束涉及 API、数据结构、配置、权限模型或系统架构，先检查是否需要同步项目规范、OpenSpec、ADR 或设计文档。
+6. 如目标仓已有根级 playbooks/ 或既有兼容目录，继续沿用现有真值源；除非我明确要求迁移，不要复制同一正文到新目录。
+7. 最终按 已解决 / 延后处理 / 明确排除 / 转入后续任务 归类所有发现，并给出验证结果、剩余风险和未覆盖范围。
+```
+
+示例请求：
+
+```text
+对照最新协议技能，升级当前项目仓库的协议包，保持现有真值源不变，先给升级预览，再按最小修改同步新增约束。
+```
+
+### 5. 审查协议体系
+
+适用：担心协议膨胀、冲突、误触发、执行率低或维护成本高。
+
+快速做法：
+
+1. 声明检查范围、未检查范围和结论适用范围。
+2. 从入口、层级、触发、重复、冲突、真值源和闭环要求检查。
+3. 只给有证据的强结论；证据不足时标注待确认。
+4. 输出问题、影响、建议和归类闭环。
+
+示例请求：
+
+```text
+审查当前技能的协议设计，重点看执行率、冲突和 Token 成本。
+```
+
+### 6. 判断原则、约束与工作流
+
+适用：有一条新规则，不确定它应如何分类、放在哪里、是否需要进入触发入口。
+
+快速做法：
+
+1. 问规则目标是什么，是否长期有效。
+2. 原则用于指导取舍，不包含具体命令或长流程。
+3. 约束必须有范围、生效条件、规则正文、验证方式和例外。
+4. 工作流必须有任务类型、步骤顺序、输入输出、验证方式和闭环。
+5. 判断它是否会改变入口选择；不会改变入口的细则不要写到用户级顶层。
+
+示例请求：
+
+```text
+判断这条规则属于原则、约束还是工作流，并建议维护位置。
+```
+
+### 7. 生成工程路由
+
+适用：想把企业级 SaaS 产品设计、管理后台/控制台设计、UI、前端结构、状态缓存、测试、UI 稳定性、可访问性、组件系统、工具链、API、安全、性能、后端语言等执行细节做成按需加载的路由。
+
+快速做法：
+
+1. 读取 `references/engineering/index.md`；前端任务再进入 `references/engineering/frontend/index.md`。
+2. 企业级 SaaS、管理后台或控制台设计任务先读取 `references/scenarios/playbooks.md` 的 `WF-ENTERPRISE-SAAS-DESIGN`，再读取 `references/engineering/frontend/enterprise-saas-design.md` 和对应检查清单。
+3. 只为项目已有证据支持的技术栈生成入口。
+4. 路由中标注规则状态：项目证据支持、条件适用或通用治理。
+5. 用户级协议只保留入口，不复制工程细则正文。
+
+示例请求：
+
+```text
+按当前仓库技术栈生成工程规则路由，只覆盖有项目证据的领域。
+```
+
+### 8. 维护技能自身
+
+适用：修改本技能的 `SKILL.md`、`references/`、`templates/`、`agents/` 或 `scripts/`。
+
+快速做法：
+
+1. 修改触发能力时同步 `SKILL.md` frontmatter description。
+2. 修改读取顺序时同步 `SKILL.md` 工作流和 `references/index.md`。
+3. 修改模板正文时同步 `templates/` 与对应的 `references/protocol/` 模板参考文件。
+4. 运行 `scripts/check-template-sync.py` 验证镜像模板同步、共享投影和独立审查模板的必备调查维度。
+
+前端设计系统维护规则的完整流程以 `references/engineering/frontend/design-system-maintenance.md` 为真值源。只有修改共享 Token、Theme、全局组件默认样式、建立共享视觉体系，或用户明确要求维护 Design System 时，才实例化或维护 `design-tokens.md`；普通局部 UI 修改读取生产样式来源后局部处理，不因文档缺失创建治理资产。`templates/frontend-design-system-review-prompt.md` 是独立、自包含的只读审查执行模板。
+
+示例请求：
+
+```text
+更新这个技能，让它支持协议审查报告，并同步触发入口和参考导航。
+```
+
+## 常用验证
+
+以下命令以**技能根目录**为工作目录（源码仓为 `skills/maintain-agent-protocols/`，安装态为宿主技能目录，例如 `~/.claude/skills/maintain-agent-protocols/`）。随技能分发的脚本都从自身位置解析仓库/技能根，不依赖调用时的 cwd。
+
+`.ts` 校验脚本依赖原生 TypeScript 类型剥离：Node 22.18+ 默认开启，Node 22.6–22.17 需在命令中追加 `--experimental-strip-types`。仓库不声明 `package.json` engines，版本要求只在此处说明。
+
+```bash
+python3 scripts/check-template-sync.py
+node scripts/check-cross-references.ts
+node scripts/check-rule-ids.ts
+node scripts/check-placeholders.ts
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s scripts -p 'test_*.py' -v
+```
+
+`check-rule-ids.ts` 同时校验编号唯一性与命名空间合法性：定义位出现的裸编号（例如历史遗留的 `PERF001`）或未登记命名空间会直接失败，不再对校验不可见。标准名（`ISO-8601`、`RFC-2119`、`SHA256` 等）按白名单放行、不计入规则编号，但每次运行都会打印「按标准名跳过」一行；白名单按前缀整体放行，若同前缀混入规则编号（`TLS-1`、`HTTP-2`），只会出现在该行，需人工复核。已登记命名空间的前缀优先于白名单，不会被吞掉。
+
+白名单与跳过行没有自动回归测试，改动后按下述探针复现（临时文件，跑完即删）：
+
+```bash
+printf '# probe\n\n- TLS-1 检查\n- HTTP-2 检查\n- SHA256 检查\n- PERF001 裸编号\n' > references/__probe_std.md
+node scripts/check-rule-ids.ts   # 预期退出码 1
+rm references/__probe_std.md
+```
+
+预期输出（`PERF001` 是故意注入的真缺陷，退出码 1 属预期）：
+
+```text
+按标准名跳过: 3 种 / 3 处（HTTP-2、SHA256、TLS-1）
+  白名单按前缀整体放行；若其中混入规则编号（如 TLS-1、HTTP-2），会只出现在本行，需人工复核。
+❌ FAIL: 发现 1 个未命名空间的规则编号:
+  PERF001 缺少命名空间前缀，出现在:
+```
+
+若跳过行为空，说明 `isStandardName` 的判定或调用点被改动，属于回归。探针必须落在 `references/` 或 `skills/` 下才会被扫描，且务必删除，否则 `PERF001` 会持续 FAIL。探针内容用 `printf` 而非 heredoc 书写，避免文档里的示例列表被 `check-rule-ids.ts` 当成真实定义位。
+
+扫描器**不跳过围栏代码块**，这是刻意的：`product-requirements-partner/references/memory-system.md` 的 `CONF-001`、`DEC-001` 就是写在 `markdown` 围栏内的模板占位符，跳过围栏会让 `CONF-*`、`DEC-*` 两族整体消失（297 → 295）而脚本仍报 PASS，正好退回本脚本要消灭的编号盲区。因此 297 这个数字含这 2 个模板占位符；写文档时不要把示例写成 `- XXX-001` 形式的列表项或标题。
+
+`validate-metadata.py`、`validate-structure.py` 由外部 `skill-craft` 工具链提供，未随本仓库分发；不可用时跳过该项，并在结果中说明它未运行。
+
+如果本轮没有修改模板、共享运行时资产或协议包工具链，仍应说明哪些检查未运行及其剩余风险。
+
+## 协议包工具链
+
+创建或补齐目标仓协议包时，优先用脚本把生成过程结构化：
+
+```bash
+python3 scripts/protocol-package.py detect <target-repo>
+python3 scripts/protocol-package.py plan <target-repo> --mode project
+python3 scripts/protocol-package.py scaffold <target-repo> --mode project
+python3 scripts/protocol-package.py validate <target-repo>
+```
+
+`detect` 输出排除自有技能/生成目录后的项目证据，并为每类证据提供来源类型、样本数、内容样本门槛、置信度和反证；排除按已知真实路径执行，不把目标仓任意 `skills/` 目录当成工具源码。泛化语义内容规则只命中一个实现文件时保留为待调查信号，不能越过项目路由阈值；结构证据或达到规则公开样本门槛的独立实现样本才可支持路由。`plan` 输出拟生成文件、直接证据路由、reference-only 支持资产、闭包预算告警、可审阅的根入口 unified diff、完整 `checkpoint_state` 和条件设计产物；`requires` 只进入路由索引的“阅读依赖”列，不选择依赖路由或抬高证据置信度。full 模式只扩大选择范围，不制造项目证据；没有直接证据的路由标为 `完整覆盖`，置信度保持 `0.00`。`scaffold` 默认跳过既有文件，并写入机器可读的 `protocol-package-state.json`；support asset 按整个生成包计算一次引用闭包和深度、文件数、字节预算，正式 route 不重复复制为 support，超限时停止生成。只有显式传入 `--design-system` 且检测到真实前端实现时才计划、生成或强校验 `design-tokens.md`；空仓、仅文档或仅测试证据不会创建该文件，且即使使用 `--overwrite` 也不会覆盖既有文件。
+
+默认不会接线根入口。显式 `--apply-entry` 只接受带 BEGIN/END marker、标题和当前协议包 `README.md` 路径的规范化入口块；应用后立即验证，失败则恢复原入口或删除本轮新建入口。`validate` 检查规范化生效入口、生成包内递归 Markdown 引用、状态字段与有序阶段、`WF-*`、`CHK-*`、协议包目录、模板资产、路由索引内容、阅读依赖和占位符泄漏；显式 Markdown 链接即使使用裸文件名也必须可达，裸行内代码文件名只有被生成映射消费时才视为导航。该验证证明静态包与接线一致，不等价于真实 Codex 宿主已经发现或按预期触发 Skill。
+
+生成方案预览读两类规模与依据信息：
+
+- 生效入口的选择依据来自目标仓真实宿主信号（`.claude/`、`.codex/`、`.cursor/`、`.github/copilot-instructions.md` 等），没有信号时 `selection_reason` 会明确写成回退默认值，不会伪装成模型感知判断。
+- `support_summary` 给出路由文件数、支持资产数与字节数、以及仅由支持资产覆盖的领域；`advisories` 用非阻塞提示说明协议包实际体积与路由裁剪结果的差额。`advisories` 只提示不阻止落盘，`warnings` 才是阻止 `scaffold` 的预算超限。
+
+## 输出闭环
+
+最终回复建议包含：
+
+- 变更范围。
+- 读取或检查过的文件。
+- 验证结果。
+- 已解决、延后处理、明确排除或转入后续任务的发现归类。
+- 剩余风险和未覆盖范围。
